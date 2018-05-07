@@ -1,4 +1,3 @@
-# New
 # ("dplyr")
 # ("qcc")
 # ("randtests")
