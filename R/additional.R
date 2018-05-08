@@ -1,193 +1,89 @@
-# New
-# ("dplyr")
-# ("qcc")
-# ("randtests")
-# ("changepoint")
-
-# Calculate Moving Range for SPC
-Moving.Range <- function(inset, bygrp="lvl", xvar="dpmo", dtvar="dt.ym"){
-  t.set <- data.frame(inset)
-  do.call(c, by(t.set, t.set[, bygrp], function(x){
-    hold <- x[[xvar]][order(x[[dtvar]])]
-    if(length(hold) <= 12){
-      c(rep(NA, length(hold)))
-    } else{ # Must have > 12 months history to calculate
-      c(rep(NA, 12), sapply(seq(13, length(hold)), function(y) {
-        qcc::sd.xbar.one(hold[(y - 12):(y - 1)])
-      }))
-    }
-  }))
-}
-
-# Calculate Rolling Average for SPC
-Rolling.Average <- function(inset, bygrp="lvl", xvar="dpmo", dtvar="dt.ym"){
-  t.set <- data.frame(inset)
-  t.set$ra <- do.call(c, by(t.set, t.set[, bygrp], function(x){
-    hold <- x[[xvar]][order(x[[dtvar]])]
-    if(length(hold) <= 12){
-      c(rep(NA, length(hold)))
-    } else{ # Must have > 12 months history to calculate
-      rm <- as.integer(zoo::rollmean(hold, 12, fill=NA, align="right"))
-      c(NA, rm[1:(length(rm) - 1)])
-    }
-  }))
-}
-
-# # Calculate SPC Special
-# SPC.Sp <- function(inset, bylvl="code", family="ff"){
-#   # Set the months at which UCL evaluation occurs
-#   t.mons <- seq(min(inset$dt.ym), max(inset$dt.ym), by="months")
-#   inset$updateUCL <- inset$dt.ym %in%
-#     t.mons[which(months(t.mons) %in% c("June", "December"))]
-#   # Set the family and code/cluster levels to trend by
-#   inset$fam <- inset[[family]]
-#   inset$lvl <- inset[[bylvl]]
-#   t.clus <- unique(select(inset, fam, lvl)) %>% filter(!is.na(lvl))
-#   # Compute trending for every value of the unique level
-#   t.out <- data.frame()
-#   for(j in 1:nrow(t.clus)){
-#     t.code <- filter(inset, fam == t.clus$fam[j] & lvl == t.clus$lvl[j] &
-#                        !is.na(dpmo))
-#     # Add in moving ranges and rolling averages
-#     t.code$mr <- Moving.Range(t.code)
-#     t.code$ra <- Rolling.Average(t.code)
-#     # Reduce current month range
-#     t.mons <- seq(min(t.code$dt.ym), max(t.code$dt.ym), by="months")
-#     # Assess when evaluation is possible based on 12 months from 1st non-zero DPMO
-#     t.code$canEval <- as.vector(sapply(unique(t.code$lvl), function(x){
-#       dpmo <- t.code[t.code$lvl == x, "dpmo"]
-#       if (all(dpmo == 0)){
-#         rep(F, length(t.mons))
-#       } else if (is.na(first(which(dpmo > 0)) + 11 > length(t.mons)) |
-#           first(which(dpmo > 0)) + 11 > length(t.mons)) {
-#         rep(F, length(t.mons))
-#       } else {index(dpmo) >= first(which(dpmo > 0)) + 11}
-#     }))
-#     # Based on when evaulation occurs and when it is possible, determine when UCL can be set
-#     t.code$canSet <- with(t.code, updateUCL & canEval)
-#     # Calculate UCL as 3-Sigma
-#     t.code$ucl <- with(t.code, ifelse(canSet, ra + 3 * mr, NA))
-#     # Carry forward the every-6-month UCLs, then calculate the minimum all-time UCL
-#     # Also include number of sigmas over the mean for ranking
-#     t.code <- t.code %>% group_by(lvl) %>%
-#       mutate(ucl.cf=na.locf(ucl, na.rm=F),
-#              ucl.min=c(rep(NA, sum(is.na(ucl.cf))),
-#                        cummin(ucl.cf[!is.na(ucl.cf)])),
-#              n.sigma=as.numeric(c(rep(NA, length(dpmo) - 1),
-#                                   ifelse(length(which.min(ucl.min)) == 0, NA,
-#                                          (dpmo[length(dpmo)] -
-#                                             ra[which.min(ucl.min)]) /
-#                                            ifelse(mr[which.min(ucl.min)] == 0, 1,
-#                                                   mr[which.min(ucl.min)]))))) %>%
-#       ungroup()
-#     # Finally, assess for breach
-#     t.code$breach <- with(t.code, ifelse(dpmo > ucl.min, "Breached UCL", "OK"))
-#     t.out <- rbind(t.out, select(t.code, -fam, -lvl))
-#   }
-#   return(t.out)
-# }
-
-# # Calculate additional trending algorithms
-# More.Trending <- function(inset, bylvl="code", family="ff"){
-#   # Set the family and code/cluster levels to trend by
-#   inset$fam <- inset[[family]]
-#   inset$lvl <- inset[[bylvl]]
-#   t.clus <- unique(select(inset, fam, lvl))
-#   # Compute trending for every value of the unique level
-#   t.out <- data.frame()
-#   for(j in 1:nrow(t.clus)){
-#     t.code <- filter(inset, fam == t.clus$fam[j] & lvl == t.clus$lvl[j])
-#     t.row <-  cbind.data.frame(t.clus[j, ], dt.ym=dataMonth,
-#                                tidy(t(Trend.Signals.OC(t.code, dataMonth))))
-#     t.out <- rbind(t.out, t.row)
-#   }
-#   return(merge(inset, t.out, by=c("fam", "lvl", "dt.ym"), all.x=T) %>%
-#            select(-fam, -lvl))
-# }
-
-
-####################################
-# STANDARDIZED TRENDING FUNCTIONS
-####################################
-
-#################
 #' Poisson for Rare Events
 #'
-#' Returns:
-#' Logical of significant trend found
+#' Test on rare events using an exact test on the Poisson distribution rate
+#' parameter (\code{stats::poisson.test()}).
 #'
-#' Parameter List:
+#' @param df Input data frame with the following columns:
+#' \describe{
+#'   \item{time}{Unique times of class \code{Date}}
+#'   \item{event}{Either the event count or rate of class \code{numeric}. If
+#'   \code{df} is of class \code{mds_ts}, this column will be created based on
+#'   the value of the \code{ts_event} parameter.}
+#' }
+#' @param eval_period A positive integer indicating the number of unique times
+#' counting in reverse chronological order to assess.
 #'
-#' inset
-#' -----
-#' Input data frame with the following columns:
-#' dt.ym = Date format with each row being a unique month
-#' count = Absolute number of complaints
+#' Default: \code{NULL} considers all times in \code{df}.
 #'
-#' eval.date
-#' ---------
-#' Which Date-format date in inset$dt.ym to run algorithm on
+#' @param zero_rate Minimum proportion of \code{event}s in \code{df}
+#' (constrained by \code{eval_period}) containing zeroes for this algorithm to
+#' run.
 #'
-#' zerorate
-#' --------
-#' Minimum proportion of months containing zeroes for this algorithm to run
+#' Default: \code{2/3} requires a minimum of 2/3 zeros in \code{event}s in
+#' \code{df}.
 #'
-#' prate
-#' -----
-#' Hypothesized Poisson monthly rate at which the test is perform (null vs. greater)
+#' @param p_rate Hypothesized Poisson rate parameter null value at which the
+#' Poisson test is performed (null vs. greater). See details for more.
 #'
-#' pcrit
-#' -----
-#' Critical p-value for test
-#################
+#' Default: \code{0.2}
+#'
+#' @param p_crit Critical p-value for the Poisson test..
+#'
+#' Default: \code{0.05}
+#'
+#' @details \code{p_rate} default of \code{0.2} is a suggested null value for
+#' the Poisson rate parameter. However this value is highly advised to be set
+#' based on known priors and/or your specific application.
+#'
+#' @export
+poisson_rare <- function (df, ...) {
+  UseMethod("poisson_rare", df)
+}
 
-Poisson.Rare <- function(inset, eval.date, zerorate=(2/3), prate=0.2, pcrit=0.05){
-  this.mo <- which(inset$dt.ym == eval.date)
-  if(length(this.mo) == 0) stop("Date not found")
-  # Control period starts at first non-zero count month
-  ctrl.period <- inset$count[which.max(inset$count > 0):this.mo]
+poisson_rare.default <- function(
+  df,
+  eval_period=NULL,
+  zero_rate=2/3,
+  p_rate=0.2,
+  p_crit=0.05
+){
+  input_param_checker(df, "data.frame", c("time", "event"))
+  input_param_checker(eval_period, "integer")
+  input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
+  input_param_checker(p_rate, "numeric", null_ok=F, max_length=1)
+  input_param_checker(p_crit, "numeric", null_ok=F, max_length=1)
 
-  if(length(ctrl.period) < 4){
-    warning("Poisson did not run - 3 months history required")
-    return(NA)
-  } else if(sum(ctrl.period != 0) < 2){
-    warning("Poisson did not run - At least 2 non-zero months required")
-    return(NA)
-  } else if(sum(ctrl.period == 0) / length(ctrl.period) >= zerorate){
-    pt <- stats::poisson.test(round(sum(ctrl.period)), length(ctrl.period), r=prate,
-                       alternative=("greater"))
-    if(pt$p.value <= pcrit) {return(TRUE)
-      } else{return(FALSE)}
+  # Order by time
+  df <- df[order(df$time), ]
+  # Restrict to eval_period
+  if (!is.null(eval_period)){
+    if (eval_period > nrow(df)){
+      stop("eval_period cannot be greater than df rows")
+    } else if (eval_period < 1){
+      stop("eval_period must be greater than 0")
+    } else df <- df[c((nrow(df) - eval_period + 1):nrow(df)), ]
+  }
+  # Check for non-runnable conditions
+  # I AM HERE!!!!
+  if(nrow(df) < 4){
+    rt <- NA
+    rm <- "Did not run: >3 time periods required"
+  } else if(sum(df$time != 0) < 2){
+    rt <- NA
+    rm <- "Did not run: 2 or more non-zero events required"
+  } else if(sum(df$time == 0) / nrow(df) < zero_rate){
+    rt <- NA
+    rm <- paste("Did not run: minimum zero_rate of", zero_rate, "not met")
   } else{
-    warning("Poisson did not run - Too few zero count months")
-    return(NA)
-
+    rt <- stats::poisson.test(round(sum(df$event)), nrow(df), r=p_rate,
+                              alternative="greater")
+    rm <- "Run success"
   }
 }
 
 
-# Poisson - Continuous Event Rate Return
-Poisson.Rare.C <- function(inset, eval.date, zerorate=(2/3)){
-  this.mo <- which(inset$dt.ym == eval.date)
-  if(length(this.mo) == 0) stop("Date not found")
-  # Control period starts at first non-zero count month
-  ctrl.period <- inset$count[which.max(inset$count > 0):this.mo]
 
-  if(length(ctrl.period) < 4){
-    warning("Poisson did not run - 3 months history required")
-    return(NA)
-  } else if(sum(ctrl.period != 0) < 2){
-    warning("Poisson did not run - At least 2 non-zero months required")
-    return(NA)
-  } else if(sum(ctrl.period == 0) / length(ctrl.period) >= zerorate){
-    pt <- stats::poisson.test(round(sum(ctrl.period)), length(ctrl.period),
-                       alternative=("greater"))
-    return(pt$estimate)
-  } else{
-    warning("Poisson did not run - Too few zero count months")
-    return(NA)
-  }
-}
+
 
 #################
 #' Shewart Signals - 4 Western Electric Rules
