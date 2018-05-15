@@ -7,13 +7,31 @@
 poisson_rare(df, ...)
 }
 \arguments{
-\item{df}{Input data frame with the following columns:
+\item{df}{Required input data frame of class \code{mds_ts}, or any data frame
+with the following columns:
 \describe{
   \item{time}{Unique times of class \code{Date}}
-  \item{event}{Either the event count or rate of class \code{numeric}. If
-  \code{df} is of class \code{mds_ts}, this column will be created based on
-  the value of the \code{ts_event} parameter.}
+  \item{event}{Either the event count or rate of class \code{numeric}}
 }}
+
+\item{ts_event}{Required if \code{df} is of class \code{mds_ts}. Named string
+indicating the variable corresponding to the event count or rate. Rate must
+be calculated in a separate column in \code{df} as it is not calculated by
+default. The name of the string is an English description of what was
+analyzed.
+
+Default: \code{"nA"} corresponding to the event count column in \code{mds_ts}
+objects. Name is generated from \code{mds_ts} metadata.
+
+Example: \code{stats::setNames("rate", "Rate of Bone Filler Events in Canada")}}
+
+\item{analysis_of}{Optional string indicating the English description of what
+was analyzed. If specified, this will override the name of the
+\code{ts_event} string parameter.
+
+Default: \code{NA} indicates no English description.
+
+Example: \code{"Rate of bone cement leakage"}}
 
 \item{eval_period}{A positive integer indicating the number of unique times
 counting in reverse chronological order to assess.
@@ -36,6 +54,22 @@ Default: \code{0.2}}
 
 Default: \code{0.05}}
 }
+\value{
+A named list, standardized as a \code{mdsstat_test} object, as
+follows:
+\describe{
+  \item{test_name}{Name of the test run}
+  \item{analysis_of}{English description of what was analyzed}
+  \item{status}{Named boolean of whether the test was run. The name contains
+  the run status.}
+  \item{result}{A standardized list of test run results: \code{statistic}
+  for the test statistic, \code{ll95} and \code{ul95} for the 95%
+  confidence bounds, \code{p} for the p-value, \code{signal} status, and
+  \code{signal_threshold}.}
+  \item{params}{The test parameters}
+  \item{data}{The data on which the test was run}
+}
+}
 \description{
 Test on rare events using an exact test on the Poisson distribution rate
 parameter (\code{stats::poisson.test()}).
@@ -44,4 +78,8 @@ parameter (\code{stats::poisson.test()}).
 \code{p_rate} default of \code{0.2} is a suggested null value for
 the Poisson rate parameter. However this value is highly advised to be set
 based on known priors and/or your specific application.
+}
+\examples{
+To write
+
 }
