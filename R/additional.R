@@ -66,11 +66,17 @@
 #'   \item{params}{The test parameters}
 #'   \item{data}{The data on which the test was run}
 #' }
-
 #'
-#' @examples To write
-#' # I AM HERE!!! Need to write tests and examples for Poisson Rare
-#'
+#' @examples
+#' # Basic Example
+#' data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))
+#' a1 <- poisson_rare(data)
+#' # Example using an mds_ts object
+#' a2 <- poisson_rare(mds_ts[[1]])
+#' # Example using a derived rate as the "event"
+#' data <- mds_ts[[1]]
+#' data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
+#' a3 <- poisson_rare(data, "rate")
 #' @export
 poisson_rare <- function (df, ...) {
   UseMethod("poisson_rare", df)
@@ -79,16 +85,21 @@ poisson_rare <- function (df, ...) {
 poisson_rare.mds_ts <- function(
   df,
   ts_event="nA",
+  analysis_of=NA,
   ...
 ){
   input_param_checker(ts_event, check_names=df, max_length=1)
 
-  if (ts_event == "nA"){
+  # Set NA counts to 0 for "nA" default
+  df$nA <- ifelse(is.na(df$nA), 0, df$nA)
+
+  # Set analysis_of
+  if (ts_event == "nA" & is.na(analysis_of)){
     name <- paste("Count of", paste(sapply(attributes(df)$nA, function(x){
       paste0(names(x), ":", x)}), collapse=" for "))
-    # Also set NA counts to 0 for "nA" default
-    df$nA <- ifelse(is.na(df$nA), 0, df$nA)
-  } else name <- names(ts_event)
+  } else if (is.na(analysis_of)){
+    name <- names(ts_event)
+  } else name <- analysis_of
 
   out <- data.frame(time=df$time,
                     event=df[[ts_event]])
@@ -108,9 +119,11 @@ poisson_rare.default <- function(
   input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
   input_param_checker(p_rate, "numeric", null_ok=F, max_length=1)
   input_param_checker(p_crit, "numeric", null_ok=F, max_length=1)
-  if (!all(c("time", "event") %in% names(temp))){
+  if (!all(c("time", "event") %in% names(df))){
     stop("df must contain columns named time and event")
   }
+  if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
+  if (p_crit < 0 | p_crit > 1) stop("p_crit must be in range [0, 1]")
 
   # Order by time
   df <- df[order(df$time), ]

@@ -7,8 +7,8 @@
 poisson_rare(df, ...)
 }
 \arguments{
-\item{df}{Required input data frame of class \code{mds_ts}, or any data frame
-with the following columns:
+\item{df}{Required input data frame of class \code{mds_ts} or, for generic
+usage, any data frame with the following columns:
 \describe{
   \item{time}{Unique times of class \code{Date}}
   \item{event}{Either the event count or rate of class \code{numeric}}
@@ -33,8 +33,8 @@ Default: \code{NA} indicates no English description.
 
 Example: \code{"Rate of bone cement leakage"}}
 
-\item{eval_period}{A positive integer indicating the number of unique times
-counting in reverse chronological order to assess.
+\item{eval_period}{Optional positive integer indicating the number of unique
+times counting in reverse chronological order to assess.
 
 Default: \code{NULL} considers all times in \code{df}.}
 
@@ -55,8 +55,7 @@ Default: \code{0.2}}
 Default: \code{0.05}}
 }
 \value{
-A named list, standardized as a \code{mdsstat_test} object, as
-follows:
+A named list of class \code{mdsstat_test} object, as follows:
 \describe{
   \item{test_name}{Name of the test run}
   \item{analysis_of}{English description of what was analyzed}
@@ -80,6 +79,13 @@ the Poisson rate parameter. However this value is highly advised to be set
 based on known priors and/or your specific application.
 }
 \examples{
-To write
-
+# Basic Example
+data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))
+a1 <- poisson_rare(data)
+# Example using an mds_ts object
+a2 <- poisson_rare(mds_ts[[1]])
+# Example using a derived rate as the "event"
+data <- mds_ts[[1]]
+data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
+a3 <- poisson_rare(data, "rate")
 }
