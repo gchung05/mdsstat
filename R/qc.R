@@ -1,7 +1,7 @@
-#' Poisson for Rare Events
+#' Shewhart x-bar Control Chart
 #'
-#' Test on rare events using an exact test on the Poisson distribution rate
-#' parameter (\code{stats::poisson.test()}).
+#' Test on device-events using the Shewhart x-bar control chart. Includes
+#' the first 4 Western Electric rules common to statistical process control.
 #'
 #' @param df Required input data frame of class \code{mds_ts} or, for generic
 #' usage, any data frame with the following columns:
@@ -29,29 +29,33 @@
 #' Example: \code{"Rate of bone cement leakage"}
 #'
 #' @param eval_period Optional positive integer indicating the number of unique
-#' times counting in reverse chronological order to assess.
+#' times counting in reverse chronological order to assess. This will be used to
+#' establish the process mean and moving range $R.
 #'
 #' Default: \code{NULL} considers all times in \code{df}.
 #'
-#' @param zero_rate Required minimum proportion of \code{event}s in \code{df}
+#' @param zero_rate Required maximum proportion of \code{event}s in \code{df}
 #' (constrained by \code{eval_period}) containing zeroes for this algorithm to
-#' run.
+#' run. Because Shewhart does not perform well on rare events, a value >0 is
+#' recommended.
 #'
-#' Default: \code{2/3} requires a minimum of 2/3 zeros in \code{event}s in
-#' \code{df}.
+#' Default: \code{1/3} requires no more than 1/3 zeros in \code{event}s in
+#' \code{df} in order to run.
 #'
-#' @param p_rate Hypothesized Poisson rate parameter null value at which the
-#' Poisson test is performed (null vs. greater). See details for more.
+#' @param we_rule Required integer from \code{1} to \code{4} representing the
+#' Western Electric rule to use. See details for descriptions.
 #'
-#' Default: \code{0.2}
+#' Default: \code{1} represents the first Western Electric rule of one point
+#' over the 3-sigma limit.
 #'
-#' @param p_crit Critical p-value for the Poisson test..
+#' @details Function \code{shewhart()} is a standard implementation of the x-bar
+#' Control Chart test from the family of statistical process control tests
+#' originally proposed by Walter Shewhart.
 #'
-#' Default: \code{0.05}
-#'
-#' @details \code{p_rate} default of \code{0.2} is a suggested null value for
-#' the Poisson rate parameter. However this value is highly advised to be set
-#' based on known priors and/or your specific application.
+#' \code{we_rule} has four possible values: \code{1} is one point over the
+#' 3-sigma limit. \code{2} is two out of three consecutive points over the
+#' 2-sigma limit. \code{3} is four of five consecutive points over the 1-sigma
+#' limit. \code{4} is nine consecutive points over the process mean.
 #'
 #' @return A named list of class \code{mdsstat_test} object, as follows:
 #' \describe{
@@ -77,12 +81,15 @@
 #' data <- mds_ts[[1]]
 #' data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
 #' a3 <- poisson_rare(data, "rate")
+#'
+#' @references
+#' Montgomery, Douglas C. Introduction to Statistical Quality Control by Douglas C. Montgomery, 5th Edition: Study Guide. Cram101, 2013.
 #' @export
-poisson_rare <- function (df, ...) {
-  UseMethod("poisson_rare", df)
+shewhart <- function (df, ...) {
+  UseMethod("shewhart", df)
 }
 
-poisson_rare.mds_ts <- function(
+shewhart.mds_ts <- function(
   df,
   ts_event="nA",
   analysis_of=NA,
@@ -103,27 +110,29 @@ poisson_rare.mds_ts <- function(
 
   out <- data.frame(time=df$time,
                     event=df[[ts_event]])
-  poisson_rare.default(out, analysis_of=name, ...)
+  shewhart.default(out, analysis_of=name, ...)
 }
 
-poisson_rare.default <- function(
-  df,
+shewhart.default <- function(
+  df, #inset
   analysis_of=NA,
-  eval_period=NULL,
-  zero_rate=2/3,
-  p_rate=0.2,
-  p_crit=0.05
+  eval_period=NULL, #n.mos
+  zero_rate=1/3,
+  we_rule=1L
 ){
   input_param_checker(df, "data.frame")
   input_param_checker(eval_period, "integer")
   input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
-  input_param_checker(p_rate, "numeric", null_ok=F, max_length=1)
-  input_param_checker(p_crit, "numeric", null_ok=F, max_length=1)
+  input_param_checker(we_rule, "integer", null_ok=F, max_length=1)
   if (!all(c("time", "event") %in% names(df))){
     stop("df must contain columns named time and event")
   }
   if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
-  if (p_crit < 0 | p_crit > 1) stop("p_crit must be in range [0, 1]")
+  if (we_rule < 1 | we_rule > 4) stop("we_rule must be in range [1L, 4L]")
+
+  # d2 is an anti-biasing constant used to estimate sigma. This d2 is set at a
+  # subgroup size of 2
+  d2 <- 2 / sqrt(pi)
 
   # Order by time
   df <- df[order(df$time), ]
@@ -136,108 +145,74 @@ poisson_rare.default <- function(
     } else df <- df[c((nrow(df) - eval_period + 1):nrow(df)), ]
   }
   # Return data
-  rd <- list(reference_time=df$time[nrow(df)],
+  tlen <- nrow(df)
+  rd <- list(reference_time=df$time[tlen],
              data=df)
-  # Set Poisson test type
-  h_alternative <- "greater"
+
   # Check for non-runnable conditions
+  hyp <- "Not run"
   if(nrow(df) < 4){
     rr <- NA
     rs <- stats::setNames(F, ">3 time periods required")
   } else if(sum(df$time != 0) < 2){
     rr <- NA
     rs <- stats::setNames(F, "2 or more non-zero events required")
-  } else if(sum(df$event == 0) / nrow(df) < zero_rate){
+  } else if(sum(df$event == 0) / nrow(df) > zero_rate){
     rr <- NA
-    rs <- stats::setNames(F, paste("Minimum zero_rate of", zero_rate, "not met"))
+    rs <- stats::setNames(F, paste("Maximum zero_rate of", zero_rate, "exceeded"))
   } else{
-    # If all conditions are met, run Poisson test
-    run <- stats::poisson.test(round(sum(df$event)), nrow(df), r=p_rate,
-                              alternative=h_alternative)
-    rr <- list(statistic=run$estimate,
-               ll95=run$conf.int[1],
-               ul95=run$conf.int[2],
-               p=stats::setNames(run$p.value, "p-value"),
-               signal=(run$p.value <= p_crit),
-               signal_threshold=stats::setNames(run$p.value, "p-value"))
+    # If all conditions are met, run Shewhart test
+    mu <- mean(df$event)
+    sigma <- mean(abs(diff(df$event))) / d2
+    df$event[length(df$event)]
+    nsigma <- (df$event - mu) / sigma
+    if (we_rule == 1L){
+      stat <- nsigma[tlen]
+      thresh <- (mu + 3 * sigma)
+      sig <- stat > thresh
+      hyp <- "1 point > 3-sigma limit"
+    } else if (we_rule == 2L){
+      stat <- nsigma[(tlen - 2):tlen]
+      thresh <- mu + 2 * sigma
+      sig <- (nsigma[tlen] > thresh) &
+        any(nsigma[(tlen - 2):(tlen - 1)] > thresh)
+      hyp <- "2 of 3 points > 2-sigma limit"
+    } else if (we_rule == 3L){
+      stat <- nsigma[(tlen - 4):tlen]
+      thresh <- mu + sigma
+      sig <- (nsigma[tlen] > thresh) &
+        (sum(nsigma[(tlen - 4):(tlen - 1)] > thresh) >= 3)
+      hyp <- "4 of 5 points > 1-sigma limit"
+    } else if (we_rule == 4L){
+      stat <- nsigma[(tlen - 8):tlen]
+      thresh <- mu
+      sig <- sum(stat > thresh) == 9
+      hyp <- "9 points > mean"
+    }
+
+    rr <- list(statistic=stat,
+               ll95=rep(mu + qnorm(0.975) * sigma, length(stat)),
+               ul95=rep(mu + qnorm(0.025) * sigma, length(stat)),
+               p=stats::setNames(NA, "p-value"),
+               signal=sig,
+               signal_threshold=stats::setNames(
+                 rep(thresh, length(stat)),
+                 rep("UCL", length(stat))))
     rm <- "Run success"
     rs <- stats::setNames(T, "Success")
   }
 
   # Return test
-  out <- list(test_name="Poisson Rare",
+  out <- list(test_name=paste("Shewhart x-bar Western Electric Rule", we_rule),
               analysis_of=analysis_of,
               status=rs,
               result=rr,
-              params=list(test_hyp=paste0("Poisson test p-value <=", p_crit),
+              params=list(test_hyp=hyp,
                           zero_rate=zero_rate,
-                          p_rate=p_rate,
-                          p_crit=p_crit,
-                          h_alternative=h_alternative),
+                          we_rule=we_rule),
               data=rd)
   class(out) <- append(class(out), "mdsstat_test")
   return(out)
-}
-
-
-
-
-
-#################
-#' Shewart Signals - 4 Western Electric Rules
-#'
-#' Returns:
-#' Vector of 4 with a logical of whether the Zone Rules 1-4 were met
-#'
-#' Parameter List:
-#'
-#' inset
-#' -----
-#' Input data frame with the following columns:
-#' dt.ym = Date format with each row being a unique month
-#' dpmo = Calculated complaint rate
-#'
-#' eval.date
-#' ---------
-#' Which Date-format date in inset$dt.ym to run algorithm on
-#'
-#' n.mos
-#' -----
-#' Number of months to look back when calculating algorithm
-#'
-#' zerorate
-#' --------
-#' Maximum proportion of months containing zeroes for this algorithm to run
-#################
-
-Shewart <- function(inset, eval.date, n.mos=12, zerorate=(1/3)){
-  d2 <- 2 / sqrt(pi)
-  if(n.mos < 12) stop("At least 12 months history is required")
-
-  this.mo <- which(inset$dt.ym == eval.date)
-  if(length(this.mo) == 0) stop("Date not found")
-
-  if(length(inset$dt.ym[1:this.mo]) >= n.mos){
-    ctrl.period <- inset$dpmo[(this.mo - n.mos + 1):this.mo]
-    if(sum(ctrl.period == 0) / length(ctrl.period) >= zerorate){
-      warning("Shewart did not run - too many zero months")
-      return(rep(NA, 4))
-    } else{
-      mu <- mean(ctrl.period[1:(length(ctrl.period) - 1)])
-      sigma <- mean(abs(ctrl.period - lag(ctrl.period))[1:(length(ctrl.period) - 1)],
-                    na.rm=T)
-      tr1 <- ctrl.period[n.mos] > (mu + 3 * sigma / d2)
-      tr2 <- (ctrl.period[n.mos] > (mu + 2 * sigma / d2)) &
-        any(ctrl.period[(n.mos - 2):(n.mos - 1)] > (mu + 2 * sigma / d2))
-      tr3 <- (ctrl.period[n.mos] > (mu + sigma / d2)) &
-        (sum(ctrl.period[(n.mos - 4):(n.mos - 1)] > (mu + sigma / d2)) >= 3)
-      tr4 <- sum(ctrl.period[(n.mos - 8):n.mos] > mu) == 9
-      return(c(tr1, tr2, tr3, tr4))
-    }
-  } else{
-    warning("Shewart did not run - insufficient months")
-    return(rep(NA, 4))
-  }
 }
 
 # Shewhart - Continuous N-Sigma Return

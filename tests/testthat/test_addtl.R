@@ -1,4 +1,4 @@
-context("Quality Control Algorithms")
+context("Additional Algorithms")
 
 # Reference example
 data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))
