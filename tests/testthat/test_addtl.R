@@ -67,7 +67,7 @@ test_that("df parameter functions as expected", {
                                    "params",
                                    "data")))
   expect_equal(a2$test_name, "Poisson Rare")
-  expect_match(a2$analysis_of, "Count of\\:+")
+  expect_match(a2$analysis_of, "Count of .+")
   expect_true(a2$status)
   expect_true(all(names(a2$result) %in% c("statistic",
                                           "ll95",

@@ -1,24 +1,33 @@
-#' Shewhart x-bar Control Chart
+#' Proportional Reporting Ratio
 #'
-#' Test on device-events using the Shewhart x-bar control chart. Includes
-#' the first 4 Western Electric rules common to statistical process control.
+#' Test on device-events using the proportional reporting ratio (PRR). From
+#' the family of disproportionality analyses (DPA) used to generate signals of
+#' disproportionate reporting (SDRs).
 #'
 #' @param df Required input data frame of class \code{mds_ts} or, for generic
 #' usage, any data frame with the following columns:
 #' \describe{
 #'   \item{time}{Unique times of class \code{Date}}
-#'   \item{event}{Either the event count or rate of class \code{numeric}}
+#'   \item{nA}{Cell A count (class \code{numeric}) of the 2x2 table:
+#'   device/event of interest.}
+#'   \item{nB}{Cell B count (class \code{numeric}) of the 2x2 table:
+#'   device/non-event of interest.}
+#'   \item{nC}{Cell C count (class \code{numeric}) of the 2x2 table:
+#'   non-device/event of interest.}
+#'   \item{nD}{Cell D count (class \code{numeric}) of the 2x2 table:
+#'   non-device/non-event of interest.}
 #' }
 #' @param ts_event Required if \code{df} is of class \code{mds_ts}. Named string
-#' indicating the variable corresponding to the event count or rate. Rate must
-#' be calculated in a separate column in \code{df} as it is not calculated by
-#' default. The name of the string is an English description of what was
-#' analyzed.
+#' indicating the variable corresponding to the event count (cell A in the 2x2
+#' contingency table). In most cases, the default (\code{"nA"}) is the appropriate
+#' setting. Otherwise specify the name of the alternate variable containing
+#' event counts for cell A. The name of the string is an English description of
+#' what was analyzed.
 #'
 #' Default: \code{"nA"} corresponding to the event count column in \code{mds_ts}
 #' objects. Name is generated from \code{mds_ts} metadata.
 #'
-#' Example: \code{stats::setNames("rate", "Rate of Bone Filler Events in Canada")}
+#' Example: \code{stats::setNames("eventCount", "Count of Bone Cement Leakages")}
 #'
 #' @param analysis_of Optional string indicating the English description of what
 #' was analyzed. If specified, this will override the name of the
@@ -26,36 +35,16 @@
 #'
 #' Default: \code{NA} indicates no English description.
 #'
-#' Example: \code{"Rate of bone cement leakage"}
+#' Example: \code{"Count of bone cement leakages"}
 #'
-#' @param eval_period Optional positive integer indicating the number of unique
-#' times counting in reverse chronological order to assess. This will be used to
-#' establish the process mean and moving range.
+#' @param eval_period Required positive integer indicating the number of unique
+#' times counting in reverse chronological order to sum over to create the 2x2
+#' contingency table.
 #'
-#' Default: \code{NULL} considers all times in \code{df}.
+#' Default: \code{1} considers only the most recent time in \code{df}.
 #'
-#' @param zero_rate Required maximum proportion of \code{event}s in \code{df}
-#' (constrained by \code{eval_period}) containing zeroes for this algorithm to
-#' run. Because Shewhart does not perform well on rare events, a value >0 is
-#' recommended.
-#'
-#' Default: \code{1/3} requires no more than 1/3 zeros in \code{event}s in
-#' \code{df} in order to run.
-#'
-#' @param we_rule Required integer from \code{1} to \code{4} representing the
-#' Western Electric rule to use. See details for descriptions.
-#'
-#' Default: \code{1} represents the first Western Electric rule of one point
-#' over the 3-sigma limit.
-#'
-#' @details Function \code{shewhart()} is a standard implementation of the x-bar
-#' Control Chart test from the family of statistical process control tests
-#' originally proposed by Walter Shewhart.
-#'
-#' \code{we_rule} has four possible values: \code{1} is one point over the
-#' 3-sigma limit. \code{2} is two out of three consecutive points over the
-#' 2-sigma limit. \code{3} is four of five consecutive points over the 1-sigma
-#' limit. \code{4} is nine consecutive points over the process mean.
+#' EXample: \code{12} sums over the last 12 time periods to create the 2x2
+#' contingency table.
 #'
 #' @return A named list of class \code{mdsstat_test} object, as follows:
 #' \describe{
@@ -73,23 +62,23 @@
 #'
 #' @examples
 #' # Basic Example
-#' data <- data.frame(time=c(1:25), event=as.integer(rnorm(25, 100, 25)))
-#' a1 <- shewhart(data)
+#' data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))
+#' a1 <- poisson_rare(data)
 #' # Example using an mds_ts object
-#' a2 <- shewhart(mds_ts[[3]])
+#' a2 <- poisson_rare(mds_ts[[1]])
 #' # Example using a derived rate as the "event"
-#' data <- mds_ts[[3]]
+#' data <- mds_ts[[1]]
 #' data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
-#' a3 <- shewhart(data, "rate")
+#' a3 <- poisson_rare(data, "rate")
 #'
 #' @references
-#' Montgomery, Douglas C. Introduction to Statistical Quality Control by Douglas C. Montgomery, 5th Edition: Study Guide. Cram101, 2013.
+#' Evans, S. J. W., Waller, P. C., & Davis, S. (2001). Use of proportional reporting ratios (PRRs) for signal generation from spontaneous adverse drug reaction reports. Pharmacoepidemiology and Drug Safety, 10(6), 483–486. https://doi.org/10.1002/pds.677
 #' @export
-shewhart <- function (df, ...) {
-  UseMethod("shewhart", df)
+prr <- function (df, ...) {
+  UseMethod("prr", df)
 }
 
-shewhart.mds_ts <- function(
+prr.mds_ts <- function(
   df,
   ts_event="nA",
   analysis_of=NA,
@@ -113,12 +102,10 @@ shewhart.mds_ts <- function(
   shewhart.default(out, analysis_of=name, ...)
 }
 
-shewhart.default <- function(
+prr.default <- function(
   df,
   analysis_of=NA,
-  eval_period=NULL,
-  zero_rate=1/3,
-  we_rule=1L
+  eval_period=1
 ){
   input_param_checker(df, "data.frame")
   input_param_checker(eval_period, "integer")
