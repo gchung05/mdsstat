@@ -35,7 +35,7 @@ Example: \code{"Rate of bone cement leakage"}}
 
 \item{eval_period}{Optional positive integer indicating the number of unique
 times counting in reverse chronological order to assess. This will be used to
-establish the process mean and moving range $R.
+establish the process mean and moving range.
 
 Default: \code{NULL} considers all times in \code{df}.}
 
@@ -61,7 +61,7 @@ A named list of class \code{mdsstat_test} object, as follows:
   \item{status}{Named boolean of whether the test was run. The name contains
   the run status.}
   \item{result}{A standardized list of test run results: \code{statistic}
-  for the test statistic, \code{ll95} and \code{ul95} for the 95%
+  for the test statistic, \code{lcl} and \code{ucl} for the 95%
   confidence bounds, \code{p} for the p-value, \code{signal} status, and
   \code{signal_threshold}.}
   \item{params}{The test parameters}
@@ -84,14 +84,14 @@ limit. \code{4} is nine consecutive points over the process mean.
 }
 \examples{
 # Basic Example
-data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))
-a1 <- poisson_rare(data)
+data <- data.frame(time=c(1:25), event=as.integer(rnorm(25, 100, 25)))
+a1 <- shewhart(data)
 # Example using an mds_ts object
-a2 <- poisson_rare(mds_ts[[1]])
+a2 <- shewhart(mds_ts[[3]])
 # Example using a derived rate as the "event"
-data <- mds_ts[[1]]
+data <- mds_ts[[3]]
 data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
-a3 <- poisson_rare(data, "rate")
+a3 <- shewhart(data, "rate")
 
 }
 \references{

@@ -62,7 +62,7 @@ A named list of class \code{mdsstat_test} object, as follows:
   \item{status}{Named boolean of whether the test was run. The name contains
   the run status.}
   \item{result}{A standardized list of test run results: \code{statistic}
-  for the test statistic, \code{ll95} and \code{ul95} for the 95%
+  for the test statistic, \code{lcl} and \code{ucl} for the 95%
   confidence bounds, \code{p} for the p-value, \code{signal} status, and
   \code{signal_threshold}.}
   \item{params}{The test parameters}

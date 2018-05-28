@@ -64,7 +64,7 @@
 #'   \item{status}{Named boolean of whether the test was run. The name contains
 #'   the run status.}
 #'   \item{result}{A standardized list of test run results: \code{statistic}
-#'   for the test statistic, \code{ll95} and \code{ul95} for the 95%
+#'   for the test statistic, \code{lcl} and \code{ucl} for the 95%
 #'   confidence bounds, \code{p} for the p-value, \code{signal} status, and
 #'   \code{signal_threshold}.}
 #'   \item{params}{The test parameters}
@@ -121,12 +121,10 @@ shewhart.default <- function(
   we_rule=1L
 ){
   input_param_checker(df, "data.frame")
+  input_param_checker(c("time", "event"), check_names=df)
   input_param_checker(eval_period, "integer")
   input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
   input_param_checker(we_rule, "integer", null_ok=F, max_length=1)
-  if (!all(c("time", "event") %in% names(df))){
-    stop("df must contain columns named time and event")
-  }
   if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
   if (we_rule < 1 | we_rule > 4) stop("we_rule must be in range [1L, 4L]")
 
@@ -190,9 +188,9 @@ shewhart.default <- function(
       hyp <- "9 points > mean"
     }
 
-    rr <- list(statistic=stat,
-               ll95=rep(mu + qnorm(0.025) * sigma, length(stat)),
-               ul95=rep(mu + qnorm(0.975) * sigma, length(stat)),
+    rr <- list(statistic=stats::setNames(stat, "N-Sigmas"),
+               lcl=rep(mu + qnorm(0.025) * sigma, length(stat)),
+               ucl=rep(mu + qnorm(0.975) * sigma, length(stat)),
                p=stats::setNames(NA, "p-value"),
                signal=sig,
                signal_threshold=stats::setNames(
@@ -200,7 +198,6 @@ shewhart.default <- function(
                  rep("UCL", length(stat))),
                mu=mu,
                sigma=sigma)
-    rm <- "Run success"
     rs <- stats::setNames(T, "Success")
   }
 
@@ -210,6 +207,7 @@ shewhart.default <- function(
               status=rs,
               result=rr,
               params=list(test_hyp=hyp,
+                          eval_period=eval_period,
                           zero_rate=zero_rate,
                           we_rule=we_rule),
               data=rd)

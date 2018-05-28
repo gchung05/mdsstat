@@ -1,7 +1,7 @@
 context("Additional Algorithms")
 
 # Reference example
-data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))
+data <- data.frame(time=c(1:8), event=c(rep(0, 6), stats::rpois(2, 4)))
 a1 <- poisson_rare(data)
 
 # Basic
@@ -25,18 +25,19 @@ test_that("outputs are as expected", {
   expect_equal(a1$analysis_of, NA)
   expect_true(a1$status, T)
   expect_true(all(names(a1$result) %in% c("statistic",
-                                          "ll95",
-                                          "ul95",
+                                          "lcl",
+                                          "ucl",
                                           "p",
                                           "signal",
                                           "signal_threshold")))
   expect_true(a1$result$statistic > 0)
-  expect_true(a1$result$ll95 > 0)
-  expect_true(a1$result$ul95 > 0)
+  expect_true(a1$result$lcl > 0)
+  expect_true(a1$result$ucl > 0)
   expect_true(a1$result$p > 0)
   expect_is(a1$result$signal, "logical")
   expect_true(a1$result$signal_threshold > 0)
   expect_true(all(names(a1$params) %in% c("test_hyp",
+                                          "eval_period",
                                           "zero_rate",
                                           "p_rate",
                                           "p_crit",
@@ -70,18 +71,19 @@ test_that("df parameter functions as expected", {
   expect_match(a2$analysis_of, "Count of .+")
   expect_true(a2$status)
   expect_true(all(names(a2$result) %in% c("statistic",
-                                          "ll95",
-                                          "ul95",
+                                          "lcl",
+                                          "ucl",
                                           "p",
                                           "signal",
                                           "signal_threshold")))
   expect_true(a2$result$statistic > 0)
-  expect_true(a2$result$ll95 > 0)
-  expect_true(a2$result$ul95 > 0)
+  expect_true(a2$result$lcl > 0)
+  expect_true(a2$result$ucl > 0)
   expect_true(a2$result$p > 0)
   expect_is(a2$result$signal, "logical")
   expect_true(a2$result$signal_threshold > 0)
   expect_true(all(names(a2$params) %in% c("test_hyp",
+                                          "eval_period",
                                           "zero_rate",
                                           "p_rate",
                                           "p_crit",

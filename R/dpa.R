@@ -20,14 +20,10 @@
 #' @param ts_event Required if \code{df} is of class \code{mds_ts}. Named string
 #' indicating the variable corresponding to the event count (cell A in the 2x2
 #' contingency table). In most cases, the default (\code{"nA"}) is the appropriate
-#' setting. Otherwise specify the name of the alternate variable containing
-#' event counts for cell A. The name of the string is an English description of
-#' what was analyzed.
+#' setting. See details for alternative options.
 #'
 #' Default: \code{"nA"} corresponding to the event count column in \code{mds_ts}
 #' objects. Name is generated from \code{mds_ts} metadata.
-#'
-#' Example: \code{stats::setNames("eventCount", "Count of Bone Cement Leakages")}
 #'
 #' @param analysis_of Optional string indicating the English description of what
 #' was analyzed. If specified, this will override the name of the
@@ -41,10 +37,31 @@
 #' times counting in reverse chronological order to sum over to create the 2x2
 #' contingency table.
 #'
-#' Default: \code{1} considers only the most recent time in \code{df}.
+#' Default: \code{1L} considers only the most recent time in \code{df}.
 #'
-#' EXample: \code{12} sums over the last 12 time periods to create the 2x2
+#' EXample: \code{12L} sums over the last 12 time periods to create the 2x2
 #' contingency table.
+#'
+#' @param null_ratio Numeric PRR value representing the null hypothesis, used
+#' with \code{alpha} to establish the signal status and the p-value.
+#'
+#' Default: \code{1} indicates a null hypothesis of PRR=1 and tests if the
+#' actual PRR is greater than 1.
+#'
+#' @param alpha Numeric value representing the statistical alpha used to
+#' establish the signal status.
+#'
+#' Default: \code{0.05} corresponds to the standard alpha value of 5%.
+#'
+#' @details For parameter \code{ts_event}, in the uncommon case where the
+#' device-event count (Cell A) variable is not \code{"nA"}, the name of the
+#' variable may be specified here. Note that the remaining 3 cells of the 2x2
+#' contingency table (Cells B, C, D) must be the variables \code{"nB"},
+#' \code{"nC"}, and \code{"nD"} respectively in \code{df}. A named character
+#' vector may be used where the name is the English description of what was
+#' analyzed. Note that if the parameter \code{analysis_of} is specified, it will
+#' override this name. Example: \code{ts_event=stats::setNames("eventCount",
+#' "Count of Bone Cement Leakages")}
 #'
 #' @return A named list of class \code{mdsstat_test} object, as follows:
 #' \describe{
@@ -53,7 +70,7 @@
 #'   \item{status}{Named boolean of whether the test was run. The name contains
 #'   the run status.}
 #'   \item{result}{A standardized list of test run results: \code{statistic}
-#'   for the test statistic, \code{ll95} and \code{ul95} for the 95%
+#'   for the test statistic, \code{lcl} and \code{ucl} for the set
 #'   confidence bounds, \code{p} for the p-value, \code{signal} status, and
 #'   \code{signal_threshold}.}
 #'   \item{params}{The test parameters}
@@ -97,29 +114,35 @@ prr.mds_ts <- function(
     name <- names(ts_event)
   } else name <- analysis_of
 
-  out <- data.frame(time=df$time,
-                    event=df[[ts_event]])
-  shewhart.default(out, analysis_of=name, ...)
+  if (attributes(df)$dpa){
+    out <- data.frame(time=df$time,
+                      nA=df[[ts_event]],
+                      nB=df$nB,
+                      nC=df$nC,
+                      nD=df$nD)
+  } else{
+    stop("Input mds_ts df does not contain data for disproportionality analysis.")
+  }
+  prr.default(out, analysis_of=name, ...)
 }
 
 prr.default <- function(
   df,
   analysis_of=NA,
-  eval_period=1
+  eval_period=1L,
+  null_ratio=1,
+  alpha=0.05
 ){
-  input_param_checker(df, "data.frame")
-  input_param_checker(eval_period, "integer")
-  input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
-  input_param_checker(we_rule, "integer", null_ok=F, max_length=1)
-  if (!all(c("time", "event") %in% names(df))){
-    stop("df must contain columns named time and event")
-  }
-  if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
-  if (we_rule < 1 | we_rule > 4) stop("we_rule must be in range [1L, 4L]")
+  # Contingency table primary variables
+  c2x2 <- c("nA", "nB", "nC", "nD")
 
-  # d2 is an anti-biasing constant used to estimate sigma. This d2 is set at a
-  # subgroup size of 2
-  d2 <- 2 / sqrt(pi)
+  input_param_checker(df, "data.frame")
+  input_param_checker(c("time", c2x2), check_names=df)
+  input_param_checker(eval_period, "integer")
+  input_param_checker(null_ratio, "numeric")
+  input_param_checker(alpha, "numeric")
+  if (null_ratio < 1) stop("null_ratio must be 1 or greater")
+  if (alpha <= 0 | alpha >= 1) stop("alpha must be in range (0, 1)")
 
   # Order by time
   df <- df[order(df$time), ]
@@ -129,7 +152,13 @@ prr.default <- function(
       stop("eval_period cannot be greater than df rows")
     } else if (eval_period < 1){
       stop("eval_period must be greater than 0")
-    } else df <- df[c((nrow(df) - eval_period + 1):nrow(df)), ]
+    } else{
+      df <- df[c((nrow(df) - eval_period + 1):nrow(df)), ]
+      # Sum over eval_period
+      newTime <- paste(range(df$time), collapse=" to ")
+      df <- cbind(data.frame(time=newTime),
+                  data.frame(t(colSums(df[, c2x2], na.rm=T))))
+    }
   }
   # Return data
   tlen <- nrow(df)
@@ -138,67 +167,43 @@ prr.default <- function(
 
   # Check for non-runnable conditions
   hyp <- "Not run"
-  if(nrow(df) < 4){
+  if(any(df[, c2x2] == 0)){
     rr <- NA
-    rs <- stats::setNames(F, ">3 time periods required")
-  } else if(sum(df$time != 0) < 2){
-    rr <- NA
-    rs <- stats::setNames(F, "2 or more non-zero events required")
-  } else if(sum(df$event == 0) / nrow(df) > zero_rate){
-    rr <- NA
-    rs <- stats::setNames(F, paste("Maximum zero_rate of", zero_rate, "exceeded"))
+    rs <- stats::setNames(F, "contingency table has zero counts")
   } else{
-    # If all conditions are met, run Shewhart test
-    mu <- mean(df$event)
-    sigma <- mean(abs(diff(df$event))) / d2
-    df$event[length(df$event)]
-    nsigma <- (df$event - mu) / sigma
-    if (we_rule == 1L){
-      stat <- nsigma[tlen]
-      thresh <- (mu + 3 * sigma)
-      sig <- stat > thresh
-      hyp <- "1 point > 3-sigma limit"
-    } else if (we_rule == 2L){
-      stat <- nsigma[(tlen - 2):tlen]
-      thresh <- mu + 2 * sigma
-      sig <- (nsigma[tlen] > thresh) &
-        any(nsigma[(tlen - 2):(tlen - 1)] > thresh)
-      hyp <- "2 of 3 points > 2-sigma limit"
-    } else if (we_rule == 3L){
-      stat <- nsigma[(tlen - 4):tlen]
-      thresh <- mu + sigma
-      sig <- (nsigma[tlen] > thresh) &
-        (sum(nsigma[(tlen - 4):(tlen - 1)] > thresh) >= 3)
-      hyp <- "4 of 5 points > 1-sigma limit"
-    } else if (we_rule == 4L){
-      stat <- nsigma[(tlen - 8):tlen]
-      thresh <- mu
-      sig <- sum(stat > thresh) == 9
-      hyp <- "9 points > mean"
-    }
+    # If all conditions are met, run PRR test
+    # Calculate PRR
+    stat <- (df$nA / (df$nA + df$nB)) / (df$nC / (df$nC + df$nD))
+    s <- sqrt((1 / df$nA) + (1 / df$nC) -
+                (1 / (df$nA + df$nB)) - (1 / (df$nC + df$nD)))
+    # Establish confidence limits
+    z <- qnorm(1 - (alpha / 2))
+    cl <- c(stat / exp(z * s), stat * exp(z * s))
+    p <-
+    # Determine signal & hypothesis
+    sig <- cl[1] > null_ratio
+    hyp <- paste0("Two-sided test at alpha=", alpha, " of PRR > ", null_ratio)
+    # stat thresh sig hyp null_ratio alpha
 
-    rr <- list(statistic=stat,
-               ll95=rep(mu + qnorm(0.025) * sigma, length(stat)),
-               ul95=rep(mu + qnorm(0.975) * sigma, length(stat)),
-               p=stats::setNames(NA, "p-value"),
+    rr <- list(statistic=stats::setNames(stat, "PRR"),
+               lcl=cl[1],
+               ucl=cl[2],
+               p=min(stats::pnorm((null_ratio - stat) / exp(s)) * 2, 1),
                signal=sig,
-               signal_threshold=stats::setNames(
-                 rep(thresh, length(stat)),
-                 rep("UCL", length(stat))),
-               mu=mu,
-               sigma=sigma)
-    rm <- "Run success"
+               signal_threshold=stats::setNames(alpha, "critical p-value"),
+               sigma=exp(s))
     rs <- stats::setNames(T, "Success")
   }
 
   # Return test
-  out <- list(test_name=paste("Shewhart x-bar Western Electric Rule", we_rule),
+  out <- list(test_name="Proportional Reporting Ratio",
               analysis_of=analysis_of,
               status=rs,
               result=rr,
               params=list(test_hyp=hyp,
-                          zero_rate=zero_rate,
-                          we_rule=we_rule),
+                          eval_period=eval_period,
+                          null_ratio=null_ratio,
+                          alpha=alpha),
               data=rd)
   class(out) <- append(class(out), "mdsstat_test")
   return(out)

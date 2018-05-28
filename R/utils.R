@@ -40,7 +40,9 @@ input_param_checker <- function(
     }
     if (length(check_names) > 0){
       if (!all(x %in% names(check_names))){
-        stop(paste0(x, " names not found in ", check_names))
+        stop(paste0(paste(x, collapse=", "),
+                    " variable names not found in ",
+                    deparse(substitute(check_names))))
       }
     }
     if (!is.null(max_length)){

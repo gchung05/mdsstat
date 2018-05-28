@@ -1,8 +1,12 @@
 context("DPA Algorithms")
 
 # Reference example
-data <- data.frame(time=c(1:25), event=as.integer(rnorm(25, 100, 25)))
-a1 <- shewhart(data)
+data <- data.frame(time=c(1:25),
+                   nA=as.integer(stats::rnorm(25, 25, 5)),
+                   nB=as.integer(stats::rnorm(25, 50, 5)),
+                   nC=as.integer(stats::rnorm(25, 100, 25)),
+                   nD=as.integer(stats::rnorm(25, 200, 25)))
+a1 <- prr(data)
 
 # Basic
 # -----
@@ -21,48 +25,101 @@ test_that("function returns core mdsstat_test components", {
                                    "data")))
 })
 test_that("outputs are as expected", {
-  expect_equal(a1$test_name, "Shewhart x-bar Western Electric Rule 1")
+  expect_equal(a1$test_name, "Proportional Reporting Ratio")
   expect_equal(a1$analysis_of, NA)
   expect_true(a1$status, T)
   expect_true(all(names(a1$result) %in% c("statistic",
-                                          "ll95",
-                                          "ul95",
+                                          "lcl",
+                                          "ucl",
                                           "p",
                                           "signal",
                                           "signal_threshold",
-                                          "mu",
                                           "sigma")))
   expect_true(abs(a1$result$statistic) > 0)
-  expect_true(abs(a1$result$ll95) > 0)
-  expect_true(abs(a1$result$ul95) > 0)
-  expect_true(a1$result$ul95 > a1$result$ll95)
-  expect_true(is.na(a1$result$p))
+  expect_true(abs(a1$result$lcl) > 0)
+  expect_true(abs(a1$result$ucl) > 0)
+  expect_true(a1$result$ucl > a1$result$lcl)
+  expect_true(a1$result$p > 0 & a1$result$p <= 1)
   expect_is(a1$result$signal, "logical")
-  expect_true(a1$result$signal_threshold > 0)
+  expect_equal(as.numeric(a1$result$signal_threshold), 0.05)
   expect_true(all(names(a1$params) %in% c("test_hyp",
-                                          "zero_rate",
-                                          "we_rule")))
+                                          "eval_period",
+                                          "null_ratio",
+                                          "alpha")))
   expect_is(a1$params$test_hyp, "character")
-  expect_equal(a1$params$zero_rate, 1/3)
-  expect_equal(a1$params$we_rule, 1L)
-  expect_true(all(names(a1$data) %in% c("reference_time",
-                                          "data")))
-  expect_equal(a1$data$reference_time, 25)
-  expect_equal(a1$data$data, data)
+  expect_equal(a1$params$null_ratio, 1)
+  expect_equal(a1$params$alpha, 0.05)
+  expect_true(all(names(a1$data) %in% c("reference_time", "data")))
+  expect_true(all(names(a1$data$data) %in% c("time", "nA", "nB", "nC", "nD")))
+  expect_equal(as.character(a1$data$reference_time), "25 to 25")
+  expect_equal(a1$data$data[, -1], data.frame(t(colSums(data[nrow(data), -1]))))
 })
 
 # Reference example
-data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))
-a1a <- shewhart(data)
+data <- data.frame(time=c(1:25),
+                   nA=rep(0, 25),
+                   nB=as.integer(stats::rnorm(25, 50, 25)),
+                   nC=as.integer(stats::rnorm(25, 100, 25)),
+                   nD=as.integer(stats::rnorm(25, 200, 25)))
+a1a <- prr(data)
 
-test_that("test does not run on rare events", {
+test_that("test does not run on 0 cell A counts", {
   expect_true(isFALSE(a1a$status))
+})
+
+# Reference example
+data <- data.frame(time=c(1:25),
+                   nA=as.integer(stats::rnorm(25, 50, 25)),
+                   nB=rep(0, 25),
+                   nC=as.integer(stats::rnorm(25, 100, 25)),
+                   nD=as.integer(stats::rnorm(25, 200, 25)))
+a1a <- prr(data)
+
+test_that("test does not run on 0 cell B counts", {
+  expect_true(isFALSE(a1a$status))
+})
+
+# Reference example
+data <- data.frame(time=c(1:25),
+                   nA=as.integer(stats::rnorm(25, 50, 25)),
+                   nB=as.integer(stats::rnorm(25, 50, 25)),
+                   nC=rep(0, 25),
+                   nD=as.integer(stats::rnorm(25, 200, 25)))
+a1a <- prr(data)
+
+test_that("test does not run on 0 cell C counts", {
+  expect_true(isFALSE(a1a$status))
+})
+
+# Reference example
+data <- data.frame(time=c(1:25),
+                   nA=as.integer(stats::rnorm(25, 50, 25)),
+                   nB=as.integer(stats::rnorm(25, 50, 25)),
+                   nC=as.integer(stats::rnorm(25, 50, 25)),
+                   nD=rep(0, 25))
+a1a <- prr(data)
+
+test_that("test does not run on 0 cell D counts", {
+  expect_true(isFALSE(a1a$status))
+})
+
+# Reference example
+data <- data.frame(time=c(1:25),
+                   nA=as.integer(stats::rnorm(25, 25, 25)))
+test_that("test errors on missing 2x2 cells", {
+  expect_error(prr(data))
+  expect_error(prr(mds_ts[[1]]))
+})
+test_that("test does not run on 0 cell counts", {
+  expect_true(isFALSE(prr(mds_ts[[2]])$status))
+  expect_true(isFALSE(prr(mds_ts[[2]], eval_period=6L)$status))
 })
 
 # Parameter checks
 # ----------------
 a2d <- mds_ts[[3]]
-a2 <- shewhart(a2d)
+a2 <- prr(a2d)
+
 test_that("df parameter functions as expected", {
   expect_is(a2, "list")
   expect_is(a2, "mdsstat_test")
@@ -72,98 +129,78 @@ test_that("df parameter functions as expected", {
                                    "result",
                                    "params",
                                    "data")))
-  expect_equal(a2$test_name, "Shewhart x-bar Western Electric Rule 1")
+  expect_equal(a2$test_name, "Proportional Reporting Ratio")
   expect_match(a2$analysis_of, "Count of .+")
   expect_true(a2$status)
   expect_true(all(names(a2$result) %in% c("statistic",
-                                          "ll95",
-                                          "ul95",
+                                          "lcl",
+                                          "ucl",
                                           "p",
                                           "signal",
                                           "signal_threshold",
-                                          "mu",
                                           "sigma")))
   expect_true(abs(a2$result$statistic) > 0)
-  expect_true(abs(a2$result$ll95) > 0)
-  expect_true(abs(a2$result$ul95) > 0)
-  expect_true(a2$result$ul95 > a2$result$ll95)
-  expect_true(is.na(a1$result$p))
+  expect_true(abs(a2$result$lcl) > 0)
+  expect_true(abs(a2$result$ucl) > 0)
+  expect_true(a2$result$ucl > a2$result$lcl)
+  expect_true(a1$result$p > 0 & a1$result$p <= 1)
   expect_is(a2$result$signal, "logical")
-  expect_true(a2$result$signal_threshold > 0)
+  expect_equal(as.numeric(a2$result$signal_threshold), 0.05)
   expect_true(all(names(a2$params) %in% c("test_hyp",
-                                          "zero_rate",
-                                          "we_rule")))
+                                          "eval_period",
+                                          "null_ratio",
+                                          "alpha")))
   expect_is(a2$params$test_hyp, "character")
-  expect_equal(a2$params$zero_rate, 1/3)
-  expect_equal(a2$params$we_rule, 1L)
-  expect_true(all(names(a2$data) %in% c("reference_time",
-                                        "data")))
-  expect_equal(a2$data$reference_time, max(a2d$time))
-  expect_equal(a2$data$data[[1]], a2d[[1]])
-  expect_equal(a2$data$data[[2]], ifelse(is.na(a2d$nA), 0, a2d$nA))
+  expect_equal(a2$params$null_ratio, 1)
+  expect_equal(a2$params$alpha, 0.05)
+  expect_true(all(names(a2$data) %in% c("reference_time", "data")))
+  expect_true(all(names(a2$data$data) %in% c("time", "nA", "nB", "nC", "nD")))
+  expect_equal(as.character(a2$data$reference_time),
+               paste(a2d$time[nrow(a2d)], "to", a2d$time[nrow(a2d)]))
+  expect_equal(a2$data$data[, -1],
+               data.frame(t(colSums(a2d[nrow(a2d), c("nA", "nB", "nC", "nD")]))))
 })
 
-a2d <- mds_ts[[3]]
-a2d$rate <- ifelse(is.na(a2d$nA), 0, a2d$nA)
-a2d$rate <- a2d$rate / a2d$exposure
-a2 <- shewhart(a2d, ts_event="rate")
+a3d <- mds_ts[[3]]
+a3d$nA2 <- ifelse(is.na(a3d$nA), 0, a3d$nA)
+a3 <- prr(a3d, ts_event="nA2")
 test_that("ts_event parameter functions as expected", {
-  expect_equal(a2$data$reference_time, max(a2d$time))
-  expect_equal(a2$data$data[[1]], a2d$time)
-  expect_equal(a2$data$data[[2]], a2d$rate)
+  expect_equal(a3$result$statistic, prr(a3d)$result$statistic)
+  expect_null(a3$analysis_of)
 })
 
-a2 <- shewhart(a2d, analysis_of="Testing")
+a3 <- prr(a3d, analysis_of="Testing")
 test_that("ts_event parameter functions as expected", {
-  expect_equal(a2$analysis_of, "Testing")
+  expect_equal(a3$analysis_of, "Testing")
 })
 
-a2 <- shewhart(a2d, eval_period=3L)
+a3 <- prr(a3d, eval_period=3L)
 test_that("eval_period parameter functions as expected", {
-  expect_equal(names(a2$status), ">3 time periods required")
-  expect_equal(nrow(a2$data$data), 3L)
-  expect_error(eval_period(a2d, eval_period=2))
-  expect_error(eval_period(a2d, eval_period=0))
-  expect_error(eval_period(a2d, eval_period=nrow(a2d) + 1))
+  expect_equal(a3$data$data[, -1],
+               data.frame(t(colSums(a3d[c((nrow(a3d) - 3L + 1):nrow(a3d)),
+                                        c("nA", "nB", "nC", "nD")]))))
+  expect_error(prr(a3d, eval_period=as.integer(nrow(a3d) + 1)))
+  expect_error(prr(a3d, eval_period=0L))
 })
 
-test_that("zero_rate parameter functions as expected", {
-  expect_is(shewhart(a2d, zero_rate=0), "mdsstat_test")
-  expect_is(shewhart(a2d, zero_rate=1), "mdsstat_test")
-  expect_error(shewhart(a2d, zero_rate=1.1))
-  expect_error(shewhart(a2d, zero_rate=-1))
+a3 <- prr(a3d, null_ratio=2)
+test_that("null_ratio parameter functions as expected", {
+  expect_error(prr(a3d, null_ratio=0.1))
+  expect_error(prr(a3d, null_ratio=0))
+  expect_error(prr(a3d, null_ratio=-1))
+  expect_is(prr(a3d, null_ratio=2), "mdsstat_test")
+  expect_is(prr(a3d, null_ratio=4), "mdsstat_test")
+  expect_equal(a3$params$null_ratio, 2)
 })
 
-a22L <- shewhart(a2d, we_rule=2L)
-a23L <- shewhart(a2d, we_rule=3L)
-a24L <- shewhart(a2d, we_rule=4L)
-test_that("we_rule parameter functions as expected", {
-  expect_is(a22L, "mdsstat_test")
-  expect_is(a23L, "mdsstat_test")
-  expect_is(a24L, "mdsstat_test")
-  expect_error(shewhart(a2d, we_rule=1))
-  expect_error(shewhart(a2d, we_rule=5L))
-  expect_error(shewhart(a2d, we_rule=5))
-  expect_error(shewhart(a2d, we_rule=0L))
-})
-test_that("we_rule 2 functions as expected", {
-  expect_equal(a22L$test_name, "Shewhart x-bar Western Electric Rule 2")
-  expect_equal(length(a22L$result$statistic), 3)
-  expect_equal(length(a22L$result$ll95), 3)
-  expect_equal(length(a22L$result$ul95), 3)
-  expect_equal(length(a22L$result$signal_threshold), 3)
-})
-test_that("we_rule 3 functions as expected", {
-  expect_equal(a23L$test_name, "Shewhart x-bar Western Electric Rule 3")
-  expect_equal(length(a23L$result$statistic), 5)
-  expect_equal(length(a23L$result$ll95), 5)
-  expect_equal(length(a23L$result$ul95), 5)
-  expect_equal(length(a23L$result$signal_threshold), 5)
-})
-test_that("we_rule 4 functions as expected", {
-  expect_equal(a24L$test_name, "Shewhart x-bar Western Electric Rule 4")
-  expect_equal(length(a24L$result$statistic), 9)
-  expect_equal(length(a24L$result$ll95), 9)
-  expect_equal(length(a24L$result$ul95), 9)
-  expect_equal(length(a24L$result$signal_threshold), 9)
+a3 <- prr(a3d, alpha=0.01)
+test_that("alpha parameter functions as expected", {
+  expect_error(prr(a3d, alpha=0))
+  expect_error(prr(a3d, alpha=1))
+  expect_error(prr(a3d, alpha=-.01))
+  expect_error(prr(a3d, alpha=1.01))
+  expect_is(prr(a3d, alpha=0.10), "mdsstat_test")
+  expect_is(a3, "mdsstat_test")
+  expect_equal(a3$params$alpha, 0.01)
+  expect_equal(as.numeric(a3$result$signal_threshold), 0.01)
 })

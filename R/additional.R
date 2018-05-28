@@ -60,7 +60,7 @@
 #'   \item{status}{Named boolean of whether the test was run. The name contains
 #'   the run status.}
 #'   \item{result}{A standardized list of test run results: \code{statistic}
-#'   for the test statistic, \code{ll95} and \code{ul95} for the 95%
+#'   for the test statistic, \code{lcl} and \code{ucl} for the 95%
 #'   confidence bounds, \code{p} for the p-value, \code{signal} status, and
 #'   \code{signal_threshold}.}
 #'   \item{params}{The test parameters}
@@ -115,13 +115,11 @@ poisson_rare.default <- function(
   p_crit=0.05
 ){
   input_param_checker(df, "data.frame")
+  input_param_checker(c("time", "event"), check_names=df)
   input_param_checker(eval_period, "integer")
   input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
   input_param_checker(p_rate, "numeric", null_ok=F, max_length=1)
   input_param_checker(p_crit, "numeric", null_ok=F, max_length=1)
-  if (!all(c("time", "event") %in% names(df))){
-    stop("df must contain columns named time and event")
-  }
   if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
   if (p_crit < 0 | p_crit > 1) stop("p_crit must be in range [0, 1]")
 
@@ -154,13 +152,12 @@ poisson_rare.default <- function(
     # If all conditions are met, run Poisson test
     run <- stats::poisson.test(round(sum(df$event)), nrow(df), r=p_rate,
                               alternative=h_alternative)
-    rr <- list(statistic=run$estimate,
-               ll95=run$conf.int[1],
-               ul95=run$conf.int[2],
+    rr <- list(statistic=stats::setNames(run$estimate, "Rate"),
+               lcl=run$conf.int[1],
+               ucl=run$conf.int[2],
                p=stats::setNames(run$p.value, "p-value"),
                signal=(run$p.value <= p_crit),
-               signal_threshold=stats::setNames(run$p.value, "p-value"))
-    rm <- "Run success"
+               signal_threshold=stats::setNames(p_crit, "critical p-value"))
     rs <- stats::setNames(T, "Success")
   }
 
@@ -170,6 +167,7 @@ poisson_rare.default <- function(
               status=rs,
               result=rr,
               params=list(test_hyp=paste0("Poisson test p-value <=", p_crit),
+                          eval_period=eval_period,
                           zero_rate=zero_rate,
                           p_rate=p_rate,
                           p_crit=p_crit,

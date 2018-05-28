@@ -1,7 +1,7 @@
 context("Qc Algorithms")
 
 # Reference example
-data <- data.frame(time=c(1:25), event=as.integer(rnorm(25, 100, 25)))
+data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
 a1 <- shewhart(data)
 
 # Basic
@@ -25,21 +25,22 @@ test_that("outputs are as expected", {
   expect_equal(a1$analysis_of, NA)
   expect_true(a1$status, T)
   expect_true(all(names(a1$result) %in% c("statistic",
-                                          "ll95",
-                                          "ul95",
+                                          "lcl",
+                                          "ucl",
                                           "p",
                                           "signal",
                                           "signal_threshold",
                                           "mu",
                                           "sigma")))
   expect_true(abs(a1$result$statistic) > 0)
-  expect_true(abs(a1$result$ll95) > 0)
-  expect_true(abs(a1$result$ul95) > 0)
-  expect_true(a1$result$ul95 > a1$result$ll95)
+  expect_true(abs(a1$result$lcl) > 0)
+  expect_true(abs(a1$result$ucl) > 0)
+  expect_true(a1$result$ucl > a1$result$lcl)
   expect_true(is.na(a1$result$p))
   expect_is(a1$result$signal, "logical")
   expect_true(a1$result$signal_threshold > 0)
   expect_true(all(names(a1$params) %in% c("test_hyp",
+                                          "eval_period",
                                           "zero_rate",
                                           "we_rule")))
   expect_is(a1$params$test_hyp, "character")
@@ -76,21 +77,22 @@ test_that("df parameter functions as expected", {
   expect_match(a2$analysis_of, "Count of .+")
   expect_true(a2$status)
   expect_true(all(names(a2$result) %in% c("statistic",
-                                          "ll95",
-                                          "ul95",
+                                          "lcl",
+                                          "ucl",
                                           "p",
                                           "signal",
                                           "signal_threshold",
                                           "mu",
                                           "sigma")))
   expect_true(abs(a2$result$statistic) > 0)
-  expect_true(abs(a2$result$ll95) > 0)
-  expect_true(abs(a2$result$ul95) > 0)
-  expect_true(a2$result$ul95 > a2$result$ll95)
+  expect_true(abs(a2$result$lcl) > 0)
+  expect_true(abs(a2$result$ucl) > 0)
+  expect_true(a2$result$ucl > a2$result$lcl)
   expect_true(is.na(a1$result$p))
   expect_is(a2$result$signal, "logical")
   expect_true(a2$result$signal_threshold > 0)
   expect_true(all(names(a2$params) %in% c("test_hyp",
+                                          "eval_period",
                                           "zero_rate",
                                           "we_rule")))
   expect_is(a2$params$test_hyp, "character")
@@ -149,21 +151,21 @@ test_that("we_rule parameter functions as expected", {
 test_that("we_rule 2 functions as expected", {
   expect_equal(a22L$test_name, "Shewhart x-bar Western Electric Rule 2")
   expect_equal(length(a22L$result$statistic), 3)
-  expect_equal(length(a22L$result$ll95), 3)
-  expect_equal(length(a22L$result$ul95), 3)
+  expect_equal(length(a22L$result$lcl), 3)
+  expect_equal(length(a22L$result$ucl), 3)
   expect_equal(length(a22L$result$signal_threshold), 3)
 })
 test_that("we_rule 3 functions as expected", {
   expect_equal(a23L$test_name, "Shewhart x-bar Western Electric Rule 3")
   expect_equal(length(a23L$result$statistic), 5)
-  expect_equal(length(a23L$result$ll95), 5)
-  expect_equal(length(a23L$result$ul95), 5)
+  expect_equal(length(a23L$result$lcl), 5)
+  expect_equal(length(a23L$result$ucl), 5)
   expect_equal(length(a23L$result$signal_threshold), 5)
 })
 test_that("we_rule 4 functions as expected", {
   expect_equal(a24L$test_name, "Shewhart x-bar Western Electric Rule 4")
   expect_equal(length(a24L$result$statistic), 9)
-  expect_equal(length(a24L$result$ll95), 9)
-  expect_equal(length(a24L$result$ul95), 9)
+  expect_equal(length(a24L$result$lcl), 9)
+  expect_equal(length(a24L$result$ucl), 9)
   expect_equal(length(a24L$result$signal_threshold), 9)
 })
