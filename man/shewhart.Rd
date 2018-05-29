@@ -2,9 +2,16 @@
 % Please edit documentation in R/qc.R
 \name{shewhart}
 \alias{shewhart}
+\alias{shewhart.mds_ts}
+\alias{shewhart.default}
 \title{Shewhart x-bar Control Chart}
 \usage{
 shewhart(df, ...)
+
+\method{shewhart}{mds_ts}(df, ts_event = "nA", analysis_of = NA, ...)
+
+\method{shewhart}{default}(df, analysis_of = NA, eval_period = NULL,
+  zero_rate = 1/3, we_rule = 1L)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic

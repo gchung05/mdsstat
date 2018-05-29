@@ -89,6 +89,7 @@ shewhart <- function (df, ...) {
   UseMethod("shewhart", df)
 }
 
+#' @rdname shewhart
 shewhart.mds_ts <- function(
   df,
   ts_event="nA",
@@ -113,6 +114,7 @@ shewhart.mds_ts <- function(
   shewhart.default(out, analysis_of=name, ...)
 }
 
+#' @rdname shewhart
 shewhart.default <- function(
   df,
   analysis_of=NA,

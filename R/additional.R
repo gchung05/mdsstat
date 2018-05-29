@@ -82,6 +82,7 @@ poisson_rare <- function (df, ...) {
   UseMethod("poisson_rare", df)
 }
 
+#' @rdname poisson_rare
 poisson_rare.mds_ts <- function(
   df,
   ts_event="nA",
@@ -106,6 +107,7 @@ poisson_rare.mds_ts <- function(
   poisson_rare.default(out, analysis_of=name, ...)
 }
 
+#' @rdname poisson_rare
 poisson_rare.default <- function(
   df,
   analysis_of=NA,

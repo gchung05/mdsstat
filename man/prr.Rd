@@ -2,9 +2,16 @@
 % Please edit documentation in R/dpa.R
 \name{prr}
 \alias{prr}
+\alias{prr.mds_ts}
+\alias{prr.default}
 \title{Proportional Reporting Ratio}
 \usage{
 prr(df, ...)
+
+\method{prr}{mds_ts}(df, ts_event = "nA", analysis_of = NA, ...)
+
+\method{prr}{default}(df, analysis_of = NA, eval_period = 1L,
+  null_ratio = 1, alpha = 0.05)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic
