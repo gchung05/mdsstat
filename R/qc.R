@@ -143,7 +143,7 @@ shewhart.default <- function(
     } else if (eval_period < 1){
       stop("eval_period must be greater than 0")
     } else df <- df[c((nrow(df) - eval_period + 1):nrow(df)), ]
-  }
+  } else eval_period <- nrow(df)
   # Return data
   tlen <- nrow(df)
   rd <- list(reference_time=df$time[tlen],
@@ -154,6 +154,15 @@ shewhart.default <- function(
   if(nrow(df) < 4){
     rr <- NA
     rs <- stats::setNames(F, ">3 time periods required")
+  } else if (we_rule == 2L & (nrow(df) < 6)){
+    rr <- NA
+    rs <- stats::setNames(F, ">5 time periods required for WE rule 2")
+  } else if (we_rule == 3L & (nrow(df) < 10)){
+    rr <- NA
+    rs <- stats::setNames(F, ">17 time periods required for WE rule 3")
+  } else if (we_rule == 4L & (nrow(df) < 18)){
+    rr <- NA
+    rs <- stats::setNames(F, ">17 time periods required for WE rule 4")
   } else if(sum(df$time != 0) < 2){
     rr <- NA
     rs <- stats::setNames(F, "2 or more non-zero events required")

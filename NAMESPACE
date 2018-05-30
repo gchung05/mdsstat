@@ -3,3 +3,4 @@
 export(poisson_rare)
 export(prr)
 export(shewhart)
+export(test2row)

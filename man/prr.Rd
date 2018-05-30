@@ -97,14 +97,15 @@ override this name. Example: \code{ts_event=stats::setNames("eventCount",
 }
 \examples{
 # Basic Example
-data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))
-a1 <- poisson_rare(data)
+# Reference example
+data <- data.frame(time=c(1:25),
+                   nA=as.integer(stats::rnorm(25, 25, 5)),
+                   nB=as.integer(stats::rnorm(25, 50, 5)),
+                   nC=as.integer(stats::rnorm(25, 100, 25)),
+                   nD=as.integer(stats::rnorm(25, 200, 25)))
+a1 <- prr(data)
 # Example using an mds_ts object
-a2 <- poisson_rare(mds_ts[[1]])
-# Example using a derived rate as the "event"
-data <- mds_ts[[1]]
-data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
-a3 <- poisson_rare(data, "rate")
+a2 <- prr(mds_ts[[3]])
 
 }
 \references{
