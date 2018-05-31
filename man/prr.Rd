@@ -8,7 +8,7 @@
 \usage{
 prr(df, ...)
 
-\method{prr}{mds_ts}(df, ts_event = "nA", analysis_of = NA, ...)
+\method{prr}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA, ...)
 
 \method{prr}{default}(df, analysis_of = NA, eval_period = 1L,
   null_ratio = 1, alpha = 0.05)
@@ -30,11 +30,11 @@ usage, any data frame with the following columns:
 
 \item{ts_event}{Required if \code{df} is of class \code{mds_ts}. Named string
 indicating the variable corresponding to the event count (cell A in the 2x2
-contingency table). In most cases, the default (\code{"nA"}) is the appropriate
-setting. See details for alternative options.
+contingency table). In most cases, the default is the appropriate setting.
+See details for alternative options.
 
-Default: \code{"nA"} corresponding to the event count column in \code{mds_ts}
-objects. Name is generated from \code{mds_ts} metadata.}
+Default: \code{c("Count"="nA")} corresponding to the event count column in
+\code{mds_ts} objects. Name is generated from \code{mds_ts} metadata.}
 
 \item{analysis_of}{Optional string indicating the English description of what
 was analyzed. If specified, this will override the name of the
@@ -92,8 +92,8 @@ contingency table (Cells B, C, D) must be the variables \code{"nB"},
 \code{"nC"}, and \code{"nD"} respectively in \code{df}. A named character
 vector may be used where the name is the English description of what was
 analyzed. Note that if the parameter \code{analysis_of} is specified, it will
-override this name. Example: \code{ts_event=stats::setNames("eventCount",
-"Count of Bone Cement Leakages")}
+override this name. Example: \code{ts_event=c("Count of Bone Cement
+Leakages"="event_count")}
 }
 \examples{
 # Basic Example

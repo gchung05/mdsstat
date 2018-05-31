@@ -15,10 +15,10 @@
 #' default. The name of the string is an English description of what was
 #' analyzed.
 #'
-#' Default: \code{"nA"} corresponding to the event count column in \code{mds_ts}
-#' objects. Name is generated from \code{mds_ts} metadata.
+#' Default: \code{c("Count"="nA")} corresponding to the event count column in
+#' \code{mds_ts} objects. Name is generated from \code{mds_ts} metadata.
 #'
-#' Example: \code{stats::setNames("rate", "Rate of Bone Filler Events in Canada")}
+#' Example: \code{c("Rate of Bone Filler Events in Canada"="rate")}
 #'
 #' @param analysis_of Optional string indicating the English description of what
 #' was analyzed. If specified, this will override the name of the
@@ -92,21 +92,20 @@ shewhart <- function (df, ...) {
 #' @rdname shewhart
 shewhart.mds_ts <- function(
   df,
-  ts_event="nA",
+  ts_event=c("Count"="nA"),
   analysis_of=NA,
   ...
 ){
   input_param_checker(ts_event, check_names=df, max_length=1)
+  if (is.null(names(ts_event))) stop("ts_event must be named")
 
   # Set NA counts to 0 for "nA" default
   df$nA <- ifelse(is.na(df$nA), 0, df$nA)
 
   # Set analysis_of
-  if (ts_event == "nA" & is.na(analysis_of)){
-    name <- paste("Count of", paste(sapply(attributes(df)$nA, function(x){
-      paste0(names(x), ":", x)}), collapse=" for "))
-  } else if (is.na(analysis_of)){
-    name <- names(ts_event)
+  if (is.na(analysis_of)){
+    name <- paste(names(ts_event), "of",
+                  paste(attributes(df)$nLabels$nA, collapse=" for "))
   } else name <- analysis_of
 
   out <- data.frame(time=df$time,
@@ -199,7 +198,7 @@ shewhart.default <- function(
       hyp <- "9 points > mean"
     }
 
-    rr <- list(statistic=stats::setNames(stat, "N-Sigmas"),
+    rr <- list(statistic=stats::setNames(stat, rep("N-Sigmas", length(stat))),
                lcl=rep(mu + qnorm(0.025) * sigma, length(stat)),
                ucl=rep(mu + qnorm(0.975) * sigma, length(stat)),
                p=stats::setNames(NA, "p-value"),

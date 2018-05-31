@@ -163,10 +163,10 @@ test_that("df parameter functions as expected", {
 
 a3d <- mds_ts[[3]]
 a3d$nA2 <- ifelse(is.na(a3d$nA), 0, a3d$nA)
-a3 <- prr(a3d, ts_event="nA2")
+a3 <- prr(a3d, ts_event=c("Count"="nA2"))
 test_that("ts_event parameter functions as expected", {
   expect_equal(a3$result$statistic, prr(a3d)$result$statistic)
-  expect_null(a3$analysis_of)
+  expect_match(a3$analysis_of, "Count of .+")
 })
 
 a3 <- prr(a3d, analysis_of="Testing")

@@ -103,7 +103,7 @@ test_that("df parameter functions as expected", {
 a2d <- mds_ts[[1]]
 a2d$rate <- ifelse(is.na(a2d$nA), 0, a2d$nA)
 a2d$rate <- a2d$rate / a2d$exposure
-a2 <- poisson_rare(a2d, ts_event="rate")
+a2 <- poisson_rare(a2d, ts_event=c("Rate"="rate"))
 test_that("ts_event parameter functions as expected", {
   expect_equal(a2$data$reference_time, max(a2d$time))
   expect_equal(a2$data$data[[1]], a2d$time)

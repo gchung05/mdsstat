@@ -108,7 +108,7 @@ test_that("df parameter functions as expected", {
 a2d <- mds_ts[[3]]
 a2d$rate <- ifelse(is.na(a2d$nA), 0, a2d$nA)
 a2d$rate <- a2d$rate / a2d$exposure
-a2 <- shewhart(a2d, ts_event="rate")
+a2 <- shewhart(a2d, ts_event=c("Rate"="rate"))
 test_that("ts_event parameter functions as expected", {
   expect_equal(a2$data$reference_time, max(a2d$time))
   expect_equal(a2$data$data[[1]], a2d$time)
@@ -162,10 +162,12 @@ test_that("we_rule 3 functions as expected", {
   expect_equal(length(a23L$result$ucl), 5)
   expect_equal(length(a23L$result$signal_threshold), 5)
 })
+data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
+a14L <- shewhart(data, we_rule=4L)
 test_that("we_rule 4 functions as expected", {
-  expect_equal(a24L$test_name, "Shewhart x-bar Western Electric Rule 4")
-  expect_equal(length(a24L$result$statistic), 9)
-  expect_equal(length(a24L$result$lcl), 9)
-  expect_equal(length(a24L$result$ucl), 9)
-  expect_equal(length(a24L$result$signal_threshold), 9)
+  expect_equal(a14L$test_name, "Shewhart x-bar Western Electric Rule 4")
+  expect_equal(length(a14L$result$statistic), 9)
+  expect_equal(length(a14L$result$lcl), 9)
+  expect_equal(length(a14L$result$ucl), 9)
+  expect_equal(length(a14L$result$signal_threshold), 9)
 })

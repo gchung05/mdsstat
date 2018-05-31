@@ -8,7 +8,8 @@
 \usage{
 shewhart(df, ...)
 
-\method{shewhart}{mds_ts}(df, ts_event = "nA", analysis_of = NA, ...)
+\method{shewhart}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA,
+  ...)
 
 \method{shewhart}{default}(df, analysis_of = NA, eval_period = NULL,
   zero_rate = 1/3, we_rule = 1L)
@@ -27,10 +28,10 @@ be calculated in a separate column in \code{df} as it is not calculated by
 default. The name of the string is an English description of what was
 analyzed.
 
-Default: \code{"nA"} corresponding to the event count column in \code{mds_ts}
-objects. Name is generated from \code{mds_ts} metadata.
+Default: \code{c("Count"="nA")} corresponding to the event count column in
+\code{mds_ts} objects. Name is generated from \code{mds_ts} metadata.
 
-Example: \code{stats::setNames("rate", "Rate of Bone Filler Events in Canada")}}
+Example: \code{c("Rate of Bone Filler Events in Canada"="rate")}}
 
 \item{analysis_of}{Optional string indicating the English description of what
 was analyzed. If specified, this will override the name of the

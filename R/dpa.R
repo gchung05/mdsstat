@@ -19,11 +19,11 @@
 #' }
 #' @param ts_event Required if \code{df} is of class \code{mds_ts}. Named string
 #' indicating the variable corresponding to the event count (cell A in the 2x2
-#' contingency table). In most cases, the default (\code{"nA"}) is the appropriate
-#' setting. See details for alternative options.
+#' contingency table). In most cases, the default is the appropriate setting.
+#' See details for alternative options.
 #'
-#' Default: \code{"nA"} corresponding to the event count column in \code{mds_ts}
-#' objects. Name is generated from \code{mds_ts} metadata.
+#' Default: \code{c("Count"="nA")} corresponding to the event count column in
+#' \code{mds_ts} objects. Name is generated from \code{mds_ts} metadata.
 #'
 #' @param analysis_of Optional string indicating the English description of what
 #' was analyzed. If specified, this will override the name of the
@@ -60,8 +60,8 @@
 #' \code{"nC"}, and \code{"nD"} respectively in \code{df}. A named character
 #' vector may be used where the name is the English description of what was
 #' analyzed. Note that if the parameter \code{analysis_of} is specified, it will
-#' override this name. Example: \code{ts_event=stats::setNames("eventCount",
-#' "Count of Bone Cement Leakages")}
+#' override this name. Example: \code{ts_event=c("Count of Bone Cement
+#' Leakages"="event_count")}
 #'
 #' @return A named list of class \code{mdsstat_test} object, as follows:
 #' \describe{
@@ -99,21 +99,20 @@ prr <- function (df, ...) {
 #' @rdname prr
 prr.mds_ts <- function(
   df,
-  ts_event="nA",
+  ts_event=c("Count"="nA"),
   analysis_of=NA,
   ...
 ){
   input_param_checker(ts_event, check_names=df, max_length=1)
+  if (is.null(names(ts_event))) stop("ts_event must be named")
 
   # Set NA counts to 0 for "nA" default
   df$nA <- ifelse(is.na(df$nA), 0, df$nA)
 
   # Set analysis_of
-  if (ts_event == "nA" & is.na(analysis_of)){
-    name <- paste("Count of", paste(sapply(attributes(df)$nA, function(x){
-      paste0(names(x), ":", x)}), collapse=" for "))
-  } else if (is.na(analysis_of)){
-    name <- names(ts_event)
+  if (is.na(analysis_of)){
+    name <- paste(names(ts_event), "of",
+                  paste(attributes(df)$nLabels$nA, collapse=" for "))
   } else name <- analysis_of
 
   if (attributes(df)$dpa){

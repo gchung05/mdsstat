@@ -8,7 +8,8 @@
 \usage{
 poisson_rare(df, ...)
 
-\method{poisson_rare}{mds_ts}(df, ts_event = "nA", analysis_of = NA, ...)
+\method{poisson_rare}{mds_ts}(df, ts_event = c(Count = "nA"),
+  analysis_of = NA, ...)
 
 \method{poisson_rare}{default}(df, analysis_of = NA, eval_period = NULL,
   zero_rate = 2/3, p_rate = 0.2, p_crit = 0.05)
@@ -27,10 +28,10 @@ be calculated in a separate column in \code{df} as it is not calculated by
 default. The name of the string is an English description of what was
 analyzed.
 
-Default: \code{"nA"} corresponding to the event count column in \code{mds_ts}
-objects. Name is generated from \code{mds_ts} metadata.
+Default: \code{c("Count"="nA")} corresponding to the event count column in
+\code{mds_ts} objects. Name is generated from \code{mds_ts} metadata.
 
-Example: \code{stats::setNames("rate", "Rate of Bone Filler Events in Canada")}}
+Example: \code{c("Rate of Bone Filler Events in Canada"="rate")}}
 
 \item{analysis_of}{Optional string indicating the English description of what
 was analyzed. If specified, this will override the name of the
@@ -94,5 +95,5 @@ a2 <- poisson_rare(mds_ts[[1]])
 # Example using a derived rate as the "event"
 data <- mds_ts[[1]]
 data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
-a3 <- poisson_rare(data, "rate")
+a3 <- poisson_rare(data, c("Rate"="rate"))
 }

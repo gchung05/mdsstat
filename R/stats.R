@@ -10,6 +10,8 @@
 test2row <- function(
   df
 ){
+  input_param_checker(df, "mdsstat_test")
+
   out <- data.frame(test_name=df$test_name,
                     analysis_of=df$analysis_of,
                     run_status=df$status,
@@ -48,4 +50,42 @@ test2row <- function(
   rownames(out) <- c()
   class(out) <- append(class(out), "mdsstat_df")
   return(out)
+}
+
+
+#' Define Algorithms to Run
+#'
+#' Define any number of algorithms with various parameter settings and save as a
+#' reusable set of instructions.
+#'
+#' @param df Required input object of class \code{mdsstat_test}
+#' @return 1-row data frame (class \code{mdsstat_df}) summarizing the test.
+#' @examples
+#' test2row(prr(mds_ts[[3]]))
+#' @export
+define_algos <- function(
+  algos,
+  paramlist
+){
+  formals(algo)
+  formals(eval(parse(text=algos[1])))
+  formalArgs(eval(parse(text=algos[1])))
+
+}
+
+ls("package:mdsstat")[grepl("\\.mds_ts$", ls("package:mdsstat"))]
+
+test <- function(
+  ...,
+  paramlist
+){
+  dots=list(...)
+  for(i in 1:length(dots)){
+    foo=dots[[i]]
+    print(dots[[i]])
+    print(suppressWarnings(methods(foo)))
+    print(formalArgs(dots[[i]]))
+  }
+
+  print(paramlist)
 }
