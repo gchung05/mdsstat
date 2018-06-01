@@ -2,20 +2,36 @@
 % Please edit documentation in R/stats.R
 \name{define_algos}
 \alias{define_algos}
-\title{Define Algorithms to Run}
+\title{Set List of Algorithms to Run}
 \usage{
-define_algos(algos, paramlist)
+define_algos(algos)
 }
 \arguments{
-\item{df}{Required input object of class \code{mdsstat_test}}
+\item{algos}{Required named list of \code{mdsstat} algorithms to run. Each
+named list element must be a single list of parameter values for the
+algorithm named. The list of parameters may be an empty list (indicating the
+default values) and must not contain the first parameter \code{df}. See
+details and examples for more.}
 }
 \value{
-1-row data frame (class \code{mdsstat_df}) summarizing the test.
+Validated list of instructions that may be used in the
+\code{\link{run_algos}} function.
 }
 \description{
 Define any number of algorithms with various parameter settings and save as a
 reusable set of instructions.
 }
+\details{
+Valid list names (algorithm function names in \code{mdsstat}) are
+currently \code{\link{shewhart}}, \code{\link{prr}}, and
+\code{\link{poisson_rare}}. Each algorithm may be named multiple times (to
+allow running of multiple parameter settings). Do not specify the \code{df}
+parameter.
+}
 \examples{
-test2row(prr(mds_ts[[3]]))
+x <- list(prr=list(),
+  shewhart=list(),
+  shewhart=list(ts_event=c(Rate="rate"), we_rule=2L),
+  poisson_rare=list(p_rate=0.3))
+define_algos(x)
 }

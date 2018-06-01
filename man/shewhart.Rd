@@ -37,7 +37,9 @@ Example: \code{c("Rate of Bone Filler Events in Canada"="rate")}}
 was analyzed. If specified, this will override the name of the
 \code{ts_event} string parameter.
 
-Default: \code{NA} indicates no English description.
+Default: \code{NA} indicates no English description for plain \code{df}
+data frames, or \code{ts_event} English description for \code{df} data frames
+of class \code{mds_ts}.
 
 Example: \code{"Rate of bone cement leakage"}}
 

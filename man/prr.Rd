@@ -40,7 +40,9 @@ Default: \code{c("Count"="nA")} corresponding to the event count column in
 was analyzed. If specified, this will override the name of the
 \code{ts_event} string parameter.
 
-Default: \code{NA} indicates no English description.
+Default: \code{NA} indicates no English description for plain \code{df}
+data frames, or \code{ts_event} English description for \code{df} data frames
+of class \code{mds_ts}.
 
 Example: \code{"Count of bone cement leakages"}}
 
@@ -97,7 +99,6 @@ Leakages"="event_count")}
 }
 \examples{
 # Basic Example
-# Reference example
 data <- data.frame(time=c(1:25),
                    nA=as.integer(stats::rnorm(25, 25, 5)),
                    nB=as.integer(stats::rnorm(25, 50, 5)),
