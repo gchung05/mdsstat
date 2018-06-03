@@ -64,7 +64,7 @@ actual PRR is greater than 1.}
 \item{alpha}{Numeric value representing the statistical alpha used to
 establish the signal status.
 
-Default: \code{0.05} corresponds to the standard alpha value of 5%.}
+Default: \code{0.05} corresponds to the standard alpha value of 5\%.}
 }
 \value{
 A named list of class \code{mdsstat_test} object, as follows:
@@ -97,6 +97,13 @@ analyzed. Note that if the parameter \code{analysis_of} is specified, it will
 override this name. Example: \code{ts_event=c("Count of Bone Cement
 Leakages"="event_count")}
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{mds_ts}: PRR on mds_ts data
+
+\item \code{default}: PRR on general data
+}}
+
 \examples{
 # Basic Example
 data <- data.frame(time=c(1:25),
@@ -110,5 +117,5 @@ a2 <- prr(mds_ts[[3]])
 
 }
 \references{
-Evans, S. J. W., Waller, P. C., & Davis, S. (2001). Use of proportional reporting ratios (PRRs) for signal generation from spontaneous adverse drug reaction reports. Pharmacoepidemiology and Drug Safety, 10(6), 483–486. https://doi.org/10.1002/pds.677
+Evans, S. J. W., Waller, P. C., & Davis, S. (2001). Use of proportional reporting ratios (PRRs) for signal generation from spontaneous adverse drug reaction reports. Pharmacoepidemiology and Drug Safety, 10(6), 483-486. https://doi.org/10.1002/pds.677
 }

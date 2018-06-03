@@ -88,6 +88,13 @@ parameter (\code{stats::poisson.test()}).
 the Poisson rate parameter. However this value is highly advised to be set
 based on known priors and/or your specific application.
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{mds_ts}: Poisson on mds_ts data
+
+\item \code{default}: Poisson on general data
+}}
+
 \examples{
 # Basic Example
 data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))

@@ -3,6 +3,10 @@
 #' Test on rare events using an exact test on the Poisson distribution rate
 #' parameter (\code{stats::poisson.test()}).
 #'
+#' \code{p_rate} default of \code{0.2} is a suggested null value for
+#' the Poisson rate parameter. However this value is highly advised to be set
+#' based on known priors and/or your specific application.
+#'
 #' @param df Required input data frame of class \code{mds_ts} or, for generic
 #' usage, any data frame with the following columns:
 #' \describe{
@@ -51,10 +55,6 @@
 #'
 #' Default: \code{0.05}
 #'
-#' @details \code{p_rate} default of \code{0.2} is a suggested null value for
-#' the Poisson rate parameter. However this value is highly advised to be set
-#' based on known priors and/or your specific application.
-#'
 #' @return A named list of class \code{mdsstat_test} object, as follows:
 #' \describe{
 #'   \item{test_name}{Name of the test run}
@@ -84,7 +84,7 @@ poisson_rare <- function (df, ...) {
   UseMethod("poisson_rare", df)
 }
 
-#' @rdname poisson_rare
+#' @describeIn poisson_rare Poisson on mds_ts data
 poisson_rare.mds_ts <- function(
   df,
   ts_event=c("Count"="nA"),
@@ -108,7 +108,7 @@ poisson_rare.mds_ts <- function(
   poisson_rare.default(out, analysis_of=name, ...)
 }
 
-#' @rdname poisson_rare
+#' @describeIn poisson_rare Poisson on general data
 poisson_rare.default <- function(
   df,
   analysis_of=NA,

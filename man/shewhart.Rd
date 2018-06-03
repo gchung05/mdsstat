@@ -92,6 +92,13 @@ originally proposed by Walter Shewhart.
 2-sigma limit. \code{3} is four of five consecutive points over the 1-sigma
 limit. \code{4} is nine consecutive points over the process mean.
 }
+\section{Methods (by class)}{
+\itemize{
+\item \code{mds_ts}: Shewhart on mds_ts data
+
+\item \code{default}: Shewhart on general data
+}}
+
 \examples{
 # Basic Example
 data <- data.frame(time=c(1:25), event=as.integer(rnorm(25, 100, 25)))

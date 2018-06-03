@@ -23,7 +23,7 @@ test_that("function returns core mdsstat_test components", {
 test_that("outputs are as expected", {
   expect_equal(a1$test_name, "Poisson Rare")
   expect_equal(a1$analysis_of, NA)
-  expect_true(a1$status, T)
+  expect_true(a1$status)
   expect_true(all(names(a1$result) %in% c("statistic",
                                           "lcl",
                                           "ucl",

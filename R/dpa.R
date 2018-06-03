@@ -4,6 +4,16 @@
 #' the family of disproportionality analyses (DPA) used to generate signals of
 #' disproportionate reporting (SDRs).
 #'
+#' For parameter \code{ts_event}, in the uncommon case where the
+#' device-event count (Cell A) variable is not \code{"nA"}, the name of the
+#' variable may be specified here. Note that the remaining 3 cells of the 2x2
+#' contingency table (Cells B, C, D) must be the variables \code{"nB"},
+#' \code{"nC"}, and \code{"nD"} respectively in \code{df}. A named character
+#' vector may be used where the name is the English description of what was
+#' analyzed. Note that if the parameter \code{analysis_of} is specified, it will
+#' override this name. Example: \code{ts_event=c("Count of Bone Cement
+#' Leakages"="event_count")}
+#'
 #' @param df Required input data frame of class \code{mds_ts} or, for generic
 #' usage, any data frame with the following columns:
 #' \describe{
@@ -53,17 +63,7 @@
 #' @param alpha Numeric value representing the statistical alpha used to
 #' establish the signal status.
 #'
-#' Default: \code{0.05} corresponds to the standard alpha value of 5%.
-#'
-#' @details For parameter \code{ts_event}, in the uncommon case where the
-#' device-event count (Cell A) variable is not \code{"nA"}, the name of the
-#' variable may be specified here. Note that the remaining 3 cells of the 2x2
-#' contingency table (Cells B, C, D) must be the variables \code{"nB"},
-#' \code{"nC"}, and \code{"nD"} respectively in \code{df}. A named character
-#' vector may be used where the name is the English description of what was
-#' analyzed. Note that if the parameter \code{analysis_of} is specified, it will
-#' override this name. Example: \code{ts_event=c("Count of Bone Cement
-#' Leakages"="event_count")}
+#' Default: \code{0.05} corresponds to the standard alpha value of 5\%.
 #'
 #' @return A named list of class \code{mdsstat_test} object, as follows:
 #' \describe{
@@ -91,13 +91,13 @@
 #' a2 <- prr(mds_ts[[3]])
 #'
 #' @references
-#' Evans, S. J. W., Waller, P. C., & Davis, S. (2001). Use of proportional reporting ratios (PRRs) for signal generation from spontaneous adverse drug reaction reports. Pharmacoepidemiology and Drug Safety, 10(6), 483–486. https://doi.org/10.1002/pds.677
+#' Evans, S. J. W., Waller, P. C., & Davis, S. (2001). Use of proportional reporting ratios (PRRs) for signal generation from spontaneous adverse drug reaction reports. Pharmacoepidemiology and Drug Safety, 10(6), 483-486. https://doi.org/10.1002/pds.677
 #' @export
 prr <- function (df, ...) {
   UseMethod("prr", df)
 }
 
-#' @rdname prr
+#' @describeIn prr PRR on mds_ts data
 prr.mds_ts <- function(
   df,
   ts_event=c("Count"="nA"),
@@ -128,7 +128,7 @@ prr.mds_ts <- function(
   prr.default(out, analysis_of=name, ...)
 }
 
-#' @rdname prr
+#' @describeIn prr PRR on general data
 prr.default <- function(
   df,
   analysis_of=NA,

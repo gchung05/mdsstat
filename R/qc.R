@@ -3,6 +3,29 @@
 #' Test on device-events using the Shewhart x-bar control chart. Includes
 #' the first 4 Western Electric rules common to statistical process control.
 #'
+#' Function \code{shewhart()} is a standard implementation of the x-bar
+#' Control Chart test from the family of statistical process control tests
+#' originally proposed by Walter Shewhart.
+#'
+#' \code{we_rule} has four possible values: \code{1} is one point over the
+#' 3-sigma limit. \code{2} is two out of three consecutive points over the
+#' 2-sigma limit. \code{3} is four of five consecutive points over the 1-sigma
+#' limit. \code{4} is nine consecutive points over the process mean.
+#'
+#' @return A named list of class \code{mdsstat_test} object, as follows:
+#' \describe{
+#'   \item{test_name}{Name of the test run}
+#'   \item{analysis_of}{English description of what was analyzed}
+#'   \item{status}{Named boolean of whether the test was run. The name contains
+#'   the run status.}
+#'   \item{result}{A standardized list of test run results: \code{statistic}
+#'   for the test statistic, \code{lcl} and \code{ucl} for the 95%
+#'   confidence bounds, \code{p} for the p-value, \code{signal} status, and
+#'   \code{signal_threshold}.}
+#'   \item{params}{The test parameters}
+#'   \item{data}{The data on which the test was run}
+#' }
+#'
 #' @param df Required input data frame of class \code{mds_ts} or, for generic
 #' usage, any data frame with the following columns:
 #' \describe{
@@ -50,29 +73,6 @@
 #' Default: \code{1} represents the first Western Electric rule of one point
 #' over the 3-sigma limit.
 #'
-#' @details Function \code{shewhart()} is a standard implementation of the x-bar
-#' Control Chart test from the family of statistical process control tests
-#' originally proposed by Walter Shewhart.
-#'
-#' \code{we_rule} has four possible values: \code{1} is one point over the
-#' 3-sigma limit. \code{2} is two out of three consecutive points over the
-#' 2-sigma limit. \code{3} is four of five consecutive points over the 1-sigma
-#' limit. \code{4} is nine consecutive points over the process mean.
-#'
-#' @return A named list of class \code{mdsstat_test} object, as follows:
-#' \describe{
-#'   \item{test_name}{Name of the test run}
-#'   \item{analysis_of}{English description of what was analyzed}
-#'   \item{status}{Named boolean of whether the test was run. The name contains
-#'   the run status.}
-#'   \item{result}{A standardized list of test run results: \code{statistic}
-#'   for the test statistic, \code{lcl} and \code{ucl} for the 95%
-#'   confidence bounds, \code{p} for the p-value, \code{signal} status, and
-#'   \code{signal_threshold}.}
-#'   \item{params}{The test parameters}
-#'   \item{data}{The data on which the test was run}
-#' }
-#'
 #' @examples
 #' # Basic Example
 #' data <- data.frame(time=c(1:25), event=as.integer(rnorm(25, 100, 25)))
@@ -91,7 +91,7 @@ shewhart <- function (df, ...) {
   UseMethod("shewhart", df)
 }
 
-#' @rdname shewhart
+#' @describeIn shewhart Shewhart on mds_ts data
 shewhart.mds_ts <- function(
   df,
   ts_event=c("Count"="nA"),
@@ -115,7 +115,7 @@ shewhart.mds_ts <- function(
   shewhart.default(out, analysis_of=name, ...)
 }
 
-#' @rdname shewhart
+#' @describeIn shewhart Shewhart on general data
 shewhart.default <- function(
   df,
   analysis_of=NA,
