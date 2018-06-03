@@ -5,19 +5,24 @@
 #' @param df Required input object of class \code{mdsstat_test}
 #' @return 1-row data frame (class \code{mdsstat_df}) summarizing the test.
 #' @examples
-#' test2row(prr(mds_ts[[3]]))
+#' test_as_row(prr(mds_ts[[3]]))
 #' @export
-test2row <- function(
+test_as_row <- function(
   df
 ){
   input_param_checker(df, "mdsstat_test")
+
+  # Set eval period to length of time series as default behavior
+  eval_period <- ifelse(is.null(df$params$eval_period), nrow(df$data$data),
+                        df$params$eval_period)
 
   out <- data.frame(test_name=df$test_name,
                     analysis_of=df$analysis_of,
                     run_status=df$status,
                     run_msg=names(df$status),
-                    reference_time=as.character(df$data$reference_time),
-                    eval_period=df$params$eval_period,
+                    ref_time_start=df$data$reference_time[1],
+                    ref_time_end=df$data$reference_time[2],
+                    eval_period=eval_period,
                     test_hyp=df$params$test_hyp,
                     test_params=I(list(df$params[!names(df$params) %in%
                                                    c("test_hyp",
@@ -27,7 +32,6 @@ test2row <- function(
                  data.frame(signal=NA,
                             signal_threshold=I(list(NA)),
                             stat=I(list(NA)),
-                            stat_name=I(list(NA)),
                             stat_lcl=I(list(NA)),
                             stat_ucl=I(list(NA)),
                             p_value=NA,
@@ -37,9 +41,8 @@ test2row <- function(
                  data.frame(signal=df$result$signal,
                             signal_threshold=I(list(df$result$signal_threshold)),
                             stat=I(list(df$result$statistic)),
-                            stat_name=I(list(names(df$result$statistic))),
-                            stat_lcl=I(list(names(df$result$lcl))),
-                            stat_ucl=I(list(names(df$result$ucl))),
+                            stat_lcl=I(list(df$result$lcl)),
+                            stat_ucl=I(list(df$result$ucl)),
                             p_value=df$result$p,
                             stat_addtl=I(list(df$result[!names(df$result) %in%
                                                           c("signal",
@@ -139,11 +142,8 @@ define_algos <- function(
 #' @return A \code{mdsstat_tests} data frame or list of \code{mdsstat_test}
 #' lists with the results of the algorithm runs.
 #' @examples
-#' data <- data.frame(time=c(1:25),
-#'                    nA=as.integer(stats::rnorm(25, 25, 5)),
-#'                    nB=as.integer(stats::rnorm(25, 50, 5)),
-#'                    nC=as.integer(stats::rnorm(25, 100, 25)),
-#'                    nD=as.integer(stats::rnorm(25, 200, 25)))
+#' data <- mds_ts[[3]]
+#' data$rate <- data$nA / data$exposure
 #' x <- list(prr=list(),
 #'   shewhart=list(),
 #'   shewhart=list(ts_event=c(Rate="rate"), we_rule=2L),
@@ -161,15 +161,18 @@ run_algos <- function(
   input_param_checker(algos, "mdsstat_da")
   input_param_checker(dataframe, "logical")
 
-  # I AM HERE!!!
+  if (dataframe){
+    stats <- data.frame()
+  } else stats <- list()
+  for (i in 1:length(algos)){
+    algo <- eval(parse(text=names(algos)[i]))
+    test <- do.call(algo, c(list(df=data),algos[[i]]))
+    if (dataframe){
+      stats <- rbind(stats, test_as_row(test))
+    } else stats[[i]] <- test
+  }
 
   if (dataframe) class(stats) <- append(class(stats), "mdsstat_tests")
   return(stats)
 }
 
-# do.call(runif,c(list(n=100),params))
-
-# x <- list(prr=list(),
-#           shewhart=list(ts_event=c(Rate="rate"),
-#                         we_rule=2L),
-#           poisson_rare=list(p_rate=0.3))

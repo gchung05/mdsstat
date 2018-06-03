@@ -137,7 +137,7 @@ poisson_rare.default <- function(
     } else df <- df[c((nrow(df) - eval_period + 1):nrow(df)), ]
   }
   # Return data
-  rd <- list(reference_time=df$time[nrow(df)],
+  rd <- list(reference_time=range(df$time),
              data=df)
   # Set Poisson test type
   h_alternative <- "greater"

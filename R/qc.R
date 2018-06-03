@@ -147,7 +147,7 @@ shewhart.default <- function(
   } else eval_period <- nrow(df)
   # Return data
   tlen <- nrow(df)
-  rd <- list(reference_time=df$time[tlen],
+  rd <- list(reference_time=range(df$time),
              data=df)
 
   # Check for non-runnable conditions

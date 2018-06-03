@@ -27,11 +27,8 @@ lists with the results of the algorithm runs.
 Run a multiple number of \code{mdsstat} algorithms on a single input dataset.
 }
 \examples{
-data <- data.frame(time=c(1:25),
-                   nA=as.integer(stats::rnorm(25, 25, 5)),
-                   nB=as.integer(stats::rnorm(25, 50, 5)),
-                   nC=as.integer(stats::rnorm(25, 100, 25)),
-                   nD=as.integer(stats::rnorm(25, 200, 25)))
+data <- mds_ts[[3]]
+data$rate <- data$nA / data$exposure
 x <- list(prr=list(),
   shewhart=list(),
   shewhart=list(ts_event=c(Rate="rate"), we_rule=2L),

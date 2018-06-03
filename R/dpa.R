@@ -158,14 +158,15 @@ prr.default <- function(
     } else{
       df <- df[c((nrow(df) - eval_period + 1):nrow(df)), ]
       # Sum over eval_period
-      newTime <- paste(range(df$time), collapse=" to ")
-      df <- cbind(data.frame(time=newTime),
+      timeRange <- range(df$time)
+      df <- cbind(data.frame(time_start=timeRange[1],
+                             time_end=timeRange[2]),
                   data.frame(t(colSums(df[, c2x2], na.rm=T))))
     }
   }
   # Return data
   tlen <- nrow(df)
-  rd <- list(reference_time=df$time[tlen],
+  rd <- list(reference_time=timeRange,
              data=df)
 
   # Check for non-runnable conditions
