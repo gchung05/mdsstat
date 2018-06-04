@@ -71,7 +71,7 @@
 #'
 #' @examples
 #' # Basic Example
-#' data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))
+#' data <- data.frame(time=c(1:8), event=c(rep(0, 6), stats::rpois(2, 4)))
 #' a1 <- poisson_rare(data)
 #' # Example using an mds_ts object
 #' a2 <- poisson_rare(mds_ts[[1]])
