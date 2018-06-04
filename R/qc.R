@@ -75,7 +75,7 @@
 #'
 #' @examples
 #' # Basic Example
-#' data <- data.frame(time=c(1:25), event=as.integer(rnorm(25, 100, 25)))
+#' data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
 #' a1 <- shewhart(data)
 #' # Example using an mds_ts object
 #' a2 <- shewhart(mds_ts[[3]])
