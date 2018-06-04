@@ -50,9 +50,11 @@ test_that("outputs are as expected", {
   expect_equal(a1$params$null_ratio, 1)
   expect_equal(a1$params$alpha, 0.05)
   expect_true(all(names(a1$data) %in% c("reference_time", "data")))
-  expect_true(all(names(a1$data$data) %in% c("time", "nA", "nB", "nC", "nD")))
-  expect_equal(as.character(a1$data$reference_time), "25 to 25")
-  expect_equal(a1$data$data[, -1], data.frame(t(colSums(data[nrow(data), -1]))))
+  expect_true(all(names(a1$data$data) %in% c("time_start", "time_end",
+                                             "nA", "nB", "nC", "nD")))
+  expect_equal(a1$data$reference_time[1], a1$data$data$time_start)
+  expect_equal(a1$data$reference_time[2], a1$data$data$time_end)
+  expect_equal(a1$data$data[, -c(1:2)], data.frame(t(colSums(data[nrow(data), -1]))))
 })
 
 # Reference example
@@ -154,10 +156,11 @@ test_that("df parameter functions as expected", {
   expect_equal(a2$params$null_ratio, 1)
   expect_equal(a2$params$alpha, 0.05)
   expect_true(all(names(a2$data) %in% c("reference_time", "data")))
-  expect_true(all(names(a2$data$data) %in% c("time", "nA", "nB", "nC", "nD")))
-  expect_equal(as.character(a2$data$reference_time),
-               paste(a2d$time[nrow(a2d)], "to", a2d$time[nrow(a2d)]))
-  expect_equal(a2$data$data[, -1],
+  expect_true(all(names(a2$data$data) %in% c("time_start", "time_end",
+                                             "nA", "nB", "nC", "nD")))
+  expect_equal(a2$data$reference_time[1], a2$data$data$time_start)
+  expect_equal(a2$data$reference_time[2], a2$data$data$time_end)
+  expect_equal(a2$data$data[, -c(1:2)],
                data.frame(t(colSums(a2d[nrow(a2d), c("nA", "nB", "nC", "nD")]))))
 })
 
@@ -176,7 +179,7 @@ test_that("ts_event parameter functions as expected", {
 
 a3 <- prr(a3d, eval_period=3L)
 test_that("eval_period parameter functions as expected", {
-  expect_equal(a3$data$data[, -1],
+  expect_equal(a3$data$data[, -c(1:2)],
                data.frame(t(colSums(a3d[c((nrow(a3d) - 3L + 1):nrow(a3d)),
                                         c("nA", "nB", "nC", "nD")]))))
   expect_error(prr(a3d, eval_period=as.integer(nrow(a3d) + 1)))

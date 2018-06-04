@@ -49,7 +49,7 @@ test_that("outputs are as expected", {
   expect_equal(a1$params$h_alternative, "greater")
   expect_true(all(names(a1$data) %in% c("reference_time",
                                           "data")))
-  expect_equal(a1$data$reference_time, 8)
+  expect_equal(a1$data$reference_time, range(a1$data$data$time))
   expect_equal(a1$data$data, data)
 })
 
@@ -95,7 +95,7 @@ test_that("df parameter functions as expected", {
   expect_equal(a2$params$h_alternative, "greater")
   expect_true(all(names(a2$data) %in% c("reference_time",
                                         "data")))
-  expect_equal(a2$data$reference_time, max(mds_ts[[1]]$time))
+  expect_equal(a2$data$reference_time, range(mds_ts[[1]]$time))
   expect_equal(a2$data$data[[1]], mds_ts[[1]][[1]])
   expect_equal(a2$data$data[[2]], ifelse(is.na(mds_ts[[1]]$nA), 0, mds_ts[[1]]$nA))
 })
@@ -105,7 +105,7 @@ a2d$rate <- ifelse(is.na(a2d$nA), 0, a2d$nA)
 a2d$rate <- a2d$rate / a2d$exposure
 a2 <- poisson_rare(a2d, ts_event=c("Rate"="rate"))
 test_that("ts_event parameter functions as expected", {
-  expect_equal(a2$data$reference_time, max(a2d$time))
+  expect_equal(a2$data$reference_time, range(a2d$time))
   expect_equal(a2$data$data[[1]], a2d$time)
   expect_equal(a2$data$data[[2]], a2d$rate)
 })
