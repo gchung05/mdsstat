@@ -1,5 +1,8 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+What does `mdsstat` do?
+-----------------------
+
 The `mdsstat` package:
 
 -   Standardizes the output of various statistical trending algorithms
