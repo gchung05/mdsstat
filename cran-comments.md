@@ -1,3 +1,8 @@
+## Resubmission
+This is a resubmission. I have:
+
+* Single-quoted 'mds' in the description.
+
 ## Test environments
 * local Windows 10 install, R 3.5.0
 * ubuntu 14.04.5 (on travis-ci), R 3.5.0
