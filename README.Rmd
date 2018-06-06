@@ -12,6 +12,8 @@ knitr::opts_chunk$set(
 )
 ```
 
+## What does `mdsstat` do?
+
 The `mdsstat` package:
 
 - Standardizes the output of various statistical trending algorithms
