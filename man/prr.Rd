@@ -54,7 +54,7 @@ contingency table.
 
 Default: \code{1L} considers only the most recent time in \code{df}.
 
-EXample: \code{12L} sums over the last 12 time periods to create the 2x2
+Example: \code{12L} sums over the last 12 time periods to create the 2x2
 contingency table.}
 
 \item{null_ratio}{Numeric PRR value representing the null hypothesis, used
