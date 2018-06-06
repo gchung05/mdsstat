@@ -11,7 +11,7 @@ prr(df, ...)
 \method{prr}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA, ...)
 
 \method{prr}{default}(df, analysis_of = NA, eval_period = 1L,
-  null_ratio = 1, alpha = 0.05)
+  null_ratio = 1, alpha = 0.05, ...)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic
@@ -27,6 +27,8 @@ usage, any data frame with the following columns:
   \item{nD}{Cell D count (class \code{numeric}) of the 2x2 table:
   non-device/non-event of interest.}
 }}
+
+\item{...}{Further arguments passed onto \code{prr} methods}
 
 \item{ts_event}{Required if \code{df} is of class \code{mds_ts}. Named string
 indicating the variable corresponding to the event count (cell A in the 2x2

@@ -55,3 +55,15 @@
 #' }
 #' @source Random normal distribution using \code{rnorm()}.
 "sales"
+
+#' Sample List of \code{mds_ts} Time Series
+#'
+#' A list of three \code{mds_ts} time series generated using the \code{mds}
+#' package function \code{time_series()}. Its underlying data were queried from
+#' the [FDA MAUDE API](https://open.fda.gov/api/). Furthermore, a simulated
+#' exposure dataset was generated to provide exposure data.
+#'
+#' @format A list with 3 elements, with each element being a data frame of class
+#' @source \code{maude} and \code{sales} datasets, run through \code{mds}
+#' package functions.
+"mds_ts"

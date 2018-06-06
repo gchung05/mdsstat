@@ -12,7 +12,7 @@ shewhart(df, ...)
   ...)
 
 \method{shewhart}{default}(df, analysis_of = NA, eval_period = NULL,
-  zero_rate = 1/3, we_rule = 1L)
+  zero_rate = 1/3, we_rule = 1L, ...)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic
@@ -21,6 +21,8 @@ usage, any data frame with the following columns:
   \item{time}{Unique times of class \code{Date}}
   \item{event}{Either the event count or rate of class \code{numeric}}
 }}
+
+\item{...}{Further arguments passed onto \code{shewhart} methods}
 
 \item{ts_event}{Required if \code{df} is of class \code{mds_ts}. Named string
 indicating the variable corresponding to the event count or rate. Rate must
@@ -101,14 +103,14 @@ limit. \code{4} is nine consecutive points over the process mean.
 
 \examples{
 # Basic Example
-data <- data.frame(time=c(1:25), event=as.integer(rnorm(25, 100, 25)))
+data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
 a1 <- shewhart(data)
 # Example using an mds_ts object
 a2 <- shewhart(mds_ts[[3]])
 # Example using a derived rate as the "event"
 data <- mds_ts[[3]]
 data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
-a3 <- shewhart(data, "rate")
+a3 <- shewhart(data, c(Rate="rate"))
 
 }
 \references{

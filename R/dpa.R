@@ -65,6 +65,8 @@
 #'
 #' Default: \code{0.05} corresponds to the standard alpha value of 5\%.
 #'
+#' @param ... Further arguments passed onto \code{prr} methods
+#'
 #' @return A named list of class \code{mdsstat_test} object, as follows:
 #' \describe{
 #'   \item{test_name}{Name of the test run}
@@ -98,6 +100,7 @@ prr <- function (df, ...) {
 }
 
 #' @describeIn prr PRR on mds_ts data
+#' @export
 prr.mds_ts <- function(
   df,
   ts_event=c("Count"="nA"),
@@ -129,12 +132,14 @@ prr.mds_ts <- function(
 }
 
 #' @describeIn prr PRR on general data
+#' @export
 prr.default <- function(
   df,
   analysis_of=NA,
   eval_period=1L,
   null_ratio=1,
-  alpha=0.05
+  alpha=0.05,
+  ...
 ){
   # Contingency table primary variables
   c2x2 <- c("nA", "nB", "nC", "nD")
@@ -181,7 +186,7 @@ prr.default <- function(
     s <- sqrt((1 / df$nA) + (1 / df$nC) -
                 (1 / (df$nA + df$nB)) - (1 / (df$nC + df$nD)))
     # Establish confidence limits
-    z <- qnorm(1 - (alpha / 2))
+    z <- stats::qnorm(1 - (alpha / 2))
     cl <- c(stat / exp(z * s), stat * exp(z * s))
     p <-
     # Determine signal & hypothesis

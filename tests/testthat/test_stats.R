@@ -44,25 +44,25 @@ test_that("only legal inputs are allowed", {
 # ------------
 # Reference example
 x <- list(prr=list(),
-             shewhart=list(),
-             shewhart=list(ts_event=c(Rate="rate"), we_rule=2L),
-             poisson_rare=list(p_rate=0.3))
+          shewhart=list(),
+          shewhart=list(ts_event=c(Rate="rate"), we_rule=2L),
+          poisson_rare=list(p_rate=0.3))
 a2 <- define_algos(x)
-# Return behavior
-test_that("function returns the correct class", {
-  expect_is(a2, "list")
-  expect_is(a2, "mdsstat_da")
-})
-test_that("function returns core mdsstat_da components", {
-  expect_equal(names(a2), c("prr", "shewhart", "shewhart", "poisson_rare"))
-  expect_equal(length(a2), 4)
-})
-test_that("outputs are as expected", {
-  expect_equal(a2[[1]], list())
-  expect_equal(a2[[2]], list())
-  expect_equal(names(a2[[3]]), c("ts_event", "we_rule"))
-  expect_equal(names(a2[[4]]), c("p_rate"))
-})
+# # Return behavior
+# test_that("function returns the correct class", {
+#   expect_is(a2, "list")
+#   expect_is(a2, "mdsstat_da")
+# })
+# test_that("function returns core mdsstat_da components", {
+#   expect_equal(names(a2), c("prr", "shewhart", "shewhart", "poisson_rare"))
+#   expect_equal(length(a2), 4)
+# })
+# test_that("outputs are as expected", {
+#   expect_equal(a2[[1]], list())
+#   expect_equal(a2[[2]], list())
+#   expect_equal(names(a2[[3]]), c("ts_event", "we_rule"))
+#   expect_equal(names(a2[[4]]), c("p_rate"))
+# })
 
 # run_algos
 # ---------

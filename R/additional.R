@@ -55,6 +55,8 @@
 #'
 #' Default: \code{0.05}
 #'
+#' @param ... Further arguments passed onto \code{poisson_rare} methods
+#'
 #' @return A named list of class \code{mdsstat_test} object, as follows:
 #' \describe{
 #'   \item{test_name}{Name of the test run}
@@ -85,6 +87,7 @@ poisson_rare <- function (df, ...) {
 }
 
 #' @describeIn poisson_rare Poisson on mds_ts data
+#' @export
 poisson_rare.mds_ts <- function(
   df,
   ts_event=c("Count"="nA"),
@@ -109,13 +112,15 @@ poisson_rare.mds_ts <- function(
 }
 
 #' @describeIn poisson_rare Poisson on general data
+#' @export
 poisson_rare.default <- function(
   df,
   analysis_of=NA,
   eval_period=NULL,
   zero_rate=2/3,
   p_rate=0.2,
-  p_crit=0.05
+  p_crit=0.05,
+  ...
 ){
   input_param_checker(df, "data.frame")
   input_param_checker(c("time", "event"), check_names=df)

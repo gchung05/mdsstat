@@ -35,5 +35,5 @@ x <- list(prr=list(),
   poisson_rare=list(p_rate=0.3))
 algos <- define_algos(x)
 run_algos(data, algos)
-run_algos(data, algos, F)
+run_algos(data, algos, FALSE)
 }

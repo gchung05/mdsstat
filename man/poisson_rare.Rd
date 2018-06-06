@@ -12,7 +12,7 @@ poisson_rare(df, ...)
   analysis_of = NA, ...)
 
 \method{poisson_rare}{default}(df, analysis_of = NA, eval_period = NULL,
-  zero_rate = 2/3, p_rate = 0.2, p_crit = 0.05)
+  zero_rate = 2/3, p_rate = 0.2, p_crit = 0.05, ...)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic
@@ -21,6 +21,8 @@ usage, any data frame with the following columns:
   \item{time}{Unique times of class \code{Date}}
   \item{event}{Either the event count or rate of class \code{numeric}}
 }}
+
+\item{...}{Further arguments passed onto \code{poisson_rare} methods}
 
 \item{ts_event}{Required if \code{df} is of class \code{mds_ts}. Named string
 indicating the variable corresponding to the event count or rate. Rate must
@@ -97,7 +99,7 @@ based on known priors and/or your specific application.
 
 \examples{
 # Basic Example
-data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))
+data <- data.frame(time=c(1:8), event=c(rep(0, 6), stats::rpois(2, 4)))
 a1 <- poisson_rare(data)
 # Example using an mds_ts object
 a2 <- poisson_rare(mds_ts[[1]])

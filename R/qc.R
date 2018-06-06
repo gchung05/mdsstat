@@ -73,6 +73,8 @@
 #' Default: \code{1} represents the first Western Electric rule of one point
 #' over the 3-sigma limit.
 #'
+#' @param ... Further arguments passed onto \code{shewhart} methods
+#'
 #' @examples
 #' # Basic Example
 #' data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
@@ -82,7 +84,7 @@
 #' # Example using a derived rate as the "event"
 #' data <- mds_ts[[3]]
 #' data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
-#' a3 <- shewhart(data, "rate")
+#' a3 <- shewhart(data, c(Rate="rate"))
 #'
 #' @references
 #' Montgomery, Douglas C. Introduction to Statistical Quality Control by Douglas C. Montgomery, 5th Edition: Study Guide. Cram101, 2013.
@@ -92,6 +94,7 @@ shewhart <- function (df, ...) {
 }
 
 #' @describeIn shewhart Shewhart on mds_ts data
+#' @export
 shewhart.mds_ts <- function(
   df,
   ts_event=c("Count"="nA"),
@@ -116,12 +119,14 @@ shewhart.mds_ts <- function(
 }
 
 #' @describeIn shewhart Shewhart on general data
+#' @export
 shewhart.default <- function(
   df,
   analysis_of=NA,
   eval_period=NULL,
   zero_rate=1/3,
-  we_rule=1L
+  we_rule=1L,
+  ...
 ){
   input_param_checker(df, "data.frame")
   input_param_checker(c("time", "event"), check_names=df)
@@ -201,8 +206,8 @@ shewhart.default <- function(
     }
 
     rr <- list(statistic=stats::setNames(stat, rep("N-Sigmas", length(stat))),
-               lcl=rep(mu + qnorm(0.025) * sigma, length(stat)),
-               ucl=rep(mu + qnorm(0.975) * sigma, length(stat)),
+               lcl=rep(mu + stats::qnorm(0.025) * sigma, length(stat)),
+               ucl=rep(mu + stats::qnorm(0.975) * sigma, length(stat)),
                p=stats::setNames(NA, "p-value"),
                signal=sig,
                signal_threshold=stats::setNames(

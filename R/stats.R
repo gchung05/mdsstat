@@ -86,8 +86,9 @@ define_algos <- function(
   input_param_checker(algos, "list")
 
   # Each list item must be an algorithm in mdsstat
-  algolist <- ls("package:mdsstat")[grepl("\\.mds_ts$", ls("package:mdsstat"))]
-  algolist <- gsub("\\.mds_ts$", "", algolist)
+  algolist <- c("poisson_rare", "prr", "shewhart")
+  # algolist <- ls("package:mdsstat")[grepl("\\.mds_ts$", ls("package:mdsstat"))]
+  # algolist <- gsub("\\.mds_ts$", "", algolist)
   if (!all(names(algos) %in% algolist)){
     notalgo <- names(algos)[!names(algos) %in% algolist]
     stop(paste(paste(notalgo, collapse=", "),
@@ -105,8 +106,9 @@ define_algos <- function(
 
   # All list elements in each algorithm must be parameter names and not be df
   for (i in 1:length(algos)){
-    args <- unique(unlist(
-      sapply(c(names(algos)[i], suppressWarnings(methods(names(algos)[i]))), formalArgs)))
+    tname <- names(algos)[i]
+    tmeth <- c(tname, as.character(utils::methods(tname)))
+    args <- unique(unlist(sapply(tmeth, function(x) names(formals(x)))))
     args <- args[!args %in% c("df", "...")]
     if (any(names(algos[[i]]) %in% "df")){
       stop(paste("Do not specify df parameter in", names(algos)[i]))
@@ -150,7 +152,7 @@ define_algos <- function(
 #'   poisson_rare=list(p_rate=0.3))
 #' algos <- define_algos(x)
 #' run_algos(data, algos)
-#' run_algos(data, algos, F)
+#' run_algos(data, algos, FALSE)
 #' @export
 run_algos <- function(
   data,
