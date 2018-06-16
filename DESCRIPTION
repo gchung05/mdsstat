@@ -1,7 +1,7 @@
 Package: mdsstat
 Type: Package
 Title: Statistical Trending for Medical Devices Surveillance
-Version: 0.1.0
+Version: 0.1.1.9000
 Authors@R: person("Gary", "Chung", email="gchung05@gmail.com",
   role=c("aut", "cre"))
 Maintainer: Gary Chung <gchung05@gmail.com>
