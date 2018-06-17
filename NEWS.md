@@ -8,6 +8,7 @@ UNDER DEVELOPMENT
 
 **Potential Updates**
 
+- Allow `run_algos()` to run on a list of `mds_ts` objects
 - Add CUSUM
 
 **Bugfixes**
