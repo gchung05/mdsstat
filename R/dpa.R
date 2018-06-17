@@ -188,16 +188,15 @@ prr.default <- function(
     # Establish confidence limits
     z <- stats::qnorm(1 - (alpha / 2))
     cl <- c(stat / exp(z * s), stat * exp(z * s))
-    p <-
+    p <- min(stats::pnorm((log(null_ratio) - log(stat)) / s) * 2, 1)
     # Determine signal & hypothesis
-    sig <- cl[1] > null_ratio
+    sig <- p <= alpha
     hyp <- paste0("Two-sided test at alpha=", alpha, " of PRR > ", null_ratio)
-    # stat thresh sig hyp null_ratio alpha
 
     rr <- list(statistic=stats::setNames(stat, "PRR"),
                lcl=cl[1],
                ucl=cl[2],
-               p=min(stats::pnorm((null_ratio - stat) / exp(s)) * 2, 1),
+               p=p,
                signal=sig,
                signal_threshold=stats::setNames(alpha, "critical p-value"),
                sigma=exp(s))

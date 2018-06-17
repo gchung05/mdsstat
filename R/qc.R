@@ -184,24 +184,24 @@ shewhart.default <- function(
     if (we_rule == 1L){
       stat <- nsigma[tlen]
       thresh <- (mu + 3 * sigma)
-      sig <- stat > thresh
+      sig <- stat > 3
       hyp <- "1 point > 3-sigma limit"
     } else if (we_rule == 2L){
       stat <- nsigma[(tlen - 2):tlen]
       thresh <- mu + 2 * sigma
-      sig <- (nsigma[tlen] > thresh) &
-        any(nsigma[(tlen - 2):(tlen - 1)] > thresh)
+      sig <- (nsigma[tlen] > 2) &
+        any(nsigma[(tlen - 2):(tlen - 1)] > 2)
       hyp <- "2 of 3 points > 2-sigma limit"
     } else if (we_rule == 3L){
       stat <- nsigma[(tlen - 4):tlen]
       thresh <- mu + sigma
-      sig <- (nsigma[tlen] > thresh) &
-        (sum(nsigma[(tlen - 4):(tlen - 1)] > thresh) >= 3)
+      sig <- (nsigma[tlen] > 1) &
+        (sum(nsigma[(tlen - 4):(tlen - 1)] > 1) >= 3)
       hyp <- "4 of 5 points > 1-sigma limit"
     } else if (we_rule == 4L){
       stat <- nsigma[(tlen - 8):tlen]
       thresh <- mu
-      sig <- sum(stat > thresh) == 9
+      sig <- sum(stat > 0) == 9
       hyp <- "9 points > mean"
     }
 
