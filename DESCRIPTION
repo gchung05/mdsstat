@@ -15,7 +15,7 @@ Description: A collection of common statistical algorithms used in active
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.50)
+Depends: R (>= 3.5.0)
 Imports:
   utils,
   stats,
