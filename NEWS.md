@@ -1,6 +1,13 @@
-`mds` 0.1.1
+`mds` 0.2.1
 ---------------------------------------
 UNDER DEVELOPMENT
+
+**Potential Updates**
+
+- Add CUSUM
+
+# `mdsstat` 0.2.0
+---------------------------------------
 
 **Implemented Updates**
 
@@ -12,11 +19,7 @@ UNDER DEVELOPMENT
 - `shewhart()` now outputs the correct signal logic
 - `prr()` now outputs the correct signal logic and p-value
 
-**Potential Updates**
-
-- Add CUSUM
-
-`mdsstat` 0.1.0
+# `mdsstat` 0.1.0
 ---------------------------------------
 
 - Initial Release. Yay!
