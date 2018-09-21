@@ -129,3 +129,10 @@ test_that("non_dpa option works as expected", {
   expect_warning(run_algos(data, a4, non_dpa="warn"))
   expect_error(run_algos(data, a4, non_dpa="stop"))
 })
+# Input is a list rather than a single time series
+test_that("list data input works as expected", {
+  expect_is(run_algos(mds_ts, a4), "data.frame")
+  expect_is(run_algos(mds_ts, a4, dataframe=F), "list")
+  expect_error(run_algos(list(foo=data.frame(c(1:3))), a4))
+  expect_error(run_algos(list(foo=data.frame(c(1:3))), a4, dataframe=F))
+})

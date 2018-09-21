@@ -150,6 +150,7 @@ define_algos <- function(
 #'
 #' Default: \code{"skip"}
 #'
+#' @param ... Further arguments for future work.
 #' @return A \code{mdsstat_tests} data frame or list of \code{mdsstat_test}
 #' lists with the results of the algorithm runs.
 #' @examples
@@ -167,7 +168,48 @@ run_algos <- function(
   data,
   algos,
   dataframe=T,
-  non_dpa="skip"
+  non_dpa="skip",
+  ...
+){
+  UseMethod("run_algos", data)
+}
+
+#' @describeIn run_algos Run algorithms on a list of time series
+#' @export
+run_algos.list <- function(
+  data,
+  algos,
+  dataframe=T,
+  non_dpa="skip",
+  ...
+){
+  dots <- list(...)
+  if (dataframe){
+    out <- data.frame()
+  } else out <- list()
+  for(i in 1:length(data)){
+    this <- run_algos(data=data[[i]],
+                      algos=algos,
+                      dataframe=dataframe,
+                      non_dpa=non_dpa,
+                      ...)
+    if (dataframe){
+      out <- rbind(out, this)
+    } else{
+      out[[i]] <- this
+    }
+  }
+  return(out)
+}
+
+#' @describeIn run_algos Run algorithms on a single time series
+#' @export
+run_algos.default <- function(
+  data,
+  algos,
+  dataframe=T,
+  non_dpa="skip",
+  ...
 ){
   input_param_checker(data, "data.frame")
   input_param_checker(algos, "mdsstat_da")

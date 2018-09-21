@@ -8,8 +8,8 @@
 \usage{
 shewhart(df, ...)
 
-\method{shewhart}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA,
-  ...)
+\method{shewhart}{mds_ts}(df, ts_event = c(Count = "nA"),
+  analysis_of = NA, ...)
 
 \method{shewhart}{default}(df, analysis_of = NA, eval_period = NULL,
   zero_rate = 1/3, we_rule = 1L, ...)

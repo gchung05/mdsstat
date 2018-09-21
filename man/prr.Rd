@@ -8,7 +8,8 @@
 \usage{
 prr(df, ...)
 
-\method{prr}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA, ...)
+\method{prr}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA,
+  ...)
 
 \method{prr}{default}(df, analysis_of = NA, eval_period = 1L,
   null_ratio = 1, alpha = 0.05, ...)
