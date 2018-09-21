@@ -91,6 +91,7 @@ test_that("function returns core mdsstat_tests components", {
                                    "stat_addtl")))
   expect_equal(nrow(a3), 4)
 })
+# Output behavior
 test_that("outputs are as expected", {
   expect_equal(as.character(a3$test_name), c(
     "Proportional Reporting Ratio",
@@ -103,6 +104,7 @@ test_that("outputs are as expected", {
   expect_match(as.character(a3$analysis_of[4]), "Count of .+")
   expect_equal(a3$run_status, c(T, T, T, F))
 })
+# Parameter settings
 a3a <- run_algos(data, a2, dataframe=F)
 test_that("list option works as expected", {
   expect_is(a3a, "list")
@@ -111,4 +113,19 @@ test_that("list option works as expected", {
   expect_equal(a3a[[2]]$test_name, "Shewhart x-bar Western Electric Rule 1")
   expect_equal(a3a[[3]]$test_name, "Shewhart x-bar Western Electric Rule 2")
   expect_equal(a3a[[4]]$test_name, "Poisson Rare")
+})
+test_that("DPA runs as it should when DPA data exists", {
+  expect_is(run_algos(data, a2, non_dpa="skip"), "data.frame")
+  expect_is(run_algos(data, a2, non_dpa="warn"), "data.frame")
+  expect_is(run_algos(data, a2, non_dpa="stop"), "data.frame")
+})
+x <- list(prr=list(),
+          shewhart=list(),
+          poisson_rare=list(p_rate=0.3))
+a4 <- define_algos(x)
+data <- mds_ts[[1]]
+test_that("non_dpa option works as expected", {
+  expect_is(run_algos(data, a4, non_dpa="skip"), "data.frame")
+  expect_warning(run_algos(data, a4, non_dpa="warn"))
+  expect_error(run_algos(data, a4, non_dpa="stop"))
 })
