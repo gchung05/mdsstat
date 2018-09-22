@@ -66,7 +66,7 @@ data <- data.frame(time=c(1:25),
 a1a <- prr(data)
 
 test_that("test does not run on 0 cell A counts", {
-  expect_true(isFALSE(a1a$status))
+  expect_true(!a1a$status)
 })
 
 # Reference example
@@ -78,7 +78,7 @@ data <- data.frame(time=c(1:25),
 a1a <- prr(data)
 
 test_that("test does not run on 0 cell B counts", {
-  expect_true(isFALSE(a1a$status))
+  expect_true(!a1a$status)
 })
 
 # Reference example
@@ -90,7 +90,7 @@ data <- data.frame(time=c(1:25),
 a1a <- prr(data)
 
 test_that("test does not run on 0 cell C counts", {
-  expect_true(isFALSE(a1a$status))
+  expect_true(!a1a$status)
 })
 
 # Reference example
@@ -102,7 +102,7 @@ data <- data.frame(time=c(1:25),
 a1a <- prr(data)
 
 test_that("test does not run on 0 cell D counts", {
-  expect_true(isFALSE(a1a$status))
+  expect_true(!a1a$status)
 })
 
 # Reference example
@@ -113,8 +113,8 @@ test_that("test errors on missing 2x2 cells", {
   expect_error(prr(mds_ts[[1]]))
 })
 test_that("test does not run on 0 cell counts", {
-  expect_true(isFALSE(prr(mds_ts[[2]])$status))
-  expect_true(isFALSE(prr(mds_ts[[2]], eval_period=6L)$status))
+  expect_true(!prr(mds_ts[[2]])$status)
+  expect_true(!prr(mds_ts[[2]], eval_period=6L)$status)
 })
 
 # Parameter checks
