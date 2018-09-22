@@ -2,11 +2,11 @@
 #'
 #' A dataset containing 535 events reported into the FDA MAUDE database on bone
 #' cement in 2017. Data were obtained via the openFDA API
-#' (\url{https://open.fda.gov/api/}).
+#' (\url{https://open.fda.gov}).
 #'
 #' @format A data frame with 535 rows and 15 variables. Full variable
 #' descriptions may be found on the FDA Device Reference Guide
-#' (\url{https://open.fda.gov/device/event/reference/}). Note that \code{region}
+#' (\url{https://open.fda.gov}). Note that \code{region}
 #' is a simulated variable not present in MAUDE. Descriptions as follows:
 #' \describe{
 #'   \item{report_number}{Identifying number for the adverse event report.}
