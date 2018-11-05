@@ -316,7 +316,8 @@ prr.default <- function(
 #'
 #' @references
 #' Stricker BH, Tijssen JG. Serum sickness-like reactions to cefaclor. J Clin Epidemiol. 1992;45(10):1177-84.
-#' Böhm R, Klein H.-J. (v2018-10-16). Primer on Disportionality Analysis. OpenVigil http://openvigil.sourcefourge.net/doc/DPA.pdf
+#'
+#' Bohm R, Klein H.-J. (v2018-10-16). Primer on Disportionality Analysis. OpenVigil http://openvigil.sourcefourge.net/doc/DPA.pdf
 #'
 #' @export
 ror <- function (df, ...) {

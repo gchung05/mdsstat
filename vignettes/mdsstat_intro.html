@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+<meta name="date" content="2018-11-04" />
+
+<title>Statistical Trending on Medical Device Surveillance Data</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Statistical Trending on Medical Device Surveillance Data</h1>
+<h4 class="date"><em>2018-11-04</em></h4>
+
+
+
+<p>The <code>mdsstat</code> package:</p>
+<ul>
+<li>Standardizes the output of various statistical trending algorithms</li>
+<li>Allows running of multiple algorithms on the same data</li>
+<li>Allows running of both <strong>disproportionality</strong> and <strong>quality control</strong> algorithms</li>
+<li>Creates lightweight analysis definitions and output files for auditability, documentation, and reproducibility</li>
+</ul>
+<p><strong>Why?</strong></p>
+<p>There are many ways to trend medical device event data. Some are drawn from the <a href="https://en.wikipedia.org/wiki/Quality_control">quality control</a> discipline, others from disproportionality analysis used in pharmacoepidemiology, and yet others from the general field of statistics.</p>
+<p>There is a need to rigorously compare and contrast these various methods to more fully understand their respective performance and applicability in surveillance of medical devices.</p>
+<p><strong>How?</strong></p>
+<p>The <code>mdsstat</code> package aims to provide a collection of statistical trending algorithms used in medical device surveillance. Furthermore, each algorithm is written with a standardized, reusable framework philosophy. The same input data can be fed through multiple algorithms. All algorithms return <strong>results that can be sorted, stacked, and compared.</strong></p>
+<p>This package is written in tandem with the <code>mds</code> package. These are complementary in the sense that:</p>
+<ul>
+<li><code>mds</code> standardizes medical device event data.</li>
+<li><code>mdsstat</code> standardizes the statistical trending of medical device event data.</li>
+</ul>
+<p>While <code>mdsstat</code> algorithms can run on generic R data frames, additional efficiency and traceability benefits are derived by running on data frames generated by <code>mds::time_series()</code> from the <code>mds</code> package.</p>
+<p><strong>Purpose of This Vignette</strong></p>
+<ul>
+<li>Introduce <a href="#algos">the algorithms</a></li>
+<li>Show how to <a href="#onealgo">run one algorithm</a></li>
+<li>Show how to run <a href="#mutlialgo">multiple algorithms</a></li>
+</ul>
+<div id="data-maude-time-series-generated-from-mdstime_series" class="section level2">
+<h2>Data: MAUDE Time Series Generated from <code>mds::time_series()</code></h2>
+<p>The following examples use a sample list of three time series generated by <code>mds::time_series()</code> from the <code>mds</code> package, saved as <code>mds_ts</code> in this package. The underlying data were queried from the <a href="https://open.fda.gov">FDA MAUDE API</a>. Furthermore, a simulated exposure dataset was generated to provide exposure data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mdsstat)
+<span class="kw">data</span>(mds_ts)</code></pre></div>
+</div>
+<div id="algos" class="section level2">
+<h2>The Algorithms</h2>
+<p>This is the current list of algorithms available:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Function</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>shewhart()</code></td>
+<td align="left">Shewhart x-bar Control Chart with 4 Western Electric Rules</td>
+</tr>
+<tr class="even">
+<td align="left"><code>prr()</code></td>
+<td align="left">Proportional Reporting Ratio</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>poisson_rare()</code></td>
+<td align="left">Poisson Test on Rare Events</td>
+</tr>
+</tbody>
+</table>
+<p>These are planned/proposed algorithms to add:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Function</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>ebgm()</code></td>
+<td align="left">Empirical Bayes Geometric Mean (basis of the Gamma Poisson Shrinker)</td>
+</tr>
+<tr class="even">
+<td align="left"><code>bcpnn()</code></td>
+<td align="left">Bayesian Confidence Propagation Neural Network</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>ror()</code></td>
+<td align="left">Reporting Odds Ratio</td>
+</tr>
+<tr class="even">
+<td align="left"><code>chi_square()</code></td>
+<td align="left">Chi-Square Test</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>poisson_rare()</code></td>
+<td align="left">Poisson Test on Rare Events</td>
+</tr>
+<tr class="even">
+<td align="left"><code>changepoint()</code></td>
+<td align="left">Binary Segmentation Changepoint</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>cusum()</code></td>
+<td align="left">Cumulative Sum Control Chart with 4 Western Electric Rules</td>
+</tr>
+<tr class="even">
+<td align="left"><code>ewma()</code></td>
+<td align="left">Exponentially Weighted Moving Average with 4 WE Rules</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>cox_stuart()</code></td>
+<td align="left">Cox-Stuart Test</td>
+</tr>
+<tr class="even">
+<td align="left"><code>uptrend()</code></td>
+<td align="left">Linear Uptrend by Linear Modeling</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="onealgo" class="section level2">
+<h2>Run One Algorithm</h2>
+<p>In basic usage, running an <code>mdsstat</code> algorithm requires two considerations:</p>
+<ol style="list-style-type: decimal">
+<li>Input data format (may be reused in other algorithms)</li>
+<li>Algorithm parameter settings (unique to the algorithm)</li>
+</ol>
+<p>Here are some example algorithm calls:</p>
+<pre><code># Example mds_ts data
+data &lt;- mds_ts[[3]]
+data$rate &lt;- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
+
+# Four different algorithm calls
+shewhart(data)
+prr(data)
+shewhart(data, ts_event=c(Rate=&quot;rate&quot;), we_rule=2L)
+poisson_rare(data, p_rate=0.3)</code></pre>
+<div id="input-data-format" class="section level3">
+<h3>Input Data Format</h3>
+<p>Input data shall be either a generic data frame (general usage) or an <code>mds_ts</code> data frame. Both are conceptually structured like time series.</p>
+<div id="mds_ts-usage" class="section level4">
+<h4><code>mds_ts</code> Usage</h4>
+<p><code>mds_ts</code> data frames are generated by <code>mds::time_series()</code> from the <code>mds</code> package. These data frames are already structured for seamless integration into <code>mdsstat</code> algorithms.</p>
+<p>Note the following:</p>
+<ul>
+<li>Disproportionality algorithms will run only if the <code>mds_ts</code> data contains the columns <code>nA</code>, <code>nB</code>, <code>nC</code>, and <code>nD</code>. These are generated by specifying device and event hierarchies using <code>mds</code> package functions.</li>
+<li>Algorithms run by default using the <code>nA</code> column for event occurrence.</li>
+<li>If running on event rate is desired, you may calculate an additional field and specify that field using the <code>ts_event</code> parameter.</li>
+</ul>
+<p><em>Running an algorithm on event rate instead of event count</em></p>
+<pre><code>data &lt;- mds_ts[[3]]
+data$rate &lt;- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
+shewhart(data, ts_event=c(&quot;Rate&quot;=&quot;rate&quot;))</code></pre>
+</div>
+<div id="general-usage-count-or-rate-data" class="section level4">
+<h4>General Usage: Count or Rate Data</h4>
+<p>A generic data frame contains two columns, <code>time</code> and <code>event</code>, where for each unique sequential time (numeric or Date), there corresponds a number indicating the event occurrence. The event occurrence may commonly be the count of events or event rate.</p>
+<p>An example:</p>
+<pre><code>data &lt;- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
+shewhart(data)</code></pre>
+</div>
+<div id="general-usage-data-for-disproportionality-analysis-dpa" class="section level4">
+<h4>General Usage: Data for Disproportionality Analysis (DPA)</h4>
+<p>Because disproportionality analysis is run on count data in a 2x2 contingency table, this data frame requires five columns, <code>time</code>, <code>nA</code>, <code>nB</code>, <code>nC</code>, and <code>nD</code>. For each unique sequential time (numeric or Date), there corresponds a set of numbers indicating the event counts. The latter four columns correspond to counts for cells A through D of the contingency table.</p>
+<p>An example:</p>
+<pre><code>data &lt;- data.frame(time=c(1:25),
+                   nA=as.integer(stats::rnorm(25, 25, 5)),
+                   nB=as.integer(stats::rnorm(25, 50, 5)),
+                   nC=as.integer(stats::rnorm(25, 100, 25)),
+                   nD=as.integer(stats::rnorm(25, 200, 25)))
+prr(data)</code></pre>
+</div>
+<div id="general-usage-countrate-and-dpa-data" class="section level4">
+<h4>General Usage: Count/Rate and DPA Data</h4>
+<p>To run algorihtms on both counts/rates and DPA, just include all the above columns, such as:</p>
+<pre><code>data &lt;- data.frame(time=c(1:25),
+                   event=as.integer(stats::rnorm(25, 100, 25)),
+                   nA=as.integer(stats::rnorm(25, 25, 5)),
+                   nB=as.integer(stats::rnorm(25, 50, 5)),
+                   nC=as.integer(stats::rnorm(25, 100, 25)),
+                   nD=as.integer(stats::rnorm(25, 200, 25)))
+shewhart(data)
+prr(data)</code></pre>
+</div>
+</div>
+</div>
+<div id="mutlialgo" class="section level2">
+<h2>Run Multiple Algorithms</h2>
+<p><code>mdsstat</code> makes it easy to run multiple algorithms and variants of the same algorithm on your data.</p>
+<p>Just two steps are required:</p>
+<ol style="list-style-type: decimal">
+<li>Use <code>define_algos()</code> to set a list of algorithms with corresponding parameter settings.</li>
+<li>Use <code>run_algos()</code> to run the algorithms defined in Step 1 on your data.</li>
+</ol>
+<p>For example:</p>
+<pre><code># Your data
+data &lt;- mds_ts[[3]]
+data$rate &lt;- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
+
+# Save a list of algorithms to run
+x &lt;- list(prr=list(),
+          shewhart=list(),
+          shewhart=list(ts_event=c(Rate=&quot;rate&quot;), we_rule=2L),
+          poisson_rare=list(p_rate=0.3))
+algos &lt;- define_algos(x)
+
+# Run algorithms
+run_algos(data, algos)</code></pre>
+<p>By default, <code>run_algos()</code> returns the results of each algorithm as a row in a data frame. This allows for easy tabular review of algorithm performance.</p>
+</div>
+<div id="one-algorithm-returned-as-a-data-frame-row" class="section level2">
+<h2>One Algorithm Returned as a Data Frame Row</h2>
+<p>Similar to the default output of <code>run_algos()</code>, you may convert the output of any <code>mdsstat</code> algorithm from the default list to a data frame row. Simply use <code>test_as_row()</code> on any algorithm output.</p>
+<p>For example:</p>
+<pre><code>data &lt;- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
+result &lt;- shewhart(data)
+test_as_row(result)</code></pre>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
