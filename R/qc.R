@@ -177,9 +177,9 @@ shewhart.default <- function(
     rs <- stats::setNames(F, paste("Maximum zero_rate of", zero_rate, "exceeded"))
   } else{
     # If all conditions are met, run Shewhart test
-    mu <- mean(df$event)
-    sigma <- mean(abs(diff(df$event))) / d2
-    df$event[length(df$event)]
+    ctrl_period <- df$event[1:(nrow(df) - 1)]
+    mu <- mean(ctrl_period)
+    sigma <- mean(abs(diff(ctrl_period))) / d2
     nsigma <- (df$event - mu) / sigma
     if (we_rule == 1L){
       stat <- nsigma[tlen]
