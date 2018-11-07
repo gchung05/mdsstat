@@ -61,8 +61,8 @@
 #'
 #' @param zero_rate Required maximum proportion of \code{event}s in \code{df}
 #' (constrained by \code{eval_period}) containing zeroes for this algorithm to
-#' run. Because Shewhart does not perform well on rare events, a value >0 is
-#' recommended.
+#' run. Because Shewhart does not perform well on time series with many 0 values,
+#' a value >0 is recommended.
 #'
 #' Default: \code{1/3} requires no more than 1/3 zeros in \code{event}s in
 #' \code{df} in order to run.
@@ -163,12 +163,12 @@ shewhart.default <- function(
   } else if (we_rule == 2L & (nrow(df) < 6)){
     rr <- NA
     rs <- stats::setNames(F, ">5 time periods required for WE rule 2")
-  } else if (we_rule == 3L & (nrow(df) < 10)){
+  } else if (we_rule == 3L & (nrow(df) < 8)){
     rr <- NA
-    rs <- stats::setNames(F, ">17 time periods required for WE rule 3")
-  } else if (we_rule == 4L & (nrow(df) < 18)){
+    rs <- stats::setNames(F, ">7 time periods required for WE rule 3")
+  } else if (we_rule == 4L & (nrow(df) < 11)){
     rr <- NA
-    rs <- stats::setNames(F, ">17 time periods required for WE rule 4")
+    rs <- stats::setNames(F, ">10 time periods required for WE rule 4")
   } else if(sum(df$time != 0) < 2){
     rr <- NA
     rs <- stats::setNames(F, "2 or more non-zero events required")
