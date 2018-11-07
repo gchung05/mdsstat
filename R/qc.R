@@ -181,6 +181,7 @@ shewhart.default <- function(
     mu <- mean(ctrl_period)
     sigma <- mean(abs(diff(ctrl_period))) / d2
     nsigma <- (df$event - mu) / sigma
+    # Calculate WE trend rules
     if (we_rule == 1L){
       stat <- nsigma[tlen]
       thresh <- (mu + 3 * sigma)
