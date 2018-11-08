@@ -1,4 +1,4 @@
-context("Qc Algorithms")
+context("Shewhart Algorithm")
 
 # Reference example
 data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
