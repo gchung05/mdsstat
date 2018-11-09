@@ -4,7 +4,18 @@ UNDER DEVELOPMENT
 
 **Potential Updates**
 
-- Add CUSUM
+- Add Bayesian DPA algorithms
+
+**Implemented Updates**
+
+- Added CUSUM algorithm
+- Added ROR algorithm
+- Added support for more complete hierarchical descriptions (see mds package)
+- Reorganized R scripts for easier navigation
+
+**Bugfixes**
+
+- `shewhart()` mu and sigma no longer calculated using the current index month
 
 # `mdsstat` 0.2.0
 ---------------------------------------
