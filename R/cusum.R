@@ -132,6 +132,8 @@ cusum.default <- function(
   input_param_checker(delta, "numeric", null_ok=F, max_length=1)
   input_param_checker(H, "numeric", null_ok=F, max_length=1)
   input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
+  if (delta <= 0) stop("delta must be >0")
+  if (!is.null(H)){ if(H <= 0) stop("H must be >0")}
   if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
 
   # d2 is an anti-biasing constant used to estimate sigma. This d2 is set at a
