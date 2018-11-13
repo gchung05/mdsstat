@@ -45,7 +45,8 @@ test_that("PRR outputs are as expected", {
   expect_true(all(names(a1$params) %in% c("test_hyp",
                                           "eval_period",
                                           "null_ratio",
-                                          "alpha")))
+                                          "alpha",
+                                          "cont_adj")))
   expect_is(a1$params$test_hyp, "character")
   expect_equal(a1$params$null_ratio, 1)
   expect_equal(a1$params$alpha, 0.05)
@@ -151,7 +152,8 @@ test_that("PRR df parameter functions as expected", {
   expect_true(all(names(a2$params) %in% c("test_hyp",
                                           "eval_period",
                                           "null_ratio",
-                                          "alpha")))
+                                          "alpha",
+                                          "cont_adj")))
   expect_is(a2$params$test_hyp, "character")
   expect_equal(a2$params$null_ratio, 1)
   expect_equal(a2$params$alpha, 0.05)

@@ -8,6 +8,7 @@ UNDER DEVELOPMENT
 
 **Implemented Updates**
 
+- Added continuity adjustment option to DPA algorithms `prr()` and `ror()`
 - Added CUSUM algorithm
 - Added ROR algorithm
 - Added support for more complete hierarchical descriptions (see mds package)

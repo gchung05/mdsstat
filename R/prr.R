@@ -65,6 +65,14 @@
 #'
 #' Default: \code{0.05} corresponds to the standard alpha value of 5\%.
 #'
+#' @param cont_adj Numeric value 0 or greater representing the continuity
+#' adjustment to be added to each cell of the 2x2 contingency table. A value
+#' greater than 0 allows for contingency tables with 0 cells to run the
+#' algorithm. A typical non-zero value is 0.5.
+#'
+#' Default: \code{0} adds zero to each cell, thus an unadjusted table. If any
+#' cell of the 2x2 is 0, the algorithm will not run.
+#'
 #' @param ... Further arguments passed onto \code{prr} methods
 #'
 #' @return A named list of class \code{mdsstat_test} object, as follows:
@@ -141,6 +149,7 @@ prr.default <- function(
   eval_period=1L,
   null_ratio=1,
   alpha=0.05,
+  cont_adj=0,
   ...
 ){
   # Contingency table primary variables
@@ -151,8 +160,10 @@ prr.default <- function(
   input_param_checker(eval_period, "integer")
   input_param_checker(null_ratio, "numeric")
   input_param_checker(alpha, "numeric")
+  input_param_checker(cont_adj, "numeric")
   if (null_ratio < 1) stop("null_ratio must be 1 or greater")
   if (alpha <= 0 | alpha >= 1) stop("alpha must be in range (0, 1)")
+  if (cont_adj < 0) stop("cont_adj must be 0 or greater")
 
   # Order by time
   df <- df[order(df$time), ]
@@ -169,6 +180,8 @@ prr.default <- function(
       df <- cbind(data.frame(time_start=timeRange[1],
                              time_end=timeRange[2]),
                   data.frame(t(colSums(df[, c2x2], na.rm=T))))
+      # Apply continuity adjustment
+      df[, c2x2] <- df[, c2x2] + cont_adj
     }
   }
   # Return data
@@ -213,7 +226,8 @@ prr.default <- function(
               params=list(test_hyp=hyp,
                           eval_period=eval_period,
                           null_ratio=null_ratio,
-                          alpha=alpha),
+                          alpha=alpha,
+                          cont_adj=cont_adj),
               data=rd)
   class(out) <- append(class(out), "mdsstat_test")
   return(out)

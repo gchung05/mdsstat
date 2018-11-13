@@ -12,7 +12,7 @@ prr(df, ...)
   ...)
 
 \method{prr}{default}(df, analysis_of = NA, eval_period = 1L,
-  null_ratio = 1, alpha = 0.05, ...)
+  null_ratio = 1, alpha = 0.05, cont_adj = 0, ...)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic
@@ -68,6 +68,14 @@ actual PRR is greater than 1.}
 establish the signal status.
 
 Default: \code{0.05} corresponds to the standard alpha value of 5\%.}
+
+\item{cont_adj}{Numeric value 0 or greater representing the continuity
+adjustment to be added to each cell of the 2x2 contingency table. A value
+greater than 0 allows for contingency tables with 0 cells to run the
+algorithm. A typical non-zero value is 0.5.
+
+Default: \code{0} adds zero to each cell, thus an unadjusted table. If any
+cell of the 2x2 is 0, the algorithm will not run.}
 }
 \value{
 A named list of class \code{mdsstat_test} object, as follows:
