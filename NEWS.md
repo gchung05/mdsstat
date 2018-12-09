@@ -1,10 +1,13 @@
-`mds` 0.2.1
+`mds` 0.2.2
 ---------------------------------------
 UNDER DEVELOPMENT
 
 **Potential Updates**
 
 - Add Bayesian DPA algorithms
+
+`mds` 0.2.1
+---------------------------------------
 
 **Implemented Updates**
 
