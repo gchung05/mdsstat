@@ -6,3 +6,5 @@
 ^cran-comments\.md$
 ^tests/dev$
 ^\.travis\.yml$
+^README\.Rmd$
+^README-.*\.png$
