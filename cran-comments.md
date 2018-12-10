@@ -4,11 +4,10 @@
 * win-builder
 
 ## R CMD check results
-There were no ERRORs, WARNINGs, or NOTEs.
+There were no ERRORs, WARNINGs, and no NOTEs.
 
 ## R CRAN web check results
-There was 1 NOTE: 2 marked UTF-8 strings in data.
-The strings in question are unimportant and serve the greater purpose of a context-releveant, open-source sample dataset.
+There were no ERRORs, WARNINGs, and no NOTEs.
 
 ## Downstream dependencies
 There are no downstream dependencies.

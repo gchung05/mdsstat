@@ -39,4 +39,9 @@ build$region <- as.character(factor(as.numeric(cut(runif(nrow(build)), 3)),
 # Done
 maude <- build
 
-devtools::use_data(maude, overwrite=T)
+# Format as ASCII
+for (i in 1:ncol(maude)){
+  maude[, i] <- iconv(maude[, i], "UTF-8", "ASCII")
+}
+
+usethis::use_data(maude, overwrite=T)
