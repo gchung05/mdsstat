@@ -57,7 +57,7 @@ data <- data.frame(time=c(1:8), event=c(rep(0, 6), rpois(2, 4)))
 a1a <- shewhart(data)
 
 test_that("test does not run on rare events", {
-  expect_true(isFALSE(a1a$status))
+  expect_true(!a1a$status)
 })
 
 # Parameter checks
