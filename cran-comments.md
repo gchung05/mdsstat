@@ -9,5 +9,8 @@ There were no ERRORs, WARNINGs, and no NOTEs.
 ## R CRAN web check results
 There were no ERRORs, WARNINGs, and no NOTEs.
 
+## r-hub check results
+There were no ERRORs, WARNINGs, and no NOTEs.
+
 ## Downstream dependencies
 There are no downstream dependencies.
