@@ -154,15 +154,13 @@ Leakages"="event_count")}
 }}
 
 \examples{
+# At minimum, the df parameter and either the h1 or relative_risk parameter
+# must be specified.
 # Basic Example
-data <- data.frame(time=c(1:25),
-                   nA=as.integer(stats::rnorm(25, 25, 5)),
-                   nB=as.integer(stats::rnorm(25, 50, 5)),
-                   nC=as.integer(stats::rnorm(25, 100, 25)),
-                   nD=as.integer(stats::rnorm(25, 200, 25)))
-a1 <- sprt(data)
+data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
+a1 <- sprt(data, h1=110)
 # Example using an mds_ts object
-a2 <- sprt(mds_ts[[3]])
+a2 <- sprt(mds_ts[[3]], relative_risk=1.2)
 
 }
 \references{
