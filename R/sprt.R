@@ -126,11 +126,13 @@
 #' }
 #'
 #' @examples
+#' # At minimum, the df parameter and either the h1 or relative_risk parameter
+#' # must be specified.
 #' # Basic Example
 #' data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
-#' a1 <- sprt(data)
+#' a1 <- sprt(data, h1=110)
 #' # Example using an mds_ts object
-#' a2 <- sprt(mds_ts[[3]])
+#' a2 <- sprt(mds_ts[[3]], relative_risk=1.2)
 #'
 #' @references
 #' Wald, Abraham (June 1945). "Sequential Tests of Statistical Hypotheses". Annals of Mathematical Statistics. 16 (2): 117-186.
@@ -164,15 +166,8 @@ sprt.mds_ts <- function(
                   paste(attributes(df)$nLabels$nA, collapse=" for "))
   } else name <- analysis_of
 
-  if (attributes(df)$dpa){
-    out <- data.frame(time=df$time,
-                      nA=df[[ts_event]],
-                      nB=df$nB,
-                      nC=df$nC,
-                      nD=df$nD)
-  } else{
-    stop("Input mds_ts df does not contain data for disproportionality analysis.")
-  }
+  out <- data.frame(time=df$time,
+                    event=df[[ts_event]])
   sprt.default(out, analysis_of=name, ...)
 }
 
@@ -194,8 +189,8 @@ sprt.default <- function(
 ){
   input_param_checker(df, "data.frame")
   input_param_checker(c("time", "event"), check_names=df)
-  input_param_checker(eval_period, "integer", null_ok=T, max_length=1)
-  input_param_checker(obs_period, "integer", null_ok=F, max_length=1)
+  input_param_checker(eval_period, "numeric", null_ok=T, max_length=1)
+  input_param_checker(obs_period, "numeric", null_ok=F, max_length=1)
   input_param_checker(h0, "numeric", null_ok=T, max_length=1)
   input_param_checker(h1, "numeric", null_ok=T, max_length=1)
   input_param_checker(relative_risk, "numeric", null_ok=T, max_length=1)
@@ -203,14 +198,28 @@ sprt.default <- function(
   input_param_checker(alpha, "numeric", null_ok=F, max_length=1)
   input_param_checker(beta, "numeric", null_ok=F, max_length=1)
   input_param_checker(h1_type, "character", null_ok=F, max_length=1)
-  if (!is.null(eval_period)){ if (eval_period < 2){
-    stop("eval_period must be 2 or greater")}}
-  if (obs_period > eval_period){
-    stop("obs_period cannot be greater than eval_period")}
+  if (!is.null(eval_period)){
+    if (eval_period < 2) stop("eval_period must be 2 or greater")
+    if (eval_period %% 1 != 0) stop("eval_period must be an integer")
+    if (obs_period > eval_period){
+      stop("obs_period cannot be greater than eval_period")}
+    if (is.null(h0) & obs_period == eval_period){
+      stop("obs_period cannot equal eval_period unless h0 is declared")}
+  }
+  if (obs_period %% 1 != 0 | obs_period <= 0){
+    stop("obs_period must be a positive integer")
+  }
+  if (obs_period > nrow(df)){
+    stop("obs_period cannot be longer than rows in df (number of times)")}
   if (!is.null(h0)){ if(h0 <=0) stop("h0 must be >0")}
+  if (is.null(h0) & obs_period == nrow(df)){
+    stop("obs_period cannot equal rows in df unless h0 is declared.")
+  }
   if (!is.null(h1)){ if (h1 <= 0) stop("h1 must be >0")}
-  if (!is.null(relative_risk)){ if (relative_risk <= 0){
-    stop("relative_risk must be >0")}}
+  if (!is.null(relative_risk)){
+    if (relative_risk <= 0) stop("relative_risk must be >0")
+    if (relative_risk == 1) stop("relative_risk cannot be 1")
+  }
   if (is.null(h1) & is.null(relative_risk)){
     stop("Either h1 or relative_risk must be specified")}
   if (!distribution %in% c("poisson", "normal")){
@@ -303,7 +312,7 @@ sprt.default <- function(
     rs <- stats::setNames(T, "Success")
 
     capitalize <- function(x){
-      paste0(toupper(substr(x, 1, 1)), substr(x, 2:nchar(x)))
+      paste0(toupper(substr(x, 1, 1)), substr(x, 2, nchar(x)))
     }
     # Return test
     out <- list(test_name=paste(capitalize(distribution), "SPRT"),
@@ -313,7 +322,8 @@ sprt.default <- function(
                 params=list(test_hyp=hyp,
                             eval_period=eval_period,
                             obs_period=obs_period,
-                            h1_source=ifelse(is.null(h1), "relative_risk", "h1"),
+                            h1_source=ifelse(is.null(relative_risk), "h1",
+                                             "relative_risk"),
                             alpha=alpha,
                             beta=beta),
                 data=rd)
