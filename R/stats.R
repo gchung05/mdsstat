@@ -219,7 +219,7 @@ run_algos.default <- function(
                "skip, stop, warn"))
   }
   # Define DPA algorithms currently in mdsstat
-  dpaalgos <- c("prr")
+  dpaalgos <- c("prr", "ror", "sprt")
 
   if (dataframe){
     stats <- data.frame()

@@ -2,8 +2,11 @@ Package: mdsstat
 Type: Package
 Title: Statistical Trending for Medical Devices Surveillance
 Version: 0.2.2.9000
-Authors@R: person("Gary", "Chung", email="gchung05@gmail.com",
-  role=c("aut", "cre"))
+Authors@R: c(
+    person("Gary", "Chung", email="gchung05@gmail.com", role=c("aut", "cre")),
+    as.person("Stephane Bottine [ctb] (derived code from 'SPRT' package)"),
+    as.person("Ismaïl Ahmed [ctb] (derived code from 'PhViD' package)"),
+    as.person("John Ihrie [ctb] (derived code from 'openEBGM' package)"))
 Maintainer: Gary Chung <gchung05@gmail.com>
 Description: A collection of common statistical algorithms used in active
     surveillance of medical device events. Context includes post-market

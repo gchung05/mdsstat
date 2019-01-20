@@ -2,9 +2,20 @@
 ---------------------------------------
 UNDER DEVELOPMENT
 
+**Implemented Updates**
+
+- Added SPRT algorithm
+- Added GPS algorithm
+
+**Bigfixes**
+
+- Fixed `analysis_of` attribute for all algorithms
+
 **Potential Updates**
 
-- Add Bayesian DPA algorithms
+- Add GPS algorithm
+- Add BCPNN algorithm
+- Add Poisson MaxSPRT algorithm
 
 `mdsstat` 0.2.1
 ---------------------------------------

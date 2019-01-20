@@ -126,7 +126,7 @@ prr.mds_ts <- function(
   # Set analysis_of
   if (is.na(analysis_of)){
     name <- paste(names(ts_event), "of",
-                  paste(attributes(df)$nLabels$nA, collapse=" for "))
+                  attributes(df)$dpa_detail$nA)
   } else name <- analysis_of
 
   if (attributes(df)$dpa){

@@ -110,7 +110,10 @@ shewhart.mds_ts <- function(
   # Set analysis_of
   if (is.na(analysis_of)){
     name <- paste(names(ts_event), "of",
-                  paste(attributes(df)$nLabels$nA, collapse=" for "))
+                  paste0(attributes(df)$device_level_source, " ",
+                         attributes(df)$device_level, ":",
+                         attributes(df)$event_level_source, " ",
+                         attributes(df)$event_level))
   } else name <- analysis_of
 
   out <- data.frame(time=df$time,
