@@ -53,7 +53,7 @@ Run a multiple number of \code{mdsstat} algorithms on a single input dataset.
 }}
 
 \examples{
-data <- mds_ts[[3]]
+data <- mds_ts[[1]]
 data$rate <- data$nA / data$exposure
 x <- list(prr=list(),
   shewhart=list(),

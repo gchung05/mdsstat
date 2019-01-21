@@ -3,7 +3,13 @@ context("Summary Statistics")
 # test_as_row
 # -----------
 # Reference example
-data <- mds_ts[[3]]
+data <- data.frame(time=c(1:25),
+                   nA=as.integer(stats::rnorm(25, 25, 5)),
+                   nB=as.integer(stats::rnorm(25, 50, 5)),
+                   nC=as.integer(stats::rnorm(25, 100, 25)),
+                   nD=as.integer(stats::rnorm(25, 200, 25)),
+                   exposure=as.integer(stats::rnorm(25, 50, 5)))
+data$event <- data$nA
 data$rate <- data$nA / data$exposure
 a1 <- test_as_row(prr(data))
 # Return behavior
@@ -30,13 +36,13 @@ test_that("function returns core mdsstat_df components", {
 })
 test_that("outputs are as expected", {
   expect_equal(as.character(a1$test_name), "Proportional Reporting Ratio")
-  expect_match(as.character(a1$analysis_of), "Count of .+")
+  expect_equal(a1$analysis_of, NA)
   expect_true(a1$run_status)
 })
 test_that("only legal inputs are allowed", {
   expect_error(test_as_row())
   expect_equal(as.character(a1$test_name), "Proportional Reporting Ratio")
-  expect_match(as.character(a1$analysis_of), "Count of .+")
+  expect_equal(a1$analysis_of, NA)
   expect_true(a1$run_status)
 })
 
@@ -98,10 +104,10 @@ test_that("outputs are as expected", {
     "Shewhart x-bar Western Electric Rule 1",
     "Shewhart x-bar Western Electric Rule 2",
     "Poisson Rare"))
-  expect_match(as.character(a3$analysis_of[1]), "Count of .+")
-  expect_match(as.character(a3$analysis_of[2]), "Count of .+")
-  expect_match(as.character(a3$analysis_of[3]), "Rate of .+")
-  expect_match(as.character(a3$analysis_of[4]), "Count of .+")
+  expect_equal(a1$analysis_of[1], NA)
+  expect_equal(a1$analysis_of[2], NA)
+  expect_equal(a1$analysis_of[3], NA)
+  expect_equal(a1$analysis_of[4], NA)
   expect_equal(a3$run_status, c(T, T, T, F))
 })
 # Parameter settings
@@ -123,7 +129,7 @@ x <- list(prr=list(),
           shewhart=list(),
           poisson_rare=list(p_rate=0.3))
 a4 <- define_algos(x)
-data <- mds_ts[[1]]
+data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
 test_that("non_dpa option works as expected", {
   expect_is(run_algos(data, a4, non_dpa="skip"), "data.frame")
   expect_warning(run_algos(data, a4, non_dpa="warn"))
@@ -136,3 +142,4 @@ test_that("list data input works as expected", {
   expect_error(run_algos(list(foo=data.frame(c(1:3))), a4))
   expect_error(run_algos(list(foo=data.frame(c(1:3))), a4, dataframe=F))
 })
+

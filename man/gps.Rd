@@ -13,7 +13,7 @@ gps(df, ...)
 
 \method{gps}{default}(df, analysis_of = NA, eval_period = 1,
   null_ratio = 1, cred_interval = 0.9, init_prior = c(0.2, 0.02, 2,
-  4, 1/3), gamma_lower = 1e-05, gamma_upper = 20, quantiles = c(0.5,
+  4, 1/3), gamma_lower = 1e-05, gamma_upper = 20, quantiles = c(0.05,
   0.95), cont_adj = 0, ...)
 }
 \arguments{
@@ -55,23 +55,31 @@ Example: \code{"Count of bone cement leakages"}}
 times counting in reverse chronological order to sum over to create the 2x2
 contingency table.
 
-Default: \code{1L} considers only the most recent time in \code{df}.
+Default: \code{1} considers only the most recent time in \code{df}.
 
-Example: \code{12L} sums over the last 12 time periods to create the 2x2
+Example: \code{12} sums over the last 12 time periods to create the 2x2
 contingency table.}
+
+\item{null_ratio}{Numeric value representing the null relative reporting
+ratio (RR), used with \code{cred_interval} to establish the signal status.
+This \code{null_ratio} is saved in the output as the signal threshold. See
+details for more.
+
+Default: \code{1} indicates a null RR of 1 and tests if the lower bound of
+the \code{cred_interval} exceeds \code{1}.}
 
 \item{cred_interval}{Numeric value between 0 and 1 representing the width of
 the Bayesian posterior credible interval, where the lower bound of the
 interval is assessed against the \code{null_ratio}. The interval bounds are
 returned as the lcl and ucl. See details for more.
 
-Default: \code{0.90} indicates a 90% credible interval with bounds at 5% and
-95%. The signal test is against the lower 5% bound, effectively creating the
+Default: \code{0.90} indicates a 90\% credible interval with bounds at 5\% and
+95\%. The signal test is against the lower 5\% bound, effectively creating the
 EB05 test.}
 
 \item{init_prior}{A numeric vector of length 5 representing the
 initialization parameters for the prior gamma mixture distribution in this
-order: alpha1, beta1, alpha2, beta2, p. See details for more.
+order: \code{alpha1, beta1, alpha2, beta2, p}. See details for more.
 
 Default: \code{c(.2, .02, 2, 4, 1/3)} as suggested in openEBGM package
 v0.7.0.}
@@ -88,18 +96,19 @@ Default: \code{20} is a value suggested in openEBGM package v0.7.0.}
 
 \item{quantiles}{Vector of quantiles between 0 and 1. \code{gps()} will
 return an equal length vector of estimated empirical Bayes quantiles from the
-posterior distribution.
+posterior distribution. Specify \code{quantiles=NULL} if no quantiles are
+desired.
 
-Default: \code{c(.5, .95)} corresponds to the 5% (EB05) and 95% (EB95)
+Default: \code{c(.05, .95)} corresponds to the 5\% (EB05) and 95\% (EB95)
 quantiles.}
 
 \item{cont_adj}{Positive integer representing the continuity
 adjustment to be added to each cell of the 2x2 contingency table. A value
 greater than 0 allows for contingency tables with 0 cells to run the
-algorithm. See details for more.
+algorithm. Adding a continuity adjustment will adversely affect the algorithm
+estimates, user discretion is advised. See details for more.
 
-Default: \code{0} adds zero to each cell, thus an unadjusted table. If either
-the B or D cells of the 2x2 are 0, the algorithm will not run.}
+Default: \code{0} adds zero to each cell, thus an unadjusted table.}
 }
 \value{
 A named list of class \code{mdsstat_test} object, as follows:
@@ -143,10 +152,12 @@ upper and lower bounds are fed into PORT optimization using the
 \code{cont_adj} provides the option to allow \code{gps()} to proceed running,
 however this is done at the user's discretion because there are adverse
 effects of adding a positive integer to every cell of the contingency table.
-By default, \code{gps()} allows 0 counts in the A and C cells, but not in B
-and D. However, the posterior distribution estimates may not be stable with
-very low or 0 count cells. Note that this release uses box-constrained PORT
-optimization only.
+By default, \code{gps()} allows 0 in the C cell only, but not in A, B, or D.
+It has been suggested that 0.5 may be an appropriate value. However,
+values <1 have been shown to be unstable using box-constrained PORT
+optimization, which is the only optimization considered in this release.
+Overall, posterior distribution estimates have been shown to be unstable with
+very low or 0 count cells.
 
 For parameter \code{ts_event}, in the uncommon case where the
 device-event count (Cell A) variable is not \code{"nA"}, the name of the
@@ -178,7 +189,7 @@ a2 <- gps(mds_ts[[3]])
 
 }
 \references{
-DuMouchel W. Bayesian data mining in large frequency tables, with an application to the FDA spontaneous reporting system. The American Statistician, 53(3):177–190, August 1999.
+DuMouchel W. Bayesian data mining in large frequency tables, with an application to the FDA spontaneous reporting system. The American Statistician, 53(3):177-190, August 1999.
 
 Ahmed I, Poncet A. PhViD: PharmacoVigilance Signal Detection, 2016. R package version 1.0.8.
 

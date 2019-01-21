@@ -57,7 +57,7 @@ test_that("outputs are as expected", {
 # Parameter checks
 # ----------------
 
-a2 <- poisson_rare(mds_ts[[1]])
+a2 <- poisson_rare(data)
 test_that("df parameter functions as expected", {
   expect_is(a2, "list")
   expect_is(a2, "mdsstat_test")
@@ -68,7 +68,7 @@ test_that("df parameter functions as expected", {
                                    "params",
                                    "data")))
   expect_equal(a2$test_name, "Poisson Rare")
-  expect_match(a2$analysis_of, "Count of .+")
+  expect_equal(a2$analysis_of, NA)
   expect_true(a2$status)
   expect_true(all(names(a2$result) %in% c("statistic",
                                           "lcl",
@@ -95,52 +95,54 @@ test_that("df parameter functions as expected", {
   expect_equal(a2$params$h_alternative, "greater")
   expect_true(all(names(a2$data) %in% c("reference_time",
                                         "data")))
-  expect_equal(a2$data$reference_time, range(mds_ts[[1]]$time))
-  expect_equal(a2$data$data[[1]], mds_ts[[1]][[1]])
-  expect_equal(a2$data$data[[2]], ifelse(is.na(mds_ts[[1]]$nA), 0, mds_ts[[1]]$nA))
+  expect_equal(a2$data$reference_time, range(data$time))
+  expect_equal(a2$data$data[[1]], data[[1]])
+  expect_equal(a2$data$data[[2]], ifelse(is.na(data$event), 0, data$event))
 })
 
-a2d <- mds_ts[[1]]
-a2d$rate <- ifelse(is.na(a2d$nA), 0, a2d$nA)
+a2d <- data
+a2d$exposure <- stats::rnorm(8, 50, 5)
+a2d$rate <- ifelse(is.na(a2d$event), 0, a2d$event)
 a2d$rate <- a2d$rate / a2d$exposure
 a2 <- poisson_rare(a2d, ts_event=c("Rate"="rate"))
 test_that("ts_event parameter functions as expected", {
   expect_equal(a2$data$reference_time, range(a2d$time))
-  expect_equal(a2$data$data[[1]], a2d$time)
-  expect_equal(a2$data$data[[2]], a2d$rate)
+  expect_equal(a2$data$data$time, a2d$time)
+  expect_equal(a2$data$data$rate, a2d$rate)
 })
 
-a2 <- poisson_rare(mds_ts[[1]], analysis_of="Testing")
+a2 <- poisson_rare(data, analysis_of="Testing")
 test_that("ts_event parameter functions as expected", {
   expect_equal(a2$analysis_of, "Testing")
 })
 
-a2 <- poisson_rare(mds_ts[[1]], eval_period=3L)
+a2 <- poisson_rare(data, eval_period=3L)
 test_that("eval_period parameter functions as expected", {
   expect_equal(names(a2$status), ">3 time periods required")
   expect_equal(nrow(a2$data$data), 3L)
-  expect_error(poisson_rare(mds_ts[[1]], eval_period=2))
-  expect_error(poisson_rare(mds_ts[[1]], eval_period=0))
-  expect_error(poisson_rare(mds_ts[[1]], eval_period=nrow(mds_ts[[1]]) + 1))
+  expect_error(poisson_rare(data, eval_period=2))
+  expect_error(poisson_rare(data, eval_period=0))
+  expect_error(poisson_rare(data, eval_period=nrow(data) + 1))
 })
 
 test_that("zero_rate parameter functions as expected", {
-  expect_is(poisson_rare(mds_ts[[1]], zero_rate=0), "mdsstat_test")
-  expect_is(poisson_rare(mds_ts[[1]], zero_rate=1), "mdsstat_test")
-  expect_error(poisson_rare(mds_ts[[1]], zero_rate=1.1))
-  expect_error(poisson_rare(mds_ts[[1]], zero_rate=-1))
+  expect_is(poisson_rare(data, zero_rate=0), "mdsstat_test")
+  expect_is(poisson_rare(data, zero_rate=1), "mdsstat_test")
+  expect_error(poisson_rare(data, zero_rate=1.1))
+  expect_error(poisson_rare(data, zero_rate=-1))
 })
 
 test_that("p_rate parameter functions as expected", {
-  expect_is(poisson_rare(mds_ts[[1]], p_rate=0), "mdsstat_test")
-  expect_is(poisson_rare(mds_ts[[1]], p_rate=2500), "mdsstat_test")
-  expect_error(poisson_rare(mds_ts[[1]], p_rate=-1))
-  expect_error(poisson_rare(mds_ts[[1]], p_rate=-.1))
+  expect_is(poisson_rare(data, p_rate=0), "mdsstat_test")
+  expect_is(poisson_rare(data, p_rate=2500), "mdsstat_test")
+  expect_error(poisson_rare(data, p_rate=-1))
+  expect_error(poisson_rare(data, p_rate=-.1))
 })
 
 test_that("p_crit parameter functions as expected", {
-  expect_is(poisson_rare(mds_ts[[1]], p_crit=0), "mdsstat_test")
-  expect_is(poisson_rare(mds_ts[[1]], p_crit=1), "mdsstat_test")
-  expect_error(poisson_rare(mds_ts[[1]], p_crit=1.1))
-  expect_error(poisson_rare(mds_ts[[1]], p_crit=-.1))
+  expect_is(poisson_rare(data, p_crit=0), "mdsstat_test")
+  expect_is(poisson_rare(data, p_crit=1), "mdsstat_test")
+  expect_error(poisson_rare(data, p_crit=1.1))
+  expect_error(poisson_rare(data, p_crit=-.1))
 })
+

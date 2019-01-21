@@ -16,5 +16,5 @@ test_as_row(df)
 Coerce an mdsstat test (class \code{mdsstat_test}) to a 1-row data frame.
 }
 \examples{
-test_as_row(prr(mds_ts[[3]]))
+test_as_row(prr(mds_ts[[1]]))
 }

@@ -6,7 +6,7 @@ data <- data.frame(time=c(1:25),
                    nB=as.integer(stats::rnorm(25, 50, 5)),
                    nC=as.integer(stats::rnorm(25, 100, 25)),
                    nD=as.integer(stats::rnorm(25, 200, 25)))
-a2 <- ror(data)
+a2 <- gps(data)
 
 # Basic
 # -----
@@ -24,8 +24,8 @@ test_that("function returns core mdsstat_test components", {
                                    "params",
                                    "data")))
 })
-test_that("ROR outputs are as expected", {
-  expect_equal(a2$test_name, "Reporting Odds Ratio")
+test_that("GPS outputs are as expected", {
+  expect_equal(a2$test_name, "Gamma Poisson Shrinker")
   expect_equal(a2$analysis_of, NA)
   expect_true(a2$status)
   expect_true(all(names(a2$result) %in% c("statistic",
@@ -34,22 +34,31 @@ test_that("ROR outputs are as expected", {
                                           "p",
                                           "signal",
                                           "signal_threshold",
-                                          "sigma")))
+                                          "quantiles")))
   expect_true(abs(a2$result$statistic) > 0)
   expect_true(abs(a2$result$lcl) > 0)
   expect_true(abs(a2$result$ucl) > 0)
   expect_true(a2$result$ucl > a2$result$lcl)
-  expect_true(a2$result$p > 0 & a2$result$p <= 1)
+  expect_true(is.na(a2$result$p))
   expect_is(a2$result$signal, "logical")
-  expect_equal(as.numeric(a2$result$signal_threshold), 0.05)
+  expect_equal(as.numeric(a2$result$signal_threshold), 1)
   expect_true(all(names(a2$params) %in% c("test_hyp",
                                           "eval_period",
                                           "null_ratio",
-                                          "alpha",
+                                          "cred_interval",
+                                          "init_prior",
+                                          "gamma_lower",
+                                          "gamma_upper",
                                           "cont_adj")))
+  expect_equal(a2$params$test_hyp,
+               "5% quantile of the posterior distribution > 1")
   expect_is(a2$params$test_hyp, "character")
   expect_equal(a2$params$null_ratio, 1)
-  expect_equal(a2$params$alpha, 0.05)
+  expect_equal(a2$params$cred_interval, 0.9)
+  expect_equal(a2$params$init_prior, c(0.2, .02, 2, 4, 1/3))
+  expect_equal(a2$params$gamma_lower, 1e-5)
+  expect_equal(a2$params$gamma_upper, 20)
+  expect_equal(a2$params$cont_adj, 0)
   expect_true(all(names(a2$data) %in% c("reference_time", "data")))
   expect_true(all(names(a2$data$data) %in% c("time_start", "time_end",
                                              "nA", "nB", "nC", "nD")))
@@ -59,48 +68,36 @@ test_that("ROR outputs are as expected", {
 })
 
 # Reference example
-data <- data.frame(time=c(1:25),
-                   nA=rep(0, 25),
-                   nB=as.integer(stats::rnorm(25, 50, 25)),
-                   nC=as.integer(stats::rnorm(25, 100, 25)),
-                   nD=as.integer(stats::rnorm(25, 200, 25)))
-a2a <- ror(data)
+data2 <- data
+data2$nA <- 0
+a2a <- gps(data2)
 
 test_that("test does not run on 0 cell A counts", {
   expect_true(!a2a$status)
 })
 
 # Reference example
-data <- data.frame(time=c(1:25),
-                   nA=as.integer(stats::rnorm(25, 50, 25)),
-                   nB=rep(0, 25),
-                   nC=as.integer(stats::rnorm(25, 100, 25)),
-                   nD=as.integer(stats::rnorm(25, 200, 25)))
-a2a <- ror(data)
+data2 <- data
+data2$nB <- 0
+a2a <- gps(data2)
 
 test_that("test does not run on 0 cell B counts", {
   expect_true(!a2a$status)
 })
 
 # Reference example
-data <- data.frame(time=c(1:25),
-                   nA=as.integer(stats::rnorm(25, 50, 25)),
-                   nB=as.integer(stats::rnorm(25, 50, 25)),
-                   nC=rep(0, 25),
-                   nD=as.integer(stats::rnorm(25, 200, 25)))
-a2a <- ror(data)
+data2 <- data
+data2$nC <- 0
+a2a <- gps(data2)
 
-test_that("test does not run on 0 cell C counts", {
-  expect_true(!a2a$status)
+test_that("test runs on 0 cell C counts", {
+  expect_true(a2a$status)
 })
 
 # Reference example
-data <- data.frame(time=c(1:25),
-                   nA=as.integer(stats::rnorm(25, 50, 25)),
-                   nB=as.integer(stats::rnorm(25, 50, 25)),
-                   nC=as.integer(stats::rnorm(25, 50, 25)),
-                   nD=rep(0, 25))
-a2a <- ror(data)
+data2 <- data
+data2$nD <- 0
+a2a <- gps(data2)
 
 test_that("test does not run on 0 cell D counts", {
   expect_true(!a2a$status)
@@ -110,21 +107,22 @@ test_that("test does not run on 0 cell D counts", {
 data <- data.frame(time=c(1:25),
                    nA=as.integer(stats::rnorm(25, 25, 25)))
 test_that("test errors on missing 2x2 cells", {
-  expect_error(ror(data))
-  expect_error(ror(mds_ts[[1]]))
+  expect_error(gps(data))
 })
-test_that("test does not run on 0 cell counts", {
-  expect_true(!ror(mds_ts[[2]])$status)
-  expect_true(!ror(mds_ts[[2]], eval_period=6L)$status)
-})
+
 
 # Parameter checks
 # ----------------
-a2d <- mds_ts[[3]]
-a3d <- mds_ts[[3]]
-a3 <- ror(a2d)
+data <- data.frame(time=c(1:25),
+                   nA=as.integer(stats::rnorm(25, 25, 5)),
+                   nB=as.integer(stats::rnorm(25, 50, 5)),
+                   nC=as.integer(stats::rnorm(25, 100, 25)),
+                   nD=as.integer(stats::rnorm(25, 200, 25)))
+a2d <- data
+a3d <- data
+a3 <- gps(a2d)
 
-test_that("ROR df parameter functions as expected", {
+test_that("GPS df parameter functions as expected", {
   expect_is(a3, "list")
   expect_is(a3, "mdsstat_test")
   expect_true(all(names(a3) %in% c("test_name",
@@ -133,8 +131,8 @@ test_that("ROR df parameter functions as expected", {
                                    "result",
                                    "params",
                                    "data")))
-  expect_equal(a3$test_name, "Reporting Odds Ratio")
-  expect_match(a3$analysis_of, "Count of .+")
+  expect_equal(a3$test_name, "Gamma Poisson Shrinker")
+  expect_equal(a3$analysis_of, NA)
   expect_true(a3$status)
   expect_true(all(names(a3$result) %in% c("statistic",
                                           "lcl",
@@ -142,22 +140,29 @@ test_that("ROR df parameter functions as expected", {
                                           "p",
                                           "signal",
                                           "signal_threshold",
-                                          "sigma")))
+                                          "quantiles")))
   expect_true(abs(a3$result$statistic) > 0)
   expect_true(abs(a3$result$lcl) > 0)
   expect_true(abs(a3$result$ucl) > 0)
   expect_true(a3$result$ucl > a3$result$lcl)
-  expect_true(a3$result$p > 0 & a3$result$p <= 1)
+  expect_true(is.na(a3$result$p))
   expect_is(a3$result$signal, "logical")
-  expect_equal(as.numeric(a3$result$signal_threshold), 0.05)
+  expect_equal(as.numeric(a3$result$signal_threshold), 1)
   expect_true(all(names(a3$params) %in% c("test_hyp",
                                           "eval_period",
                                           "null_ratio",
-                                          "alpha",
+                                          "cred_interval",
+                                          "init_prior",
+                                          "gamma_lower",
+                                          "gamma_upper",
                                           "cont_adj")))
   expect_is(a3$params$test_hyp, "character")
-  expect_equal(a3$params$null_ratio, 1)
-  expect_equal(a3$params$alpha, 0.05)
+  expect_equal(a2$params$null_ratio, 1)
+  expect_equal(a2$params$cred_interval, 0.9)
+  expect_equal(a2$params$init_prior, c(0.2, .02, 2, 4, 1/3))
+  expect_equal(a2$params$gamma_lower, 1e-5)
+  expect_equal(a2$params$gamma_upper, 20)
+  expect_equal(a2$params$cont_adj, 0)
   expect_true(all(names(a3$data) %in% c("reference_time", "data")))
   expect_true(all(names(a3$data$data) %in% c("time_start", "time_end",
                                              "nA", "nB", "nC", "nD")))
@@ -167,47 +172,130 @@ test_that("ROR df parameter functions as expected", {
                data.frame(t(colSums(a3d[nrow(a3d), c("nA", "nB", "nC", "nD")]))))
 })
 
-
-a3d <- mds_ts[[3]]
+a3d <- data
 a3d$nA2 <- ifelse(is.na(a3d$nA), 0, a3d$nA)
-a4 <- ror(a3d, ts_event=c("Count"="nA2"))
+a4 <- gps(a3d, ts_event=c("Count"="nA2"))
 test_that("ts_event parameter functions as expected", {
-  expect_equal(a4$result$statistic, ror(a3d)$result$statistic)
-  expect_match(a4$analysis_of, "Count of .+")
+  expect_equal(a4$result$statistic, gps(a3d)$result$statistic)
+  expect_equal(a4$analysis_of, NA)
 })
 
-a4 <- ror(a3d, analysis_of="Testing")
+a4 <- gps(a3d, analysis_of="Testing")
 test_that("ts_event parameter functions as expected", {
   expect_equal(a4$analysis_of, "Testing")
 })
 
-a4 <- ror(a3d, eval_period=3L)
+a4 <- gps(a3d, eval_period=3)
 test_that("eval_period parameter functions as expected", {
   expect_equal(a4$data$data[, -c(1:2)],
-               data.frame(t(colSums(a3d[c((nrow(a3d) - 3L + 1):nrow(a3d)),
+               data.frame(t(colSums(a3d[c((nrow(a3d) - 3 + 1):nrow(a3d)),
                                         c("nA", "nB", "nC", "nD")]))))
-  expect_error(ror(a3d, eval_period=as.integer(nrow(a3d) + 1)))
-  expect_error(ror(a3d, eval_period=0L))
+  expect_error(gps(a3d, eval_period=as.integer(nrow(a3d) + 1)))
+  expect_error(gps(a3d, eval_period=0))
+  expect_error(gps(a3d, eval_period=2.5))
+  expect_error(gps(a3d, eval_period=nrow(a3d) + 1))
 })
 
-a4 <- ror(a3d, null_ratio=2)
+a4 <- gps(a3d, null_ratio=2)
 test_that("null_ratio parameter functions as expected", {
-  expect_error(ror(a3d, null_ratio=0.1))
-  expect_error(ror(a3d, null_ratio=0))
-  expect_error(ror(a3d, null_ratio=-1))
-  expect_is(ror(a3d, null_ratio=2), "mdsstat_test")
-  expect_is(ror(a3d, null_ratio=4), "mdsstat_test")
+  expect_error(gps(a3d, null_ratio=0.1))
+  expect_error(gps(a3d, null_ratio=0))
+  expect_error(gps(a3d, null_ratio=-1))
+  expect_is(gps(a3d, null_ratio=2), "mdsstat_test")
+  expect_is(gps(a3d, null_ratio=4), "mdsstat_test")
   expect_equal(a4$params$null_ratio, 2)
 })
 
-a4 <- ror(a3d, alpha=0.01)
-test_that("alpha parameter functions as expected", {
-  expect_error(ror(a3d, alpha=0))
-  expect_error(ror(a3d, alpha=1))
-  expect_error(ror(a3d, alpha=-.01))
-  expect_error(ror(a3d, alpha=1.01))
-  expect_is(ror(a3d, alpha=0.10), "mdsstat_test")
+a4 <- gps(a3d, cred_interval=0.95)
+test_that("cred_interval parameter functions as expected", {
+  expect_error(gps(a3d, cred_interval=0))
+  expect_error(gps(a3d, cred_interval=1))
+  expect_error(gps(a3d, cred_interval=-.01))
+  expect_error(gps(a3d, cred_interval=1.01))
+  expect_is(gps(a3d, cred_interval=0.10), "mdsstat_test")
   expect_is(a4, "mdsstat_test")
-  expect_equal(a4$params$alpha, 0.01)
-  expect_equal(as.numeric(a4$result$signal_threshold), 0.01)
+  expect_equal(a4$params$cred_interval, 0.95)
+  expect_equal(a4$params$test_hyp,
+               "2.5% quantile of the posterior distribution > 1")
+})
+
+a4 <- gps(a3d, init_prior=c(.1, .2, .3, .4, .5))
+test_that("init_prior parameter functions as expected", {
+  expect_error(gps(a3d, init_prior=c(1e-6, .2, .3, .4, .5)))
+  expect_error(gps(a3d, init_prior=c(.1, 1e-6, .3, .4, .5)))
+  expect_error(gps(a3d, init_prior=c(.1, .2, 1e-6, .4, .5)))
+  expect_error(gps(a3d, init_prior=c(.1, .2, .3, 1e-6, .5)))
+  expect_error(gps(a3d, init_prior=c(21, .2, .3, .4, .5)))
+  expect_error(gps(a3d, init_prior=c(.1, 21, .3, .4, .5)))
+  expect_error(gps(a3d, init_prior=c(.1, .2, 21, .4, .5)))
+  expect_error(gps(a3d, init_prior=c(.1, .2, .3, 21, .5)))
+  expect_error(gps(a3d, init_prior=c(.1, .2, .3, .4, 0)))
+  expect_error(gps(a3d, init_prior=c(.1, .2, .3, .4, 1)))
+  expect_error(gps(a3d, init_prior=c(.1, .2, .3, .4, -1)))
+  expect_error(gps(a3d, init_prior=c(.1, .2, .3, .4, 1.1)))
+  expect_error(gps(a3d, init_prior=c(.1, .2, .3, .4)))
+  expect_error(gps(a3d, init_prior=c(.1, .2, .3, .4, .5, .6)))
+  expect_error(gps(a3d, init_prior=NA))
+  expect_error(gps(a3d, init_prior=NULL))
+  expect_error(gps(a3d, init_prior="foo"))
+  expect_is(a4, "mdsstat_test")
+  expect_equal(a4$params$init_prior, c(.1, .2, .3, .4, .5))
+})
+
+a4 <- gps(a3d, gamma_lower=.02)
+test_that("gamma_lower parameter functions as expected", {
+  expect_error(gps(a3d, gamma_lower=0.021))
+  expect_error(gps(a3d, gamma_lower=0))
+  expect_error(gps(a3d, gamma_lower=1))
+  expect_error(gps(a3d, gamma_lower=-1))
+  expect_error(gps(a3d, gamma_lower=NA))
+  expect_error(gps(a3d, gamma_lower=NULL))
+  expect_error(gps(a3d, gamma_lower="foo"))
+  expect_is(a4, "mdsstat_test")
+  expect_equal(a4$params$gamma_lower, 0.02)
+})
+
+a4 <- gps(a3d, gamma_upper=4)
+test_that("gamma_upper parameter functions as expected", {
+  expect_error(gps(a3d, gamma_upper=3.9))
+  expect_error(gps(a3d, gamma_upper=0))
+  expect_error(gps(a3d, gamma_upper=1))
+  expect_error(gps(a3d, gamma_upper=-1))
+  expect_error(gps(a3d, gamma_upper=NA))
+  expect_error(gps(a3d, gamma_upper=NULL))
+  expect_error(gps(a3d, gamma_upper="foo"))
+  expect_is(a4, "mdsstat_test")
+  expect_equal(a4$params$gamma_upper, 4)
+})
+
+a4 <- gps(a3d, quantiles=c(.1, .2, .3))
+test_that("quantiles parameter functions as expected", {
+  expect_error(gps(a3d, quantiles=c(0, .1, .2)))
+  expect_error(gps(a3d, quantiles=c(.1, .2, 1)))
+  expect_error(gps(a3d, quantiles=c(.1, .2, -1)))
+  expect_error(gps(a3d, quantiles=c(.1, .2, 2)))
+  expect_error(gps(a3d, quantiles=c(0)))
+  expect_error(gps(a3d, quantiles=c(1)))
+  expect_error(gps(a3d, quantiles=c(2)))
+  expect_error(gps(a3d, quantiles=c(-1)))
+  expect_is(gps(a3d, quantiles=c(.5)), "mdsstat_test")
+  expect_error(gps(a3d, quantiles=NA))
+  expect_is(gps(a3d, quantiles=NULL), "mdsstat_test")
+  expect_is(a4, "mdsstat_test")
+  expect_equal(length(a4$result$quantiles), 3)
+})
+
+a4 <- gps(a3d, cont_adj=1)
+test_that("gamma_upper parameter functions as expected", {
+  expect_equal(unlist(a3d[nrow(a3d), c("nA", "nB", "nC", "nD")]) + 1,
+               unlist(a4$data$data[, -c(1:2)]))
+  expect_error(gps(a3d, cont_adj=0.5))
+  expect_error(gps(a3d, cont_adj=0.1))
+  expect_error(gps(a3d, cont_adj=1.5))
+  expect_error(gps(a3d, cont_adj=-1))
+  expect_error(gps(a3d, cont_adj=NA))
+  expect_error(gps(a3d, cont_adj=NULL))
+  expect_error(gps(a3d, cont_adj="foo"))
+  expect_is(a4, "mdsstat_test")
+  expect_equal(a4$params$cont_adj, 1)
 })

@@ -109,18 +109,21 @@ test_that("test does not run on 0 cell D counts", {
 # Reference example
 data <- data.frame(time=c(1:25),
                    nA=as.integer(stats::rnorm(25, 25, 25)))
+data2 <- data
+data2$nA <- NA
 test_that("test errors on missing 2x2 cells", {
   expect_error(prr(data))
-  expect_error(prr(mds_ts[[1]]))
-})
-test_that("test does not run on 0 cell counts", {
-  expect_true(!prr(mds_ts[[2]])$status)
-  expect_true(!prr(mds_ts[[2]], eval_period=6L)$status)
+  expect_error(prr(data2))
 })
 
 # Parameter checks
 # ----------------
-a2d <- mds_ts[[3]]
+data <- data.frame(time=c(1:25),
+                   nA=as.integer(stats::rnorm(25, 25, 5)),
+                   nB=as.integer(stats::rnorm(25, 50, 5)),
+                   nC=as.integer(stats::rnorm(25, 100, 25)),
+                   nD=as.integer(stats::rnorm(25, 200, 25)))
+a2d <- data
 a2 <- prr(a2d)
 
 test_that("PRR df parameter functions as expected", {
@@ -133,7 +136,7 @@ test_that("PRR df parameter functions as expected", {
                                    "params",
                                    "data")))
   expect_equal(a2$test_name, "Proportional Reporting Ratio")
-  expect_match(a2$analysis_of, "Count of .+")
+  expect_true(is.na(a2$analysis_of))
   expect_true(a2$status)
   expect_true(all(names(a2$result) %in% c("statistic",
                                           "lcl",
@@ -146,7 +149,7 @@ test_that("PRR df parameter functions as expected", {
   expect_true(abs(a2$result$lcl) > 0)
   expect_true(abs(a2$result$ucl) > 0)
   expect_true(a2$result$ucl > a2$result$lcl)
-  expect_true(a1$result$p > 0 & a1$result$p <= 1)
+  expect_true(a2$result$p > 0 & a2$result$p <= 1)
   expect_is(a2$result$signal, "logical")
   expect_equal(as.numeric(a2$result$signal_threshold), 0.05)
   expect_true(all(names(a2$params) %in% c("test_hyp",
@@ -166,12 +169,12 @@ test_that("PRR df parameter functions as expected", {
                data.frame(t(colSums(a2d[nrow(a2d), c("nA", "nB", "nC", "nD")]))))
 })
 
-a3d <- mds_ts[[3]]
+a3d <- data
 a3d$nA2 <- ifelse(is.na(a3d$nA), 0, a3d$nA)
 a3 <- prr(a3d, ts_event=c("Count"="nA2"))
 test_that("ts_event parameter functions as expected", {
   expect_equal(a3$result$statistic, prr(a3d)$result$statistic)
-  expect_match(a3$analysis_of, "Count of .+")
+  expect_true(is.na(a3$analysis_of))
 })
 
 a3 <- prr(a3d, analysis_of="Testing")
@@ -209,3 +212,4 @@ test_that("alpha parameter functions as expected", {
   expect_equal(a3$params$alpha, 0.01)
   expect_equal(as.numeric(a3$result$signal_threshold), 0.01)
 })
+

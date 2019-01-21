@@ -111,17 +111,17 @@ data <- data.frame(time=c(1:25),
                    nA=as.integer(stats::rnorm(25, 25, 25)))
 test_that("test errors on missing 2x2 cells", {
   expect_error(ror(data))
-  expect_error(ror(mds_ts[[1]]))
-})
-test_that("test does not run on 0 cell counts", {
-  expect_true(!ror(mds_ts[[2]])$status)
-  expect_true(!ror(mds_ts[[2]], eval_period=6L)$status)
 })
 
 # Parameter checks
 # ----------------
-a2d <- mds_ts[[3]]
-a3d <- mds_ts[[3]]
+data <- data.frame(time=c(1:25),
+                   nA=as.integer(stats::rnorm(25, 25, 5)),
+                   nB=as.integer(stats::rnorm(25, 50, 5)),
+                   nC=as.integer(stats::rnorm(25, 100, 25)),
+                   nD=as.integer(stats::rnorm(25, 200, 25)))
+a2d <- data
+a3d <- data
 a3 <- ror(a2d)
 
 test_that("ROR df parameter functions as expected", {
@@ -134,7 +134,7 @@ test_that("ROR df parameter functions as expected", {
                                    "params",
                                    "data")))
   expect_equal(a3$test_name, "Reporting Odds Ratio")
-  expect_match(a3$analysis_of, "Count of .+")
+  expect_equal(a3$analysis_of, NA)
   expect_true(a3$status)
   expect_true(all(names(a3$result) %in% c("statistic",
                                           "lcl",
@@ -168,12 +168,12 @@ test_that("ROR df parameter functions as expected", {
 })
 
 
-a3d <- mds_ts[[3]]
+a3d <- data
 a3d$nA2 <- ifelse(is.na(a3d$nA), 0, a3d$nA)
 a4 <- ror(a3d, ts_event=c("Count"="nA2"))
 test_that("ts_event parameter functions as expected", {
   expect_equal(a4$result$statistic, ror(a3d)$result$statistic)
-  expect_match(a4$analysis_of, "Count of .+")
+  expect_equal(a4$analysis_of, NA)
 })
 
 a4 <- ror(a3d, analysis_of="Testing")
@@ -211,3 +211,4 @@ test_that("alpha parameter functions as expected", {
   expect_equal(a4$params$alpha, 0.01)
   expect_equal(as.numeric(a4$result$signal_threshold), 0.01)
 })
+

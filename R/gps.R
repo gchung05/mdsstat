@@ -25,10 +25,12 @@
 #' \code{cont_adj} provides the option to allow \code{gps()} to proceed running,
 #' however this is done at the user's discretion because there are adverse
 #' effects of adding a positive integer to every cell of the contingency table.
-#' By default, \code{gps()} allows 0 counts in the A and C cells, but not in B
-#' and D. However, the posterior distribution estimates may not be stable with
-#' very low or 0 count cells. Note that this release uses box-constrained PORT
-#' optimization only.
+#' By default, \code{gps()} allows 0 in the C cell only, but not in A, B, or D.
+#' It has been suggested that 0.5 may be an appropriate value. However,
+#' values <1 have been shown to be unstable using box-constrained PORT
+#' optimization, which is the only optimization considered in this release.
+#' Overall, posterior distribution estimates have been shown to be unstable with
+#' very low or 0 count cells.
 #'
 #' For parameter \code{ts_event}, in the uncommon case where the
 #' device-event count (Cell A) variable is not \code{"nA"}, the name of the
@@ -75,9 +77,9 @@
 #' times counting in reverse chronological order to sum over to create the 2x2
 #' contingency table.
 #'
-#' Default: \code{1L} considers only the most recent time in \code{df}.
+#' Default: \code{1} considers only the most recent time in \code{df}.
 #'
-#' Example: \code{12L} sums over the last 12 time periods to create the 2x2
+#' Example: \code{12} sums over the last 12 time periods to create the 2x2
 #' contingency table.
 #'
 #' @param null_ratio Numeric value representing the null relative reporting
@@ -86,20 +88,20 @@
 #' details for more.
 #'
 #' Default: \code{1} indicates a null RR of 1 and tests if the lower bound of
-#' the \code{cred_interval} exceeds \code{1].
+#' the \code{cred_interval} exceeds \code{1}.
 #'
 #' @param cred_interval Numeric value between 0 and 1 representing the width of
 #' the Bayesian posterior credible interval, where the lower bound of the
 #' interval is assessed against the \code{null_ratio}. The interval bounds are
 #' returned as the lcl and ucl. See details for more.
 #'
-#' Default: \code{0.90} indicates a 90% credible interval with bounds at 5% and
-#' 95%. The signal test is against the lower 5% bound, effectively creating the
+#' Default: \code{0.90} indicates a 90\% credible interval with bounds at 5\% and
+#' 95\%. The signal test is against the lower 5\% bound, effectively creating the
 #' EB05 test.
 #'
 #' @param init_prior A numeric vector of length 5 representing the
 #' initialization parameters for the prior gamma mixture distribution in this
-#' order: alpha1, beta1, alpha2, beta2, p. See details for more.
+#' order: \code{alpha1, beta1, alpha2, beta2, p}. See details for more.
 #'
 #' Default: \code{c(.2, .02, 2, 4, 1/3)} as suggested in openEBGM package
 #' v0.7.0.
@@ -116,18 +118,19 @@
 #'
 #' @param quantiles Vector of quantiles between 0 and 1. \code{gps()} will
 #' return an equal length vector of estimated empirical Bayes quantiles from the
-#' posterior distribution.
+#' posterior distribution. Specify \code{quantiles=NULL} if no quantiles are
+#' desired.
 #'
-#' Default: \code{c(.5, .95)} corresponds to the 5% (EB05) and 95% (EB95)
+#' Default: \code{c(.05, .95)} corresponds to the 5\% (EB05) and 95\% (EB95)
 #' quantiles.
 #'
 #' @param cont_adj Positive integer representing the continuity
 #' adjustment to be added to each cell of the 2x2 contingency table. A value
 #' greater than 0 allows for contingency tables with 0 cells to run the
-#' algorithm. See details for more.
+#' algorithm. Adding a continuity adjustment will adversely affect the algorithm
+#' estimates, user discretion is advised. See details for more.
 #'
-#' Default: \code{0} adds zero to each cell, thus an unadjusted table. If either
-#' the B or D cells of the 2x2 are 0, the algorithm will not run.
+#' Default: \code{0} adds zero to each cell, thus an unadjusted table.
 #'
 #' @param ... Further arguments passed onto \code{gps} methods
 #'
@@ -157,7 +160,7 @@
 #' a2 <- gps(mds_ts[[3]])
 #'
 #' @references
-#' DuMouchel W. Bayesian data mining in large frequency tables, with an application to the FDA spontaneous reporting system. The American Statistician, 53(3):177–190, August 1999.
+#' DuMouchel W. Bayesian data mining in large frequency tables, with an application to the FDA spontaneous reporting system. The American Statistician, 53(3):177-190, August 1999.
 #'
 #' Ahmed I, Poncet A. PhViD: PharmacoVigilance Signal Detection, 2016. R package version 1.0.8.
 #'
@@ -200,11 +203,6 @@ gps.mds_ts <- function(
   gps.default(out, analysis_of=name, ...)
 }
 
-# init_prior (c(.2, .02, 2, 4, 1/3)) 5 element vector per openEBGM defaults (PhViD defaults are c(.2, .06, 1.4, 1.8, 0.1))
-# gamma_lower (1e-4) per openEBGM defaults
-# gamma_upper (20) per openEBGM defaults
-# quantiles specify vector to return (default is .5, .95)
-
 #' @describeIn gps GPS on general data
 #' @export
 gps.default <- function(
@@ -216,7 +214,7 @@ gps.default <- function(
   init_prior=c(.2, .02, 2, 4, 1/3),
   gamma_lower=1e-5,
   gamma_upper=20,
-  quantiles=c(.5, .95),
+  quantiles=c(.05, .95),
   cont_adj=0,
   ...
 ){
@@ -231,7 +229,7 @@ gps.default <- function(
   input_param_checker(init_prior, "numeric", null_ok=F, max_length=5)
   input_param_checker(gamma_lower, "numeric", null_ok=F, max_length=1)
   input_param_checker(gamma_upper, "numeric", null_ok=F, max_length=1)
-  input_param_checker(quantiles, "numeric", null_ok=F)
+  input_param_checker(quantiles, "numeric", null_ok=T)
   input_param_checker(cont_adj, "numeric", null_ok=F, max_length=1)
   if (eval_period %% 1 != 0) stop("eval_period must be an integer")
   if (null_ratio < 1) stop("null_ratio must be 1 or greater")
@@ -281,9 +279,12 @@ gps.default <- function(
 
   # Check for non-runnable conditions
   hyp <- "Not run"
-  if(any(df[, c("nB", "nD")] == 0)){
+  if (any(df[, c("nB", "nD")] == 0)){
     rr <- NA
     rs <- stats::setNames(F, "contingency cells B or D have zero counts")
+  } else if (df[, c("nA")] == 0){
+    rr <- NA
+    rs <- stats::setNames(F, "contingency cell A is zero")
   } else{
     # If all conditions are met, run GPS test
     # Observed and expected
@@ -291,27 +292,27 @@ gps.default <- function(
     E <- E2x2(N)
     # Prior mixture function
     prior_f <- function(p, N, E){
-      sum(-log((p[5] * dnbinom(N,
-                               size=p[1],
-                               prob=p[2] / (p[2] + E)) +
-                  (1 - p[5]) * dnbinom(N,
-                                       size=p[3],
-                                       prob=p[4] / (p[4] + E)))))
+      sum(-log((p[5] * stats::dnbinom(N,
+                                      size=p[1],
+                                      prob=p[2] / (p[2] + E)) +
+                  (1 - p[5]) * stats::dnbinom(N,
+                                              size=p[3],
+                                              prob=p[4] / (p[4] + E)))))
     }
     # Prior estimation optimization using PORT
     optim <- suppressWarnings(
-      nlminb(start=init_prior, objective=prior_f,
-             lower=c(rep(gamma_lower, 5)),
-             upper=c(rep(gamma_upper, 4), .9999),
-             N=N, E=E))
+      stats::nlminb(start=init_prior, objective=prior_f,
+                    lower=c(rep(gamma_lower, 5)),
+                    upper=c(rep(gamma_upper, 4), .9999),
+                    N=N, E=E))
     prior <- optim$par
     # Posterior mixture Q
-    p_gamma1 <- prior[5] * dnbinom(N[1],
-                                   size=prior[1],
-                                   prob=prior[2] / (prior[2] + E[1]))
-    p_gamma_2 <- (1 - prior[5]) * dnbinom(N[1],
-                                          size=prior[3],
-                                          prob=prior[4] / (prior[4] + E[1]))
+    p_gamma1 <- prior[5] * stats::dnbinom(N[1],
+                                          size=prior[1],
+                                          prob=prior[2] / (prior[2] + E[1]))
+    p_gamma_2 <- (1 - prior[5]) * stats::dnbinom(N[1],
+                                                 size=prior[3],
+                                                 prob=prior[4] / (prior[4] + E[1]))
     Q <- p_gamma1 / (p_gamma1 + p_gamma_2)
     # Posterior expectation of lambda
     pe <- (Q * (digamma(prior[1] + N[1]) - log(prior[2] + E[1])) +
@@ -334,19 +335,23 @@ gps.default <- function(
       x
     }
     fCout <- function(p, thresh, Q, a1, b1, a2, b2){
-      Q * pgamma(p, shape=a1, rate=b1) +
-        (1 - Q) * pgamma(p, shape=a2, rate=b2) - thresh
+      Q * stats::pgamma(p, shape=a1, rate=b1) +
+        (1 - Q) * stats::pgamma(p, shape=a2, rate=b2) - thresh
     }
     # Estimate quantiles
     qEst <- numeric()
-    for (i in c(1:length(quantiles))){
-      qEst[i] <- quantEst(quantiles[i], Q,
-                          prior[1] + N[1],
-                          prior[2] + E[1],
-                          prior[3] + N[1],
-                          prior[4] + E[1])
+    if (length(quantiles) > 0){
+      if (all(!is.na(quantiles))){
+        for (i in c(1:length(quantiles))){
+          qEst[i] <- quantEst(quantiles[i], Q,
+                              prior[1] + N[1],
+                              prior[2] + E[1],
+                              prior[3] + N[1],
+                              prior[4] + E[1])
+        }
+        stats::setNames(qEst, quantiles)
+      }
     }
-    stats::setNames(qEst, quantiles)
     # Credibility interval limits
     cl_l <- round((1 - cred_interval) / 2, 3)
     cl_u <- 1 - cl_l
@@ -383,9 +388,10 @@ gps.default <- function(
                           eval_period=eval_period,
                           null_ratio=null_ratio,
                           cred_interval=cred_interval,
-                          cont_adj=cont_adj,
+                          init_prior=init_prior,
                           gamma_lower=gamma_lower,
-                          gamma_upper=gamma_upper),
+                          gamma_upper=gamma_upper,
+                          cont_adj=cont_adj),
               data=rd)
   class(out) <- append(class(out), "mdsstat_test")
   return(out)

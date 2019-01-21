@@ -5,7 +5,7 @@
 #' @param df Required input object of class \code{mdsstat_test}
 #' @return 1-row data frame (class \code{mdsstat_df}) summarizing the test.
 #' @examples
-#' test_as_row(prr(mds_ts[[3]]))
+#' test_as_row(prr(mds_ts[[1]]))
 #' @export
 test_as_row <- function(
   df
@@ -154,7 +154,7 @@ define_algos <- function(
 #' @return A \code{mdsstat_tests} data frame or list of \code{mdsstat_test}
 #' lists with the results of the algorithm runs.
 #' @examples
-#' data <- mds_ts[[3]]
+#' data <- mds_ts[[1]]
 #' data$rate <- data$nA / data$exposure
 #' x <- list(prr=list(),
 #'   shewhart=list(),
@@ -219,7 +219,7 @@ run_algos.default <- function(
                "skip, stop, warn"))
   }
   # Define DPA algorithms currently in mdsstat
-  dpaalgos <- c("prr", "ror", "sprt")
+  dpaalgos <- c("prr", "ror", "gps")
 
   if (dataframe){
     stats <- data.frame()

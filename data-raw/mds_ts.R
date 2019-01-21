@@ -18,7 +18,9 @@ Pda <- mds::define_analyses(
   Pde, "device_name",
   exposure=Pexp,
   covariates="region")
-Pts <- mds::time_series(Pda[sample(c(1:length(Pda)), 3)], Pde, Pexp)
+Pdadf <- mds::define_analyses_dataframe(Pda)
+# Pts <- mds::time_series(Pda[sample(c(1:length(Pda)), 3)], Pde, Pexp)
+Pts <- mds::time_series(Pda[c(1, 10, 20)], Pde, Pexp)
 mds_ts <- Pts
 
 devtools::use_data(mds_ts, overwrite=T)

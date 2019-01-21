@@ -68,7 +68,8 @@ test_that("test does not run on rare events", {
 
 # Parameter checks
 # ----------------
-a2d <- mds_ts[[3]]
+data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
+a2d <- data
 a2 <- cusum(a2d)
 test_that("df parameter functions as expected", {
   expect_is(a2, "list")
@@ -80,7 +81,7 @@ test_that("df parameter functions as expected", {
                                    "params",
                                    "data")))
   expect_equal(a2$test_name, "CUSUM")
-  expect_match(a2$analysis_of, "Count of .+")
+  expect_equal(a2$analysis_of, NA)
   expect_true(a2$status)
   expect_true(all(names(a2$result) %in% c("statistic",
                                           "lcl",
@@ -114,17 +115,18 @@ test_that("df parameter functions as expected", {
                                         "data")))
   expect_equal(a2$data$reference_time, range(a2d$time))
   expect_equal(a2$data$data[[1]], a2d[[1]])
-  expect_equal(a2$data$data[[2]], ifelse(is.na(a2d$nA), 0, a2d$nA))
+  expect_equal(a2$data$data[[2]], ifelse(is.na(a2d$event), 0, a2d$event))
 })
 
-a2d <- mds_ts[[3]]
-a2d$rate <- ifelse(is.na(a2d$nA), 0, a2d$nA)
+a2d <- data
+a2d$rate <- ifelse(is.na(a2d$event), 0, a2d$event)
+a2d$exposure <- stats::rnorm(25, 50, 5)
 a2d$rate <- a2d$rate / a2d$exposure
 a2 <- shewhart(a2d, ts_event=c("Rate"="rate"))
 test_that("ts_event parameter functions as expected", {
   expect_equal(a2$data$reference_time, range(a2d$time))
   expect_equal(a2$data$data[[1]], a2d$time)
-  expect_equal(a2$data$data[[2]], a2d$rate)
+  expect_equal(a2$data$data$rate, a2d$rate)
 })
 
 a2 <- shewhart(a2d, analysis_of="Testing")
@@ -168,3 +170,4 @@ test_that("delta parameter functions as expected", {
   expect_error(cusum(a2d, H=0))
   expect_error(cusum(a2d, H=-1))
 })
+

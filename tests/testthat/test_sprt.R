@@ -58,7 +58,7 @@ test_that("outputs are as expected", {
 
 # Parameter checks
 # ----------------
-a2d <- mds_ts[[3]]
+a2d <- data
 a2 <- sprt(a2d, h1=8)
 test_that("df parameter functions as expected", {
   expect_is(a2, "list")
@@ -70,7 +70,7 @@ test_that("df parameter functions as expected", {
                                    "params",
                                    "data")))
   expect_equal(a2$test_name, "Poisson SPRT")
-  expect_match(a2$analysis_of, "Count of .+")
+  expect_equal(a2$analysis_of, NA)
   expect_true(a2$status)
   expect_true(all(names(a2$result) %in% c("statistic",
                                           "lcl",
@@ -102,17 +102,18 @@ test_that("df parameter functions as expected", {
                                         "data")))
   expect_equal(a2$data$reference_time, range(a2d$time))
   expect_equal(a2$data$data[[1]], a2d[[1]])
-  expect_equal(a2$data$data[[2]], ifelse(is.na(a2d$nA), 0, a2d$nA))
+  expect_equal(a2$data$data[[2]], ifelse(is.na(a2d$event), 0, a2d$event))
 })
 
-a2d <- mds_ts[[3]]
-a2d$rate <- ifelse(is.na(a2d$nA), 0, a2d$nA)
+a2d <- data
+a2d$rate <- ifelse(is.na(a2d$event), 0, a2d$event)
+a2d$exposure <- stats::rnorm(25, 50, 5)
 a2d$rate <- a2d$rate / a2d$exposure
 a2 <- sprt(a2d, ts_event=c("Rate"="rate"), h1=8)
 test_that("ts_event parameter functions as expected", {
   expect_equal(a2$data$reference_time, range(a2d$time))
   expect_equal(a2$data$data[[1]], a2d$time)
-  expect_equal(a2$data$data[[2]], a2d$rate)
+  expect_equal(a2$data$data$rate, a2d$rate)
 })
 
 a2 <- sprt(a2d, analysis_of="Testing", h1=8)
@@ -123,7 +124,7 @@ test_that("ts_event parameter functions as expected", {
 test_that("eval_period parameter functions as expected", {
   expect_error(sprt(a2d, eval_period=0, h1=8))
   expect_error(sprt(a2d, eval_period=5.5, h1=8))
-  expect_error(sprt(a2d, eval_period=13, h1=8))
+  expect_error(sprt(a2d, eval_period=26, h1=8))
   expect_error(sprt(a2d, eval_period=10, obs_period=11, h1=8))
 })
 
@@ -132,8 +133,8 @@ test_that("obs_period parameter functions as expected", {
   expect_is(sprt(a2d, obs_period=12, h0=1, h1=8), "mdsstat_test")
   expect_error(sprt(a2d, obs_period=0, h1=8))
   expect_error(sprt(a2d, obs_period=5.5, h1=8))
-  expect_error(sprt(a2d, obs_period=13, h1=8))
-  expect_error(sprt(a2d, obs_period=12, h1=8))
+  expect_error(sprt(a2d, obs_period=26, h1=8))
+  expect_error(sprt(a2d, obs_period=25, h1=8))
   expect_error(sprt(a2d, obs_period="now", h1=8))
 })
 
@@ -216,3 +217,4 @@ test_that("h1_type parameter functions as expected", {
   expect_error(sprt(a2d, h1=8, h1_type=2))
   expect_error(sprt(a2d, h1=8, h1_type="not"))
 })
+
