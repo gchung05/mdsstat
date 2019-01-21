@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-<meta name="date" content="2019-01-13" />
+<meta name="date" content="2019-01-21" />
 
 <title>Statistical Trending on Medical Device Surveillance Data</title>
 
@@ -90,7 +90,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <h1 class="title toc-ignore">Statistical Trending on Medical Device Surveillance Data</h1>
-<h4 class="date"><em>2019-01-13</em></h4>
+<h4 class="date"><em>2019-01-21</em></h4>
 
 
 
@@ -140,6 +140,14 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <td align="left">Shewhart x-bar Control Chart with 4 Western Electric Rules</td>
 </tr>
 <tr class="even">
+<td align="left"><code>cusum()</code></td>
+<td align="left">Cumulative Sum Control Chart with 4 Western Electric Rules</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>sprt()</code></td>
+<td align="left">Sequential Probability Ratio Test</td>
+</tr>
+<tr class="even">
 <td align="left"><code>prr()</code></td>
 <td align="left">Proportional Reporting Ratio</td>
 </tr>
@@ -148,12 +156,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <td align="left">Reporting Odds Ratio</td>
 </tr>
 <tr class="even">
-<td align="left"><code>poisson_rare()</code></td>
-<td align="left">Poisson Test on Rare Events</td>
+<td align="left"><code>gps()</code></td>
+<td align="left">Gamma Poisson Shrinker (containing EBGM and EB05)</td>
 </tr>
 <tr class="odd">
-<td align="left"><code>cusum()</code></td>
-<td align="left">Cumulative Sum Control Chart with 4 Western Electric Rules</td>
+<td align="left"><code>bcpnn()</code></td>
+<td align="left">Bayesian Confidence Propagation Neural Network</td>
+</tr>
+<tr class="even">
+<td align="left"><code>poisson_rare()</code></td>
+<td align="left">Poisson Test on Rare Events</td>
 </tr>
 </tbody>
 </table>
@@ -167,24 +179,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left"><code>ebgm()</code></td>
-<td align="left">Empirical Bayes Geometric Mean (basis of the Gamma Poisson Shrinker)</td>
-</tr>
-<tr class="even">
-<td align="left"><code>bcpnn()</code></td>
-<td align="left">Bayesian Confidence Propagation Neural Network</td>
-</tr>
-<tr class="odd">
 <td align="left"><code>chi_square()</code></td>
 <td align="left">Chi-Square Test</td>
 </tr>
 <tr class="even">
-<td align="left"><code>poisson_rare()</code></td>
-<td align="left">Poisson Test on Rare Events</td>
+<td align="left"><code>changepoint()</code></td>
+<td align="left">Binary Segmentation Changepoint or other variants</td>
 </tr>
 <tr class="odd">
-<td align="left"><code>changepoint()</code></td>
-<td align="left">Binary Segmentation Changepoint</td>
+<td align="left"><code>maxsprt()</code></td>
+<td align="left">Maximized SPRT (likely Poisson variant)</td>
 </tr>
 <tr class="even">
 <td align="left"><code>ewma()</code></td>

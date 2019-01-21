@@ -6,6 +6,7 @@ UNDER DEVELOPMENT
 
 - Added SPRT algorithm
 - Added GPS algorithm
+- Added BCPNN algorithm
 
 **Bigfixes**
 
@@ -13,8 +14,6 @@ UNDER DEVELOPMENT
 
 **Potential Updates**
 
-- Add GPS algorithm
-- Add BCPNN algorithm
 - Add Poisson MaxSPRT algorithm
 
 `mdsstat` 0.2.1

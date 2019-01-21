@@ -205,8 +205,9 @@ E2x2 <- function(x){
   t_D <- tC + tD
   t_ <- tA_ + tD_
   eA <- tA_ * t_A / t_
-  eB <- tA_ * tD_ / t_
+  eB <- t_A * tD_ / t_
   eC <- tA_ * t_D / t_
   eD <- tD_ * t_D / t_
-  return(c(eA, eB, eC, eD))
+  return(stats::setNames(c(eA, eB, eC, eD),
+                         c("eA", "eB", "eC", "eD")))
 }

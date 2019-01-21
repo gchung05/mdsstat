@@ -64,20 +64,21 @@ This is the current list of algorithms available:
 Function            Description
 -----------------   ------------------------------------------------------------
 `shewhart()`        Shewhart x-bar Control Chart with 4 Western Electric Rules
+`cusum()`           Cumulative Sum Control Chart with 4 Western Electric Rules
+`sprt()`            Sequential Probability Ratio Test
 `prr()`             Proportional Reporting Ratio
 `ror()`             Reporting Odds Ratio
+`gps()`             Gamma Poisson Shrinker (containing EBGM and EB05)
+`bcpnn()`           Bayesian Confidence Propagation Neural Network
 `poisson_rare()`    Poisson Test on Rare Events
-`cusum()`           Cumulative Sum Control Chart with 4 Western Electric Rules
 
 These are planned/proposed algorithms to add:
 
 Function            Description
 -----------------   ------------------------------------------------------------
-`ebgm()`            Empirical Bayes Geometric Mean (basis of the Gamma Poisson Shrinker)
-`bcpnn()`           Bayesian Confidence Propagation Neural Network
 `chi_square()`      Chi-Square Test
-`poisson_rare()`    Poisson Test on Rare Events
-`changepoint()`     Binary Segmentation Changepoint
+`changepoint()`     Binary Segmentation Changepoint or other variants
+`maxsprt()`         Maximized SPRT (likely Poisson variant)
 `ewma()`            Exponentially Weighted Moving Average with 4 WE Rules
 `cox_stuart()`      Cox-Stuart Test
 `uptrend()`         Linear Uptrend by Linear Modeling

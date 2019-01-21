@@ -25,8 +25,8 @@
 #' \code{cont_adj} provides the option to allow \code{gps()} to proceed running,
 #' however this is done at the user's discretion because there are adverse
 #' effects of adding a positive integer to every cell of the contingency table.
-#' By default, \code{gps()} allows 0 in the C cell only, but not in A, B, or D.
-#' It has been suggested that 0.5 may be an appropriate value. However,
+#' By default, \code{gps()} runs with 0 in the C cell only, but not in A, B, or
+#' D. It has been suggested that 0.5 may be an appropriate value. However,
 #' values <1 have been shown to be unstable using box-constrained PORT
 #' optimization, which is the only optimization considered in this release.
 #' Overall, posterior distribution estimates have been shown to be unstable with
@@ -282,7 +282,7 @@ gps.default <- function(
   if (any(df[, c("nB", "nD")] == 0)){
     rr <- NA
     rs <- stats::setNames(F, "contingency cells B or D have zero counts")
-  } else if (df[, c("nA")] == 0){
+  } else if (any(df[, c("nA")] == 0)){
     rr <- NA
     rs <- stats::setNames(F, "contingency cell A is zero")
   } else{
