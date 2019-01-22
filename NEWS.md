@@ -1,6 +1,13 @@
-`mdsstat` 0.2.2
+`mdsstat` 0.3.0
 ---------------------------------------
 UNDER DEVELOPMENT
+
+**Potential Updates**
+
+- Add Poisson MaxSPRT algorithm
+
+`mdsstat` 0.2.2
+---------------------------------------
 
 **Implemented Updates**
 
@@ -11,10 +18,6 @@ UNDER DEVELOPMENT
 **Bigfixes**
 
 - Fixed `analysis_of` attribute for all algorithms
-
-**Potential Updates**
-
-- Add Poisson MaxSPRT algorithm
 
 `mdsstat` 0.2.1
 ---------------------------------------
