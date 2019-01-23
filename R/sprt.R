@@ -163,10 +163,10 @@ sprt.mds_ts <- function(
   # Set analysis_of
   if (is.na(analysis_of)){
     name <- paste(names(ts_event), "of",
-                  paste0(attributes(df)$device_level_source, " ",
-                         attributes(df)$device_level, ":",
-                         attributes(df)$event_level_source, " ",
-                         attributes(df)$event_level))
+                  paste0(attributes(df)$analysis$device_level_source, " ",
+                         attributes(df)$analysis$device_level, ":",
+                         attributes(df)$analysis$event_level_source, " ",
+                         attributes(df)$analysis$event_level))
   } else name <- analysis_of
 
   out <- data.frame(time=df$time,
