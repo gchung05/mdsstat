@@ -103,10 +103,10 @@ poisson_rare.mds_ts <- function(
   # Set analysis_of
   if (is.na(analysis_of)){
     name <- paste(names(ts_event), "of",
-                  paste0(attributes(df)$device_level_source, " ",
-                         attributes(df)$device_level, ":",
-                         attributes(df)$event_level_source, " ",
-                         attributes(df)$event_level))
+                  paste0(attributes(df)$analysis$device_level_source, " ",
+                         attributes(df)$analysis$device_level, ":",
+                         attributes(df)$analysis$event_level_source, " ",
+                         attributes(df)$analysis$event_level))
   } else name <- analysis_of
 
   out <- data.frame(time=df$time,
@@ -127,10 +127,11 @@ poisson_rare.default <- function(
 ){
   input_param_checker(df, "data.frame")
   input_param_checker(c("time", "event"), check_names=df)
-  input_param_checker(eval_period, "integer")
   input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
   input_param_checker(p_rate, "numeric", null_ok=F, max_length=1)
   input_param_checker(p_crit, "numeric", null_ok=F, max_length=1)
+  input_param_checker(eval_period, "numeric", null_ok=F, max_length=1)
+  if (eval_period %% 1 != 0) stop("eval_period must be an integer")
   if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
   if (p_crit < 0 | p_crit > 1) stop("p_crit must be in range [0, 1]")
 

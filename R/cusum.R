@@ -131,10 +131,11 @@ cusum.default <- function(
 ){
   input_param_checker(df, "data.frame")
   input_param_checker(c("time", "event"), check_names=df)
-  input_param_checker(eval_period, "integer")
+  input_param_checker(eval_period, "numeric", null_ok=F, max_length=1)
   input_param_checker(delta, "numeric", null_ok=F, max_length=1)
   input_param_checker(H, "numeric", null_ok=F, max_length=1)
   input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
+  if (eval_period %% 1 != 0) stop("eval_period must be an integer")
   if (delta <= 0) stop("delta must be >0")
   if (!is.null(H)){ if(H <= 0) stop("H must be >0")}
   if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")

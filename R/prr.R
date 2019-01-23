@@ -49,9 +49,9 @@
 #' times counting in reverse chronological order to sum over to create the 2x2
 #' contingency table.
 #'
-#' Default: \code{1L} considers only the most recent time in \code{df}.
+#' Default: \code{1} considers only the most recent time in \code{df}.
 #'
-#' Example: \code{12L} sums over the last 12 time periods to create the 2x2
+#' Example: \code{12} sums over the last 12 time periods to create the 2x2
 #' contingency table.
 #'
 #' @param null_ratio Numeric PRR value representing the null hypothesis, used
@@ -146,7 +146,7 @@ prr.mds_ts <- function(
 prr.default <- function(
   df,
   analysis_of=NA,
-  eval_period=1L,
+  eval_period=1,
   null_ratio=1,
   alpha=0.05,
   cont_adj=0,
@@ -157,10 +157,11 @@ prr.default <- function(
 
   input_param_checker(df, "data.frame")
   input_param_checker(c("time", c2x2), check_names=df)
-  input_param_checker(eval_period, "integer")
   input_param_checker(null_ratio, "numeric")
   input_param_checker(alpha, "numeric")
   input_param_checker(cont_adj, "numeric")
+  input_param_checker(eval_period, "numeric", null_ok=F, max_length=1)
+  if (eval_period %% 1 != 0) stop("eval_period must be an integer")
   if (null_ratio < 1) stop("null_ratio must be 1 or greater")
   if (alpha <= 0 | alpha >= 1) stop("alpha must be in range (0, 1)")
   if (cont_adj < 0) stop("cont_adj must be 0 or greater")
