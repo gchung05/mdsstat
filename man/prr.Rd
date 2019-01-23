@@ -11,7 +11,7 @@ prr(df, ...)
 \method{prr}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA,
   ...)
 
-\method{prr}{default}(df, analysis_of = NA, eval_period = 1L,
+\method{prr}{default}(df, analysis_of = NA, eval_period = 1,
   null_ratio = 1, alpha = 0.05, cont_adj = 0, ...)
 }
 \arguments{
@@ -53,9 +53,9 @@ Example: \code{"Count of bone cement leakages"}}
 times counting in reverse chronological order to sum over to create the 2x2
 contingency table.
 
-Default: \code{1L} considers only the most recent time in \code{df}.
+Default: \code{1} considers only the most recent time in \code{df}.
 
-Example: \code{12L} sums over the last 12 time periods to create the 2x2
+Example: \code{12} sums over the last 12 time periods to create the 2x2
 contingency table.}
 
 \item{null_ratio}{Numeric PRR value representing the null hypothesis, used
