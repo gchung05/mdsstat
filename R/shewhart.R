@@ -135,8 +135,10 @@ shewhart.default <- function(
   input_param_checker(c("time", "event"), check_names=df)
   input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
   input_param_checker(we_rule, "integer", null_ok=F, max_length=1)
-  input_param_checker(eval_period, "numeric", null_ok=F, max_length=1)
-  if (eval_period %% 1 != 0) stop("eval_period must be an integer")
+  input_param_checker(eval_period, "numeric", null_ok=T, max_length=1)
+  if (!is.null(eval_period)){
+    if (eval_period %% 1 != 0) stop("eval_period must be an integer")
+  }
   if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
   if (we_rule < 1 | we_rule > 4) stop("we_rule must be in range [1L, 4L]")
 

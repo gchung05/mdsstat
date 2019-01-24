@@ -181,13 +181,13 @@ test_that("ts_event parameter functions as expected", {
   expect_equal(a4$analysis_of, "Testing")
 })
 
-a4 <- ror(a3d, eval_period=3L)
+a4 <- ror(a3d, eval_period=3)
 test_that("eval_period parameter functions as expected", {
   expect_equal(a4$data$data[, -c(1:2)],
-               data.frame(t(colSums(a3d[c((nrow(a3d) - 3L + 1):nrow(a3d)),
+               data.frame(t(colSums(a3d[c((nrow(a3d) - 3 + 1):nrow(a3d)),
                                         c("nA", "nB", "nC", "nD")]))))
   expect_error(ror(a3d, eval_period=as.integer(nrow(a3d) + 1)))
-  expect_error(ror(a3d, eval_period=0L))
+  expect_error(ror(a3d, eval_period=0))
 })
 
 a4 <- ror(a3d, null_ratio=2)

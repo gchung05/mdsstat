@@ -134,13 +134,14 @@ test_that("ts_event parameter functions as expected", {
   expect_equal(a2$analysis_of, "Testing")
 })
 
-a2 <- cusum(a2d, eval_period=3L)
+a2 <- cusum(a2d, eval_period=3)
 test_that("eval_period parameter functions as expected", {
   expect_equal(names(a2$status), ">3 time periods required")
-  expect_equal(nrow(a2$data$data), 3L)
-  expect_error(eval_period(a2d, eval_period=2))
-  expect_error(eval_period(a2d, eval_period=0))
-  expect_error(eval_period(a2d, eval_period=nrow(a2d) + 1))
+  expect_equal(nrow(a2$data$data), 3)
+  expect_equal(names(cusum(data, eval_period=2)$status),
+               ">3 time periods required")
+  expect_error(cusum(a2d, eval_period=0))
+  expect_error(cusum(a2d, eval_period=nrow(a2d) + 1))
 })
 
 test_that("zero_rate parameter functions as expected", {
