@@ -10,9 +10,8 @@ There were no ERRORs, WARNINGs, and no NOTEs.
 There were no ERRORs, WARNINGs, and no NOTEs.
 
 ## r-hub check results (rhub v1.0.2)
-There was 1 ERROR, 0 WARNINGs, and 1 NOTE.
-ERROR 1: "No space left on device" on Windows Server 2008 R2 SP1. Currently reported on Github Issue 176 (https://github.com/r-hub/rhub/issues/176) and backlogged on Issue 109 (https://github.com/r-hub/rhub/issues/109 and Issue).
-NOTE 1: Misspelled word "pharmacovigilance" is not misspelled. Platform: Ubuntu Linux 16.04 LTS, R-release, GCC
+There were ERRORs, 0 WARNINGs, and 1 NOTE.
+NOTE: Possibly misspelled word "pharmacovigilance" is not misspelled. Platform: Ubuntu Linux 16.04 LTS, R-release, GCC
 
 ## revdepcheck results
 There were no PROBLEMS.
