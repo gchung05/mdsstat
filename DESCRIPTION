@@ -4,9 +4,9 @@ Title: Statistical Trending for Medical Devices Surveillance
 Version: 0.3.0.9000
 Authors@R: c(
     person("Gary", "Chung", email="gchung05@gmail.com", role=c("aut", "cre")),
-    person("Stephane", "Bottine", role="ctb", comment="(derived code from 'SPRT' package)"),
-    person("Ismaïl", "Ahmed", role="ctb", comment="(derived code from 'PhViD' package)"),
-    person("John", "Ihrie", role="ctb", comment="(derived code from 'openEBGM' package)"))
+    person("Stephane", "Bottine", role="ctb", comment="derived code from 'SPRT' package"),
+    person("Ismaïl", "Ahmed", role="ctb", comment="derived code from 'PhViD' package"),
+    person("John", "Ihrie", role="ctb", comment="derived code from 'openEBGM' package"))
 Maintainer: Gary Chung <gchung05@gmail.com>
 Description: A collection of common statistical algorithms used in active
     surveillance of medical device events. Context includes post-market
