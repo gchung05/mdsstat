@@ -1,7 +1,7 @@
 Package: mdsstat
 Type: Package
 Title: Statistical Trending for Medical Devices Surveillance
-Version: 0.2.2
+Version: 0.3.0.9000
 Authors@R: c(
     person("Gary", "Chung", email="gchung05@gmail.com", role=c("aut", "cre")),
     person("Stephane", "Bottine", role="ctb", comment="(derived code from 'SPRT' package)"),
