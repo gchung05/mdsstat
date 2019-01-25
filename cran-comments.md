@@ -10,7 +10,7 @@ There were no ERRORs, WARNINGs, and no NOTEs.
 There were no ERRORs, WARNINGs, and no NOTEs.
 
 ## r-hub check results (rhub v1.0.2)
-There were ERRORs, 0 WARNINGs, and 1 NOTE.
+There were 0 ERRORs, 0 WARNINGs, and 1 NOTE.
 NOTE: Possibly misspelled word "pharmacovigilance" is not misspelled. Platform: Ubuntu Linux 16.04 LTS, R-release, GCC
 
 ## revdepcheck results
