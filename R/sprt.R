@@ -90,9 +90,9 @@
 #' by the null hypothesis \code{h0}.
 #'
 #' @param distribution Required distribution to estimate. Must be either
-#' \code{\'poisson\'} or \code{\'normal\'}.
+#' \code{"poisson"} or \code{"normal"}.
 #'
-#' Default: \code{\'poisson\'}
+#' Default: \code{"poisson"}
 #'
 #' @param alpha Required Type I error probability between 0 and 1.
 #'
@@ -103,10 +103,10 @@
 #' Default: \code{0.20}
 #'
 #' @param h1_type Required type of alternative hypothesis. Must be any of three
-#' values: \code{\'greater\'}, \code{\'less\'}, or \code{\'not equal\'}. For a
-#' two-sided test, set to \code{\'not equal\'}.
+#' values: \code{"greater"}, \code{"less"}, or \code{"not equal"}. For a
+#' two-sided test, set to \code{"not equal"}.
 #'
-#' Default: \code{\'greater\'}
+#' Default: \code{"greater"}
 #'
 #' @param ... Further arguments passed onto \code{sprt} methods
 #'
