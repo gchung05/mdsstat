@@ -2,6 +2,10 @@
 ---------------------------------------
 UNDER DEVELOPMENT
 
+**Implemented Updates**
+
+- Carry over time series ID for mds_ts objects to `run_algos()` output
+
 **Potential Updates**
 
 - Add Poisson MaxSPRT algorithm

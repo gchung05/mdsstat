@@ -139,7 +139,7 @@ test_that("non_dpa option works as expected", {
 test_that("list data input works as expected", {
   expect_is(run_algos(mds_ts, a4), "data.frame")
   expect_is(run_algos(mds_ts, a4, dataframe=F), "list")
-  expect_error(run_algos(list(foo=data.frame(c(1:3))), a4))
-  expect_error(run_algos(list(foo=data.frame(c(1:3))), a4, dataframe=F))
+  expect_is(run_algos(list(foo=data.frame(c(1:3))), a4), "data.frame")
+  expect_is(run_algos(list(foo=data.frame(c(1:3))), a4, dataframe=F), "list")
 })
 

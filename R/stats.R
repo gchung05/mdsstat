@@ -11,7 +11,6 @@ test_as_row <- function(
   df
 ){
   input_param_checker(df, "mdsstat_test")
-
   # Set eval period to length of time series as default behavior
   eval_period <- ifelse(is.null(df$params$eval_period), nrow(df$data$data),
                         df$params$eval_period)
@@ -221,7 +220,9 @@ run_algos.default <- function(
                "skip, stop, warn"))
   }
   # Define DPA algorithms currently in mdsstat
-  dpaalgos <- c("prr", "ror", "gps")
+  dpaalgos <- c("poisson_rare", "prr", "shewhart",
+                "cusum", "ror",
+                "sprt", "gps", "bcpnn")
 
   if (dataframe){
     stats <- data.frame()
@@ -244,14 +245,25 @@ run_algos.default <- function(
     }
     # Run algorithm
     if (!flag){
-      test <- do.call(algo, c(list(df=data),algos[[i]]))
+      test <- do.call(algo, c(list(df=data), algos[[i]]))
+      test$ts_id <- attributes(data)$analysis$id
       if (dataframe){
-        stats <- rbind(stats, test_as_row(test))
+        ts_row <- test_as_row(test)
+        ts_row$ts_id <- test$ts_id
+        stats <- rbind(stats, ts_row)
       } else stats[[i]] <- test
     }
   }
 
   if (dataframe) class(stats) <- append(class(stats), "mdsstat_tests")
+
+  # # Final check for invalid input data
+  # if (is.data.frame(stats)){
+  #   if (nrow(stats) == 0) stop("Input dataset is invalid format.")
+  # } else if (is.list(stats)){
+  #   if (length(stats[[1]]) == 0) stop("Input dataset is invalid format.")
+  # }
+
   return(stats)
 }
 
