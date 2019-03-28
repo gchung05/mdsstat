@@ -50,8 +50,8 @@ test_that("only legal inputs are allowed", {
 # ------------
 # Reference example
 x <- list(prr=list(),
-          shewhart=list(),
-          shewhart=list(ts_event=c(Rate="rate"), we_rule=2L),
+          xbar=list(),
+          xbar=list(ts_event=c(Rate="rate"), we_rule=2),
           poisson_rare=list(p_rate=0.3))
 a2 <- define_algos(x)
 # # Return behavior
@@ -60,7 +60,7 @@ a2 <- define_algos(x)
 #   expect_is(a2, "mdsstat_da")
 # })
 # test_that("function returns core mdsstat_da components", {
-#   expect_equal(names(a2), c("prr", "shewhart", "shewhart", "poisson_rare"))
+#   expect_equal(names(a2), c("prr", "xbar", "xbar", "poisson_rare"))
 #   expect_equal(length(a2), 4)
 # })
 # test_that("outputs are as expected", {
@@ -101,8 +101,8 @@ test_that("function returns core mdsstat_tests components", {
 test_that("outputs are as expected", {
   expect_equal(as.character(a3$test_name), c(
     "Proportional Reporting Ratio",
-    "Shewhart x-bar Western Electric Rule 1",
-    "Shewhart x-bar Western Electric Rule 2",
+    "x-bar Western Electric Rule 1",
+    "x-bar Western Electric Rule 2",
     "Poisson Rare"))
   expect_equal(a1$analysis_of[1], NA)
   expect_equal(a1$analysis_of[2], NA)
@@ -116,8 +116,8 @@ test_that("list option works as expected", {
   expect_is(a3a, "list")
   expect_equal(length(a3a), 4)
   expect_equal(a3a[[1]]$test_name, "Proportional Reporting Ratio")
-  expect_equal(a3a[[2]]$test_name, "Shewhart x-bar Western Electric Rule 1")
-  expect_equal(a3a[[3]]$test_name, "Shewhart x-bar Western Electric Rule 2")
+  expect_equal(a3a[[2]]$test_name, "x-bar Western Electric Rule 1")
+  expect_equal(a3a[[3]]$test_name, "x-bar Western Electric Rule 2")
   expect_equal(a3a[[4]]$test_name, "Poisson Rare")
 })
 test_that("DPA runs as it should when DPA data exists", {
@@ -126,7 +126,7 @@ test_that("DPA runs as it should when DPA data exists", {
   expect_is(run_algos(data, a2, non_dpa="stop"), "data.frame")
 })
 x <- list(prr=list(),
-          shewhart=list(),
+          xbar=list(),
           poisson_rare=list(p_rate=0.3))
 a4 <- define_algos(x)
 data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
@@ -139,7 +139,7 @@ test_that("non_dpa option works as expected", {
 test_that("list data input works as expected", {
   expect_is(run_algos(mds_ts, a4), "data.frame")
   expect_is(run_algos(mds_ts, a4, dataframe=F), "list")
-  expect_is(run_algos(list(foo=data.frame(c(1:3))), a4), "data.frame")
-  expect_is(run_algos(list(foo=data.frame(c(1:3))), a4, dataframe=F), "list")
+  expect_is(run_algos(list(foo=data.frame(time=c(1:3), event=c(1:3))), a4), "data.frame")
+  expect_is(run_algos(list(foo=data.frame(time=c(1:3), event=c(1:3))), a4, dataframe=F), "list")
 })
 

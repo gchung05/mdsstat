@@ -4,7 +4,14 @@ UNDER DEVELOPMENT
 
 **Implemented Updates**
 
-- Carry over time series ID for mds_ts objects to `run_algos()` output
+- Added EWMA algorithm
+- Carry over time series ID for mds_ts objects to `run_algos()` output.
+- Deprecated `shewhart()` function name. Replaced with `xbar()` for clarity.
+- Added options in `shewhart()`/`xbar()`, `cusum()`, and `ewma()` to explicitly declare `mu` and `sigma`
+
+**Bugfixes**
+
+- N/A
 
 **Potential Updates**
 

@@ -85,9 +85,10 @@ define_algos <- function(
   input_param_checker(algos, "list")
 
   # Each list item must be an algorithm in mdsstat
-  algolist <- c("poisson_rare", "prr", "shewhart",
+  algolist <- c("poisson_rare", "prr", "shewhart", "xbar",
                 "cusum", "ror",
-                "sprt", "gps", "bcpnn")
+                "sprt", "gps", "bcpnn",
+                "ewma")
   # algolist <- ls("package:mdsstat")[grepl("\\.mds_ts$", ls("package:mdsstat"))]
   # algolist <- gsub("\\.mds_ts$", "", algolist)
   if (!all(names(algos) %in% algolist)){

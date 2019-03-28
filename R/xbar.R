@@ -1,10 +1,16 @@
-#' Cumuluative Sum (CUSUM)
+#' x-bar Control Chart
 #'
-#' Test on device-events using the tabular CUSUM (CUmulative SUM) method.
+#' Test on device-events using the x-bar control chart. Includes
+#' the first 4 Western Electric rules common to statistical process control.
 #'
-#' Function \code{cusum()} is an implementation of the tabular CUSUM
-#' method originally proposed by E.S. Page. CUSUM is part of the family of
-#' statistical process control tests.
+#' Function \code{xbar()} is an implementation of the x-bar
+#' Control Chart test from the family of statistical process control tests
+#' originally proposed by Walter Shewhart.
+#'
+#' \code{we_rule} has four possible values: \code{1} is one point over the
+#' 3-sigma limit. \code{2} is two out of three consecutive points over the
+#' 2-sigma limit. \code{3} is four of five consecutive points over the 1-sigma
+#' limit. \code{4} is nine consecutive points over the process mean.
 #'
 #' @return A named list of class \code{mdsstat_test} object, as follows:
 #' \describe{
@@ -53,22 +59,19 @@
 #'
 #' Default: \code{NULL} considers all times in \code{df}.
 #'
-#' @param delta Required number of sigmas at which to detect a mean shift.
-#'
-#' Default: \code{1} detects a mean shift of one sigma.
-#'
-#' @param H Optional positive number representing the decision interval bound.
-#' Lower values will result in a more sensitive test.
-#'
-#' Default: \code{NULL} uses a value of 5 times the estimated sigma.
-#'
 #' @param zero_rate Required maximum proportion of \code{event}s in \code{df}
 #' (constrained by \code{eval_period}) containing zeroes for this algorithm to
-#' run. Because CUSUM does not perform well on time series with many 0 values,
+#' run. Because Shewhart does not perform well on time series with many 0 values,
 #' a value >0 is recommended.
 #'
 #' Default: \code{1/3} requires no more than 1/3 zeros in \code{event}s in
 #' \code{df} in order to run.
+#'
+#' @param we_rule Required integer from \code{1} to \code{4} representing the
+#' Western Electric rule to use. See details for descriptions.
+#'
+#' Default: \code{1} represents the first Western Electric rule of one point
+#' over the 3-sigma limit.
 #'
 #' @param mu Optional value of the in-control process mean, typically measured
 #' from historical data.
@@ -85,29 +88,29 @@
 #' a moving range calculation assuming an n=2 sampling approach. The most recent
 #' measurement is then tested using this estimate.
 #'
-#' @param ... Further arguments passed onto \code{cusum} methods
+#' @param ... Further arguments passed onto \code{xbar} methods
 #'
 #' @examples
 #' # Basic Example
 #' data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
-#' a1 <- cusum(data)
+#' a1 <- xbar(data)
 #' # Example using an mds_ts object
-#' a2 <- cusum(mds_ts[[3]])
+#' a2 <- xbar(mds_ts[[3]])
 #' # Example using a derived rate as the "event"
 #' data <- mds_ts[[3]]
 #' data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
-#' a3 <- cusum(data, c(Rate="rate"))
+#' a3 <- xbar(data, c(Rate="rate"))
 #'
 #' @references
-#' Page, E. S. (June 1954). "Continuous Inspection Scheme". Biometrika. 41 (1/2): 100–115. doi:10.1093/biomet/41.1-2.100. JSTOR 2333009.
+#' Montgomery, Douglas C. Introduction to Statistical Quality Control by Douglas C. Montgomery, 5th Edition: Study Guide. Cram101, 2013.
 #' @export
-cusum <- function (df, ...) {
-  UseMethod("cusum", df)
+xbar <- function (df, ...) {
+  UseMethod("xbar", df)
 }
 
-#' @describeIn cusum CUSUM on mds_ts data
+#' @describeIn xbar x-bar on mds_ts data
 #' @export
-cusum.mds_ts <- function(
+xbar.mds_ts <- function(
   df,
   ts_event=c("Count"="nA"),
   analysis_of=NA,
@@ -130,36 +133,34 @@ cusum.mds_ts <- function(
 
   out <- data.frame(time=df$time,
                     event=df[[ts_event]])
-  cusum.default(out, analysis_of=name, ...)
+  xbar.default(out, analysis_of=name, ...)
 }
 
-#' @describeIn cusum CUSUM on general data
+#' @describeIn xbar x-bar on general data
 #' @export
-cusum.default <- function(
+xbar.default <- function(
   df,
   analysis_of=NA,
   eval_period=NULL,
-  delta=1,
-  H=NULL,
   zero_rate=1/3,
+  we_rule=1,
   mu=NULL,
   sigma=NULL,
   ...
 ){
   input_param_checker(df, "data.frame")
   input_param_checker(c("time", "event"), check_names=df)
-  input_param_checker(eval_period, "numeric", null_ok=T, max_length=1)
-  input_param_checker(delta, "numeric", null_ok=F, max_length=1)
-  input_param_checker(H, "numeric", null_ok=F, max_length=1)
   input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
+  input_param_checker(we_rule, "numeric", null_ok=F, max_length=1)
+  input_param_checker(eval_period, "numeric", null_ok=T, max_length=1)
   input_param_checker(mu, "numeric", null_ok=T, max_length=1)
   input_param_checker(sigma, "numeric", null_ok=T, max_length=1)
   if (!is.null(eval_period)){
     if (eval_period %% 1 != 0) stop("eval_period must be an integer")
   }
-  if (delta <= 0) stop("delta must be >0")
-  if (!is.null(H)){ if(H <= 0) stop("H must be >0")}
   if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
+  if (we_rule %% 1 != 0) stop("we_rule must be an integer")
+  if (we_rule < 1 | we_rule > 4) stop("we_rule must be in range [1L, 4L]")
   if (!is.null(mu)){ if(mu <= 0) stop("mu must be >0")}
   if (!is.null(sigma)){ if(sigma <= 0) stop("sigma must be >0")}
 
@@ -187,6 +188,15 @@ cusum.default <- function(
   if(nrow(df) < 4){
     rr <- NA
     rs <- stats::setNames(F, ">3 time periods required")
+  } else if (we_rule == 2L & (nrow(df) < 6)){
+    rr <- NA
+    rs <- stats::setNames(F, ">5 time periods required for WE rule 2")
+  } else if (we_rule == 3L & (nrow(df) < 8)){
+    rr <- NA
+    rs <- stats::setNames(F, ">7 time periods required for WE rule 3")
+  } else if (we_rule == 4L & (nrow(df) < 11)){
+    rr <- NA
+    rs <- stats::setNames(F, ">10 time periods required for WE rule 4")
   } else if(sum(df$time != 0) < 2){
     rr <- NA
     rs <- stats::setNames(F, "2 or more non-zero events required")
@@ -194,47 +204,59 @@ cusum.default <- function(
     rr <- NA
     rs <- stats::setNames(F, paste("Maximum zero_rate of", zero_rate, "exceeded"))
   } else{
-    # If all conditions are met, run CUSUM test
+    # If all conditions are met, run Shewhart test
     # Set control limits
     ctrl_period <- df$event[1:(nrow(df) - 1)]
     if (is.null(mu)) mu <- mean(ctrl_period)
     if (is.null(sigma)) sigma <- mean(abs(diff(ctrl_period))) / d2
-    K <- sigma * delta / 2
-    H <- ifelse(is.null(H), 5 * sigma, H)
-    Cplus <- Cminus <- c(0)
-    for (i in 1:length(df$event)){
-      Cplus[i] <- max(0, df$event[i] - (mu + K) + Cplus[i - 1])
-      Cminus[i] <- max(0, (mu - K) - df$event[i] + Cminus[i - 1])
+    nsigma <- (df$event - mu) / sigma
+    # Calculate WE trend rules
+    if (we_rule == 1L){
+      stat <- nsigma[tlen]
+      thresh <- (mu + 3 * sigma)
+      sig <- stat > 3
+      hyp <- "1 point > 3-sigma limit"
+    } else if (we_rule == 2L){
+      stat <- nsigma[(tlen - 2):tlen]
+      thresh <- mu + 2 * sigma
+      sig <- (nsigma[tlen] > 2) &
+        any(nsigma[(tlen - 2):(tlen - 1)] > 2)
+      hyp <- "2 of 3 points > 2-sigma limit"
+    } else if (we_rule == 3L){
+      stat <- nsigma[(tlen - 4):tlen]
+      thresh <- mu + sigma
+      sig <- (nsigma[tlen] > 1) &
+        (sum(nsigma[(tlen - 4):(tlen - 1)] > 1) >= 3)
+      hyp <- "4 of 5 points > 1-sigma limit"
+    } else if (we_rule == 4L){
+      stat <- nsigma[(tlen - 8):tlen]
+      thresh <- mu
+      sig <- sum(stat > 0) == 9
+      hyp <- "9 points > mean"
     }
-    # Save output parameters
-    stat <- Cplus
-    # Cminus currently not used
-    thresh <- H
-    sig <- Cplus[length(Cplus)] > H
-    hyp <- "CUSUM > decision interval"
 
-    rr <- list(statistic=stats::setNames(stat, rep("CUSUM", length(stat))),
-               lcl=rep(NA, length(stat)),
-               ucl=rep(NA, length(stat)),
+    rr <- list(statistic=stats::setNames(stat, rep("N-Sigmas", length(stat))),
+               lcl=rep(mu + stats::qnorm(0.025) * sigma, length(stat)),
+               ucl=rep(mu + stats::qnorm(0.975) * sigma, length(stat)),
                p=stats::setNames(NA, "p-value"),
                signal=sig,
-               signal_threshold=stats::setNames(H, "Decision Interval"),
+               signal_threshold=stats::setNames(
+                 rep(thresh, length(stat)),
+                 rep("UCL", length(stat))),
                mu=mu,
-               sigma=sigma,
-               K=K)
+               sigma=sigma)
     rs <- stats::setNames(T, "Success")
   }
 
   # Return test
-  out <- list(test_name="CUSUM",
+  out <- list(test_name=paste("x-bar Western Electric Rule", we_rule),
               analysis_of=analysis_of,
               status=rs,
               result=rr,
               params=list(test_hyp=hyp,
                           eval_period=eval_period,
                           zero_rate=zero_rate,
-                          delta=delta,
-                          H=H),
+                          we_rule=we_rule),
               data=rd)
   class(out) <- append(class(out), "mdsstat_test")
   return(out)

@@ -1,10 +1,10 @@
-#' Cumuluative Sum (CUSUM)
+#' Exponentially Weighted Moving Average (EWMA)
 #'
-#' Test on device-events using the tabular CUSUM (CUmulative SUM) method.
+#' Test on device-events using the EWMA method based on the normal distribution.
 #'
-#' Function \code{cusum()} is an implementation of the tabular CUSUM
-#' method originally proposed by E.S. Page. CUSUM is part of the family of
-#' statistical process control tests.
+#' Function \code{ewma()} is an implementation of the EWMA
+#' method originally proposed by S.W. Roberts based on the normal distribution.
+#' EWMA is part of the family of statistical process control tests.
 #'
 #' @return A named list of class \code{mdsstat_test} object, as follows:
 #' \describe{
@@ -53,18 +53,22 @@
 #'
 #' Default: \code{NULL} considers all times in \code{df}.
 #'
-#' @param delta Required number of sigmas at which to detect a mean shift.
+#' @param delta Required number of sigmas at which to detect a mean shift. Sigma
+#' in this context refers to the estimated standard deviation of the EWMA
+#' statistic.
 #'
-#' Default: \code{1} detects a mean shift of one sigma.
+#' Default: \code{3} detects a EWMA shift of three sigmas.
 #'
-#' @param H Optional positive number representing the decision interval bound.
-#' Lower values will result in a more sensitive test.
+#' @param lambda Required "memory" parameter in the range (0, 1]. Lower values
+#' assign more weight to prior measurements. A value of 1 indicates no memory
+#' and only considers the current measurement.
 #'
-#' Default: \code{NULL} uses a value of 5 times the estimated sigma.
+#' Default: \code{0.85} assigns higher weight to the current measurement with
+#' "light memory" of prior measurements.
 #'
 #' @param zero_rate Required maximum proportion of \code{event}s in \code{df}
 #' (constrained by \code{eval_period}) containing zeroes for this algorithm to
-#' run. Because CUSUM does not perform well on time series with many 0 values,
+#' run. Because EWMA does not perform well on time series with many 0 values,
 #' a value >0 is recommended.
 #'
 #' Default: \code{1/3} requires no more than 1/3 zeros in \code{event}s in
@@ -85,29 +89,29 @@
 #' a moving range calculation assuming an n=2 sampling approach. The most recent
 #' measurement is then tested using this estimate.
 #'
-#' @param ... Further arguments passed onto \code{cusum} methods
+#' @param ... Further arguments passed onto \code{ewma} methods
 #'
 #' @examples
 #' # Basic Example
 #' data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
-#' a1 <- cusum(data)
+#' a1 <- ewma(data)
 #' # Example using an mds_ts object
-#' a2 <- cusum(mds_ts[[3]])
+#' a2 <- ewma(mds_ts[[3]])
 #' # Example using a derived rate as the "event"
 #' data <- mds_ts[[3]]
 #' data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
-#' a3 <- cusum(data, c(Rate="rate"))
+#' a3 <- ewma(data, c(Rate="rate"))
 #'
 #' @references
-#' Page, E. S. (June 1954). "Continuous Inspection Scheme". Biometrika. 41 (1/2): 100–115. doi:10.1093/biomet/41.1-2.100. JSTOR 2333009.
+#' S. W. Roberts (1959) Control Chart Tests Based on Geometric Moving Averages, Technometrics, 1:3, 239-250, DOI: 10.1080/00401706.1959.10489860
 #' @export
-cusum <- function (df, ...) {
-  UseMethod("cusum", df)
+ewma <- function (df, ...) {
+  UseMethod("ewma", df)
 }
 
-#' @describeIn cusum CUSUM on mds_ts data
+#' @describeIn ewma EWMA on mds_ts data
 #' @export
-cusum.mds_ts <- function(
+ewma.mds_ts <- function(
   df,
   ts_event=c("Count"="nA"),
   analysis_of=NA,
@@ -130,17 +134,17 @@ cusum.mds_ts <- function(
 
   out <- data.frame(time=df$time,
                     event=df[[ts_event]])
-  cusum.default(out, analysis_of=name, ...)
+  ewma.default(out, analysis_of=name, ...)
 }
 
-#' @describeIn cusum CUSUM on general data
+#' @describeIn ewma EWMA on general data
 #' @export
-cusum.default <- function(
+ewma.default <- function(
   df,
   analysis_of=NA,
   eval_period=NULL,
-  delta=1,
-  H=NULL,
+  delta=3,
+  lambda=0.85,
   zero_rate=1/3,
   mu=NULL,
   sigma=NULL,
@@ -150,7 +154,7 @@ cusum.default <- function(
   input_param_checker(c("time", "event"), check_names=df)
   input_param_checker(eval_period, "numeric", null_ok=T, max_length=1)
   input_param_checker(delta, "numeric", null_ok=F, max_length=1)
-  input_param_checker(H, "numeric", null_ok=F, max_length=1)
+  input_param_checker(lambda, "numeric", null_ok=F, max_length=1)
   input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
   input_param_checker(mu, "numeric", null_ok=T, max_length=1)
   input_param_checker(sigma, "numeric", null_ok=T, max_length=1)
@@ -158,7 +162,7 @@ cusum.default <- function(
     if (eval_period %% 1 != 0) stop("eval_period must be an integer")
   }
   if (delta <= 0) stop("delta must be >0")
-  if (!is.null(H)){ if(H <= 0) stop("H must be >0")}
+  if (lambda <= 0 | lambda > 1) stop("lambda must be in range (0, 1]")
   if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
   if (!is.null(mu)){ if(mu <= 0) stop("mu must be >0")}
   if (!is.null(sigma)){ if(sigma <= 0) stop("sigma must be >0")}
@@ -194,39 +198,46 @@ cusum.default <- function(
     rr <- NA
     rs <- stats::setNames(F, paste("Maximum zero_rate of", zero_rate, "exceeded"))
   } else{
-    # If all conditions are met, run CUSUM test
+    # If all conditions are met, run EWMA test
     # Set control limits
     ctrl_period <- df$event[1:(nrow(df) - 1)]
     if (is.null(mu)) mu <- mean(ctrl_period)
     if (is.null(sigma)) sigma <- mean(abs(diff(ctrl_period))) / d2
-    K <- sigma * delta / 2
-    H <- ifelse(is.null(H), 5 * sigma, H)
-    Cplus <- Cminus <- c(0)
-    for (i in 1:length(df$event)){
-      Cplus[i] <- max(0, df$event[i] - (mu + K) + Cplus[i - 1])
-      Cminus[i] <- max(0, (mu - K) - df$event[i] + Cminus[i - 1])
+    ewma_sigma <- sigma * sqrt(lambda / (2 - lambda) *
+                                 (1 - (1 - lambda)) * (2 * nrow(df)))
+    lcl <- mu - delta * ewma_sigma
+    ucl <- mu + delta * ewma_sigma
+    # Calculate EWMA Values
+    ewma <- vector()
+    for(i in 1:length(df$event)){
+      if(i==1){
+        ewma[1] <- lambda * df$event[1]
+      } else{
+        ewma[i] <- lambda * df$event[i] + (1 - lambda) * ewma[i - 1]
+      }
     }
-    # Save output parameters
-    stat <- Cplus
-    # Cminus currently not used
-    thresh <- H
-    sig <- Cplus[length(Cplus)] > H
-    hyp <- "CUSUM > decision interval"
 
-    rr <- list(statistic=stats::setNames(stat, rep("CUSUM", length(stat))),
-               lcl=rep(NA, length(stat)),
-               ucl=rep(NA, length(stat)),
+    # Save output parameters
+    stat <- ewma
+    thresh <- ucl
+    sig <- stat[length(stat)] > thresh
+    hyp <- paste0("EWMA > ", delta, "-sigma UCL")
+
+    rr <- list(statistic=stats::setNames(stat, rep("EWMA", length(stat))),
+               lcl=rep(lcl, length(stat)),
+               ucl=rep(ucl, length(stat)),
                p=stats::setNames(NA, "p-value"),
                signal=sig,
-               signal_threshold=stats::setNames(H, "Decision Interval"),
+               signal_threshold=stats::setNames(ucl,
+                                                paste0(delta, "-sigma UCL")),
                mu=mu,
                sigma=sigma,
-               K=K)
+               ewma_sigma=ewma_sigma)
     rs <- stats::setNames(T, "Success")
   }
 
   # Return test
-  out <- list(test_name="CUSUM",
+  out <- list(test_name="EWMA",
               analysis_of=analysis_of,
               status=rs,
               result=rr,
@@ -234,7 +245,7 @@ cusum.default <- function(
                           eval_period=eval_period,
                           zero_rate=zero_rate,
                           delta=delta,
-                          H=H),
+                          lambda=lambda),
               data=rd)
   class(out) <- append(class(out), "mdsstat_test")
   return(out)

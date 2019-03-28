@@ -3,7 +3,7 @@
 #' Test on device-events using the Shewhart x-bar control chart. Includes
 #' the first 4 Western Electric rules common to statistical process control.
 #'
-#' Function \code{shewhart()} is a standard implementation of the x-bar
+#' Function \code{shewhart()} is an implementation of the x-bar
 #' Control Chart test from the family of statistical process control tests
 #' originally proposed by Walter Shewhart.
 #'
@@ -73,6 +73,21 @@
 #' Default: \code{1} represents the first Western Electric rule of one point
 #' over the 3-sigma limit.
 #'
+#' @param mu Optional value of the in-control process mean, typically measured
+#' from historical data.
+#'
+#' Default: \code{NULL} estimates the in-control process mean from timepoints
+#' prior to the most recent timepoint in the time series. The most recent
+#' measurement is then tested using this estimate.
+#'
+#' @param sigma Optional value of the in-control process standard deviation,
+#' typically measured from historical data.
+#'
+#' Default: \code{NULL} estimates the in-control process standard deviation
+#' from timepoints prior to the most recent timepoint in the time series using
+#' a moving range calculation assuming an n=2 sampling approach. The most recent
+#' measurement is then tested using this estimate.
+#'
 #' @param ... Further arguments passed onto \code{shewhart} methods
 #'
 #' @examples
@@ -90,6 +105,7 @@
 #' Montgomery, Douglas C. Introduction to Statistical Quality Control by Douglas C. Montgomery, 5th Edition: Study Guide. Cram101, 2013.
 #' @export
 shewhart <- function (df, ...) {
+  .Deprecated("xbar")
   UseMethod("shewhart", df)
 }
 
@@ -128,19 +144,26 @@ shewhart.default <- function(
   analysis_of=NA,
   eval_period=NULL,
   zero_rate=1/3,
-  we_rule=1L,
+  we_rule=1,
+  mu=NULL,
+  sigma=NULL,
   ...
 ){
   input_param_checker(df, "data.frame")
   input_param_checker(c("time", "event"), check_names=df)
   input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
-  input_param_checker(we_rule, "integer", null_ok=F, max_length=1)
+  input_param_checker(we_rule, "numeric", null_ok=F, max_length=1)
   input_param_checker(eval_period, "numeric", null_ok=T, max_length=1)
+  input_param_checker(mu, "numeric", null_ok=T, max_length=1)
+  input_param_checker(sigma, "numeric", null_ok=T, max_length=1)
   if (!is.null(eval_period)){
     if (eval_period %% 1 != 0) stop("eval_period must be an integer")
   }
   if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
+  if (we_rule %% 1 != 0) stop("we_rule must be an integer")
   if (we_rule < 1 | we_rule > 4) stop("we_rule must be in range [1L, 4L]")
+  if (!is.null(mu)){ if(mu <= 0) stop("mu must be >0")}
+  if (!is.null(sigma)){ if(sigma <= 0) stop("sigma must be >0")}
 
   # d2 is an anti-biasing constant used to estimate sigma. This d2 is set at a
   # subgroup size of 2
@@ -183,9 +206,10 @@ shewhart.default <- function(
     rs <- stats::setNames(F, paste("Maximum zero_rate of", zero_rate, "exceeded"))
   } else{
     # If all conditions are met, run Shewhart test
+    # Set control limits
     ctrl_period <- df$event[1:(nrow(df) - 1)]
-    mu <- mean(ctrl_period)
-    sigma <- mean(abs(diff(ctrl_period))) / d2
+    if (is.null(mu)) mu <- mean(ctrl_period)
+    if (is.null(sigma)) sigma <- mean(abs(diff(ctrl_period))) / d2
     nsigma <- (df$event - mu) / sigma
     # Calculate WE trend rules
     if (we_rule == 1L){
