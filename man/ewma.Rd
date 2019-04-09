@@ -12,7 +12,7 @@ ewma(df, ...)
   ...)
 
 \method{ewma}{default}(df, analysis_of = NA, eval_period = NULL,
-  delta = 1, lambda = 0.85, zero_rate = 1/3, mu = NULL,
+  delta = 3, lambda = 0.85, zero_rate = 1/3, mu = NULL,
   sigma = NULL, ...)
 }
 \arguments{
@@ -104,12 +104,12 @@ A named list of class \code{mdsstat_test} object, as follows:
 }
 }
 \description{
-Test on device-events using the EWMA method.
+Test on device-events using the EWMA method based on the normal distribution.
 }
 \details{
 Function \code{ewma()} is an implementation of the EWMA
-method originally proposed by S.W. Roberts. EWMA is part of the family of
-process control tests.
+method originally proposed by S.W. Roberts based on the normal distribution.
+EWMA is part of the family of statistical process control tests.
 }
 \section{Methods (by class)}{
 \itemize{

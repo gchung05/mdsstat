@@ -22,16 +22,14 @@ Define any number of algorithms with various parameter settings and save as a
 reusable set of instructions.
 }
 \details{
-Valid list names (algorithm function names in \code{mdsstat}) are
-currently \code{\link{shewhart}}, \code{\link{prr}}, and
-\code{\link{poisson_rare}}. Each algorithm may be named multiple times (to
+Each algorithm may be named multiple times (to
 allow running of multiple parameter settings). Do not specify the \code{df}
 parameter.
 }
 \examples{
 x <- list(prr=list(),
-  shewhart=list(),
-  shewhart=list(ts_event=c(Rate="rate"), we_rule=2L),
+  xbar=list(),
+  xbar=list(ts_event=c(Rate="rate"), we_rule=2),
   poisson_rare=list(p_rate=0.3))
 define_algos(x)
 }

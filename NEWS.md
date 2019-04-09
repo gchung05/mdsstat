@@ -5,13 +5,14 @@ UNDER DEVELOPMENT
 **Implemented Updates**
 
 - Added EWMA algorithm
+- Added mean-shift changepoint algorithm
 - Carry over time series ID for mds_ts objects to `run_algos()` output.
 - Deprecated `shewhart()` function name. Replaced with `xbar()` for clarity.
 - Added options in `shewhart()`/`xbar()`, `cusum()`, and `ewma()` to explicitly declare `mu` and `sigma`
 
 **Bugfixes**
 
-- N/A
+- Various documentation errata
 
 **Potential Updates**
 

@@ -63,13 +63,15 @@ This is the current list of algorithms available:
 
 Function            Description
 -----------------   ------------------------------------------------------------
-`shewhart()`        Shewhart x-bar Control Chart with 4 Western Electric Rules
+`xbar()`            Shewhart x-bar Control Chart with 4 Western Electric Rules
 `cusum()`           Cumulative Sum Control Chart with 4 Western Electric Rules
+`ewma()`            Exponentially Weighted Moving Average
 `sprt()`            Sequential Probability Ratio Test
 `prr()`             Proportional Reporting Ratio
 `ror()`             Reporting Odds Ratio
 `gps()`             Gamma Poisson Shrinker (containing EBGM and EB05)
 `bcpnn()`           Bayesian Confidence Propagation Neural Network
+`cp_mean()`         Mean-Shift Changepoint
 `poisson_rare()`    Poisson Test on Rare Events
 
 These are planned/proposed algorithms to add:
@@ -77,9 +79,8 @@ These are planned/proposed algorithms to add:
 Function            Description
 -----------------   ------------------------------------------------------------
 `chi_square()`      Chi-Square Test
-`changepoint()`     Binary Segmentation Changepoint or other variants
+`changepoint()`     Additional changepoint variants
 `maxsprt()`         Maximized SPRT (likely Poisson variant)
-`ewma()`            Exponentially Weighted Moving Average with 4 WE Rules
 `cox_stuart()`      Cox-Stuart Test
 `uptrend()`         Linear Uptrend by Linear Modeling
 
@@ -99,9 +100,9 @@ data <- mds_ts[[3]]
 data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
 
 # Four different algorithm calls
-shewhart(data)
+xbar(data)
 prr(data)
-shewhart(data, ts_event=c(Rate="rate"), we_rule=2L)
+xbar(data, ts_event=c(Rate="rate"), we_rule=2L)
 poisson_rare(data, p_rate=0.3)
 ```
 
@@ -124,7 +125,7 @@ Note the following:
 ```
 data <- mds_ts[[3]]
 data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
-shewhart(data, ts_event=c("Rate"="rate"))
+xbar(data, ts_event=c("Rate"="rate"))
 ```
 
 #### General Usage: Count or Rate Data
@@ -135,7 +136,7 @@ An example:
 
 ```
 data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
-shewhart(data)
+xbar(data)
 ```
 
 #### General Usage: Data for Disproportionality Analysis (DPA)
@@ -164,7 +165,7 @@ data <- data.frame(time=c(1:25),
                    nB=as.integer(stats::rnorm(25, 50, 5)),
                    nC=as.integer(stats::rnorm(25, 100, 25)),
                    nD=as.integer(stats::rnorm(25, 200, 25)))
-shewhart(data)
+xbar(data)
 prr(data)
 ```
 
@@ -186,8 +187,8 @@ data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
 
 # Save a list of algorithms to run
 x <- list(prr=list(),
-          shewhart=list(),
-          shewhart=list(ts_event=c(Rate="rate"), we_rule=2L),
+          xbar=list(),
+          xbar=list(ts_event=c(Rate="rate"), we_rule=2L),
           poisson_rare=list(p_rate=0.3))
 algos <- define_algos(x)
 
@@ -205,6 +206,6 @@ For example:
 
 ```
 data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
-result <- shewhart(data)
+result <- xbar(data)
 test_as_row(result)
 ```

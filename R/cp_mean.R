@@ -4,14 +4,18 @@
 #' originally described in Xu, et al 2015.
 #'
 #' Function \code{cp_mean()} is an implementation of the mean-shift changepoint
-#' method originally proposed by Xu, et al (2015) based on a bootstrap null
-#' distribution. The parameters in this implementation can be interpreted as
+#' method originally proposed by Xu, et al (2015) based on testing the
+#' mean-centered absolute cumulative sum against a bootstrap null
+#' distribution. This algorithm defines a signal as any changepoint found within
+#' the last/most recent n=\code{min_seglen} measurements of \code{df}.
+#'
+#' The parameters in this implementation can be interpreted as
 #' follows. Changepoints are detected at an \code{alpha} level based on
 #' n=\code{bootstrap_iter} bootstrap iterations (with or without replacement
 #' using \code{replace}) of the input time series
 #' \code{df}. A minimum of n=\code{min_seglen} consecutive measurements without
 #' a changepoint are required to test for an additional changepoint. Both
-#' \code{epochs} and \code{cpmax} constrain the maximum possible number of
+#' \code{epochs} and \code{cp_max} constrain the maximum possible number of
 #' changepoints detectable as follows: within each epoch, each segment of
 #' consecutive measurements at least n=\code{min_seglen} measurements long are
 #' tested for a changepoint, until no additional changepoints are found.
@@ -64,9 +68,9 @@
 #' Default: \code{NULL} considers all times in \code{df}.
 #'
 #' @param alpha Alpha or Type-I error rate for detection of a changepoint, in
-#' the range (0, 1].
+#' the range (0, 1).
 #'
-#' Default: \code{0.05} detects a changepoint at an alpha level of 0.05 or 5%.
+#' Default: \code{0.05} detects a changepoint at an alpha level of 0.05 or 5\%.
 #'
 #' @param cp_max Maximum number of changepoints detectable. This supersedes the
 #' theoretical max set by \code{epochs}.
@@ -100,6 +104,14 @@
 #'
 #' Default: \code{T} constructs bootstrap samples with replacement.
 #'
+#' @param zero_rate Required maximum proportion of \code{event}s in \code{df}
+#' (constrained by \code{eval_period}) containing zeroes for this algorithm to
+#' run. Because mean-shift changepoint does not perform well on time series with
+#' many 0 values, a value >0 is recommended.
+#'
+#' Default: \code{1/3} requires no more than 1/3 zeros in \code{event}s in
+#' \code{df} in order to run.
+#'
 #' @param ... Further arguments passed onto \code{cp_mean} methods
 #'
 #' @examples
@@ -114,7 +126,7 @@
 #' a3 <- cp_mean(data, c(Rate="rate"))
 #'
 #' @references
-#' Xu, Zhiheng, et al. "Signal detection using change point analysis in postmarket surveillance." pharmacoepidemiology and drug safety 24.6 (2015): 663-668.
+#' Xu, Zhiheng, et al. "Signal detection using change point analysis in postmarket surveillance." Pharmacoepidemiology and Drug Safety 24.6 (2015): 663-668.
 #' @export
 cp_mean <- function (df, ...) {
   UseMethod("cp_mean", df)
@@ -155,40 +167,39 @@ cp_mean.default <- function(
   analysis_of=NA,
   eval_period=NULL,
   alpha=0.05,
-  cpmax=100,
+  cp_max=100,
   min_seglen=6,
   epochs=NULL,
   bootstrap_iter=1000,
   replace=T,
+  zero_rate=1/3,
   ...
 ){
   input_param_checker(df, "data.frame")
   input_param_checker(c("time", "event"), check_names=df)
   input_param_checker(eval_period, "numeric", null_ok=T, max_length=1)
   input_param_checker(alpha, "numeric", null_ok=F, max_length=1)
-  input_param_checker(cpmax, "numeric", null_ok=F, max_length=1)
+  input_param_checker(cp_max, "numeric", null_ok=F, max_length=1)
   input_param_checker(min_seglen, "numeric", null_ok=F, max_length=1)
   input_param_checker(epochs, "numeric", null_ok=T, max_length=1)
   input_param_checker(bootstrap_iter, "numeric", null_ok=F, max_length=1)
   input_param_checker(replace, "logical", null_ok=F, max_length=1)
+  input_param_checker(zero_rate, "numeric", null_ok=F, max_length=1)
   if (!is.null(eval_period)){
     if (eval_period %% 1 != 0) stop("eval_period must be an integer")
   }
   if (alpha <= 0 | alpha >= 1) stop("alpha must be in range (0, 1)")
-  if (cpmax %% 1 != 0) stop("cpmax must be an integer")
-  if (cpmax <= 0 ) stop("cpmax must be positive")
+  if (cp_max %% 1 != 0) stop("cp_max must be an integer")
+  if (cp_max <= 0 ) stop("cp_max must be positive")
   if (min_seglen %% 1 != 0) stop("min_seglen must be an integer")
   if (min_seglen < 4) stop("min_seglen must be >=4")
-  if (epochs %% 1 != 0) stop("epochs must be an integer")
-  if (epochs <= 0 ) stop("epochs must be positive")
+  if (!is.null(epochs)){
+    if (epochs %% 1 != 0) stop("epochs must be an integer")
+    if (epochs <= 0 ) stop("epochs must be positive")
+  }
   if (bootstrap_iter %% 1 != 0) stop("bootstrap_iter must be an integer")
   if (bootstrap_iter < 1000) stop("bootstrap_iter should be >=1000")
-
-  # I AM HERE!!! READY TO WRITE IN THE FUNC
-
-  # d2 is an anti-biasing constant used to estimate sigma. This d2 is set at a
-  # subgroup size of 2
-  d2 <- 2 / sqrt(pi)
+  if (zero_rate < 0 | zero_rate > 1) stop("zero_rate must be in range [0, 1]")
 
   # Order by time
   df <- df[order(df$time), ]
@@ -218,40 +229,118 @@ cp_mean.default <- function(
     rs <- stats::setNames(F, paste("Maximum zero_rate of", zero_rate, "exceeded"))
   } else{
     # If all conditions are met, run CP test
-    # Set control limits
-    ctrl_period <- df$event[1:(nrow(df) - 1)]
-    if (is.null(mu)) mu <- mean(ctrl_period)
-    if (is.null(sigma)) sigma <- mean(abs(diff(ctrl_period))) / d2
-    ewma_sigma <- sigma * sqrt(lambda / (2 - lambda) *
-                                 (1 - (1 - lambda)) * (2 * nrow(df)))
-    lcl <- mu - delta * ewma_sigma
-    ucl <- mu + delta * ewma_sigma
-    # Calculate CP Values
-    cp_mean <- vector()
-    for(i in 1:length(df$event)){
-      if(i==1){
-        cp_mean[1] <- lambda * df$event[1]
-      } else{
-        cp_mean[i] <- lambda * df$event[i] + (1 - lambda) * cp_mean[i - 1]
+
+    # Single changepoint based on mean shift
+    # Original code by Xu, Kass-Hout 2015
+    # Updated by Chung 2019
+    # --------------------------------------
+    cp_mean_single <- function(
+      df,
+      bootstrap_iter,
+      alpha,
+      replace
+    ){
+      # Changepoint estimate based on max absolute CUSUM difference
+      x_ctr <- cumsum(df$event - mean(df$event))
+      cp <- which.max(abs(x_ctr)) + 1
+      diff <- max(x_ctr) - min(x_ctr)
+      # Bootstrap null distribution
+      n <- ifelse(length(df$event) > 7, bootstrap_iter,
+                  factorial(length(df$event)))
+      cpwo <- mat.or.vec(n, 1)
+      cpdiff <- mat.or.vec(n, 1)
+      for (n1 in 1:n){
+        x_random <- sample(df$event, replace=replace)
+        x_random_ctr <- cumsum(x_random - mean(x_random))
+        cpwo[n1] <- which.max(abs(x_random_ctr)) + 1
+        cpdiff[n1] <- max(x_random_ctr) - min(x_random_ctr)
       }
+      conflevel <- sum(diff > cpdiff) / n
+      # Assemble output
+      out <- data.frame(
+        cp=df$time[cp],
+        cpindex=cp,
+        cpfound=(1 - conflevel) <= alpha,
+
+        alpha=alpha,
+        pvalue=(1 - conflevel))
+      return(out)
+    }
+
+    # Changepoint search strategy
+    # Inspired by code written by Xu, Kass-Hout 2015
+    # Rewritten search start/stop strategy
+    # ----------------------------------------------
+    stat <- p <- NA
+    sig <- F
+    # Initial changepoint estimate
+    a <- cp_mean_single(
+      df=df,
+      bootstrap_iter=bootstrap_iter,
+      alpha=alpha,
+      replace=replace)
+    if (a$cpfound){
+      cpct <- epochct <- 1
+      # Max epochs based on number of measurements
+      if (is.null(epochs)) epochs <- floor(log2(nrow(df) / (min_seglen / 2)))
+      # Constrain maximum number of findable changepoints
+      while (cpct < cp_max & epochct <= epochs){
+        cpct_now <- cpct
+        a <- a[order(a$cpindex), ]
+        # Identify current segments
+        cps_now <- c(1, a$cpindex, length(df$event) + 1)
+        begin <- cps_now[1]
+        bhold <- data.frame()
+        # Iterate over current segments
+        for (j in c(2:(length(cps_now)))){
+          end <- cps_now[j] - 1
+          if ((end - begin + 1) >= min_seglen){
+            subx <- df[begin:end, ]
+            b <- cp_mean_single(
+              df=subx,
+              bootstrap_iter=bootstrap_iter,
+              alpha=alpha,
+              replace=replace)
+            b$cpindex[1] <- b$cpindex[1] + begin - 1
+            if (b$cpfound){
+              cpct_now <- cpct_now + 1
+              bhold <- rbind(bhold, b)
+            }
+          }
+          begin <- cps_now[j]
+        }
+        # If no changepoints are found in current epoch, stop search
+        if (cpct_now == cpct){
+          break
+        } else{
+          # If this epoch identifies more changepoints than max allowable
+          # Keep up to max by ranked p-value
+          if (cpct_now > cp_max){
+            bhold <- bhold[order(bhold$pvalue), ][c(1:(cp_max - nrow(a))), ]
+          }
+          a <- rbind(a, bhold)
+          cpct <- nrow(a)
+          epochct <- epochct + 1
+        }
+      }
+      a <- a[order(a$cpindex, decreasing=T), ]
+      # Search for changepoint within the last min_seglen measurements
+      cps_found <- a$cpindex[a$cpfound]
+      sig_period <- c((tlen - min_seglen + 1):tlen)
+      if (any(cps_found %in% sig_period)) sig <- T
+      stat <- df$time[cps_found]
+      p <- a$pvalue[a$cpfound]
     }
 
     # Save output parameters
-    stat <- cp_mean
-    thresh <- ucl
-    sig <- stat[length(stat)] > thresh
-    hyp <- paste0("CP > ", delta, "-sigma UCL")
-
-    rr <- list(statistic=stats::setNames(stat, rep("CP", length(stat))),
-               lcl=rep(lcl, length(stat)),
-               ucl=rep(ucl, length(stat)),
-               p=stats::setNames(NA, "p-value"),
+    thresh <- lcl <- ucl <- NA
+    hyp <- paste0("CP > bootstrap null CP at alpha=", alpha)
+    rr <- list(statistic=stats::setNames(stat, rep("CP time", length(stat))),
+               lcl=NA,
+               ucl=NA,
+               p=stats::setNames(p, rep("CP p-value", length(p))),
                signal=sig,
-               signal_threshold=stats::setNames(ucl,
-                                                paste0(delta, "-sigma UCL")),
-               mu=mu,
-               sigma=sigma,
-               ewma_sigma=ewma_sigma)
+               signal_threshold=stats::setNames(alpha, "alpha"))
     rs <- stats::setNames(T, "Success")
   }
 
@@ -263,8 +352,12 @@ cp_mean.default <- function(
               params=list(test_hyp=hyp,
                           eval_period=eval_period,
                           zero_rate=zero_rate,
-                          delta=delta,
-                          lambda=lambda),
+                          alpha=alpha,
+                          cp_max=cp_max,
+                          min_seglen=min_seglen,
+                          epochs=epochs,
+                          bootstrap_iter=bootstrap_iter,
+                          replace=replace),
               data=rd)
   class(out) <- append(class(out), "mdsstat_test")
   return(out)

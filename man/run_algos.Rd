@@ -56,8 +56,8 @@ Run a multiple number of \code{mdsstat} algorithms on a single input dataset.
 data <- mds_ts[[1]]
 data$rate <- data$nA / data$exposure
 x <- list(prr=list(),
-  shewhart=list(),
-  shewhart=list(ts_event=c(Rate="rate"), we_rule=2L),
+  xbar=list(),
+  xbar=list(ts_event=c(Rate="rate"), we_rule=2),
   poisson_rare=list(p_rate=0.3))
 algos <- define_algos(x)
 run_algos(data, algos)
