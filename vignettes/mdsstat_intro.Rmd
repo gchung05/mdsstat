@@ -102,7 +102,7 @@ data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
 # Four different algorithm calls
 xbar(data)
 prr(data)
-xbar(data, ts_event=c(Rate="rate"), we_rule=2L)
+xbar(data, ts_event=c(Rate="rate"), we_rule=2)
 poisson_rare(data, p_rate=0.3)
 ```
 
@@ -188,7 +188,7 @@ data$rate <- ifelse(is.na(data$nA), 0, data$nA) / data$exposure
 # Save a list of algorithms to run
 x <- list(prr=list(),
           xbar=list(),
-          xbar=list(ts_event=c(Rate="rate"), we_rule=2L),
+          xbar=list(ts_event=c(Rate="rate"), we_rule=2),
           poisson_rare=list(p_rate=0.3))
 algos <- define_algos(x)
 

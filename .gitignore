@@ -4,3 +4,4 @@
 .Ruserdata
 inst/doc
 tests/dev
+.DS_Store
