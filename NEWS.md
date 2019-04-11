@@ -1,6 +1,5 @@
 `mdsstat` 0.3.0
 ---------------------------------------
-UNDER DEVELOPMENT
 
 **Implemented Updates**
 
