@@ -1,7 +1,7 @@
 ## Test environments
 * local Windows 10 install, R 3.5.3
 * local MacOS 10.13 install, R 3.5.3
-* ubuntu 14.04.5 (on travis-ci), R 3.5.2
+* ubuntu 14.04.5 (on travis-ci), R 3.5.3
 * win-builder
 
 ## R CMD check results
@@ -11,8 +11,7 @@ There were no ERRORs, WARNINGs, and no NOTEs.
 There were no ERRORs, WARNINGs, and no NOTEs.
 
 ## r-hub check results (rhub v1.0.2)
-There were 0 ERRORs, 0 WARNINGs, and 1 NOTE.
-NOTE: Possibly misspelled word "pharmacovigilance" is not misspelled. Platform: Ubuntu Linux 16.04 LTS, R-release, GCC
+There were 0 ERRORs, 0 WARNINGs, and 0 NOTES.
 
 ## revdepcheck results
 There were no PROBLEMS.
