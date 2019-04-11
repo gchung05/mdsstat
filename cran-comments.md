@@ -1,5 +1,6 @@
 ## Test environments
-* local Windows 10 install, R 3.5.2
+* local Windows 10 install, R 3.5.3
+* local MacOS 10.13 install, R 3.5.3
 * ubuntu 14.04.5 (on travis-ci), R 3.5.2
 * win-builder
 
