@@ -1,3 +1,13 @@
+`mdsstat` 0.3.1
+---------------------------------------
+
+UNDER DEVELOPMENT
+
+**Potential Updates**
+
+- Add Poisson MaxSPRT algorithm
+
+
 `mdsstat` 0.3.0
 ---------------------------------------
 
@@ -12,10 +22,6 @@
 **Bugfixes**
 
 - Various documentation errata
-
-**Potential Updates**
-
-- Add Poisson MaxSPRT algorithm
 
 `mdsstat` 0.2.2
 ---------------------------------------
