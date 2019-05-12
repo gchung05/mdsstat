@@ -148,9 +148,9 @@ test_that("BCPNN df parameter functions as expected", {
                                           "conf_interval",
                                           "cont_adj")))
   expect_is(a3$params$test_hyp, "character")
-  expect_equal(a2$params$null_ratio, 1)
-  expect_equal(a2$params$conf_interval, 0.9)
-  expect_equal(a2$params$cont_adj, 0)
+  expect_equal(a3$params$null_ratio, 1)
+  expect_equal(a3$params$conf_interval, 0.9)
+  expect_equal(a3$params$cont_adj, 0)
   expect_true(all(names(a3$data) %in% c("reference_time", "data")))
   expect_true(all(names(a3$data$data) %in% c("time_start", "time_end",
                                              "nA", "nB", "nC", "nD")))

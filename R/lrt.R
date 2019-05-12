@@ -1,28 +1,15 @@
 #' Likelihood Ratio Rest
 #'
-#' Test on device-events using a one-layer LRT as proposed by Bate et al
-#' (1998), which assumes beta-distributed probabilities and a normal
-#' approximation of the variance of the information component (IC). From
+#' Test on device-events using the Likelihood Ratio Test, originally proposed by
+#' Huang & Tiwari (2012). From
 #' the family of disproportionality analyses (DPA) used to generate signals of
 #' disproportionate reporting (SDRs).
 #'
-#' \code{null_ratio} and \code{conf_interval} are used together to establish the
-#' signal criteria. The \code{null_ratio} is conceptually similar to the
-#' relative reporting ratio under a null hypothesis of no signal. Common values
-#' are \code{1} and, more conservatively (fewer false signals), \code{2}. The
-#' \code{conf_interval} is the IC confidence interval used to test for a
-#' signal. A value of \code{0.90} returns the 5% and 95% confidence bounds and
-#' tests if the lower bound exceeds \code{null_ratio}. Effectively,
-#' \code{conf_interval=0.90} conducts a one-sided test at the conventional 0.05
-#' alpha level.
-#'
-#' \code{cont_adj} provides the option to allow \code{lrt()} to proceed running,
-#' however this is done at the user's discretion because there are adverse
-#' effects of adding a positive number to every cell of the contingency table.
-#' By default, \code{lrt()} allows 0 in all cells except D.
-#' It has been suggested that 0.5 may be an appropriate value. However, the
-#' user is cautioned that interpretation may be compromised by adding continuity
-#' adjustments.
+#' This is an implementation of the "Regular LRT" per the revised 2019
+#' article by Huang & Tiwari. It assumes a test on a single event of interest
+#' where all other events & devices are collapsed, effectively testing a 2x2
+#' table only. Therefore this is a test on the significance of the likelihood
+#' ratio instead of the maximum likelihood over \code{n} events.
 #'
 #' For parameter \code{ts_event}, in the uncommon case where the
 #' device-event count (Cell A) variable is not \code{"nA"}, the name of the
@@ -74,16 +61,18 @@
 #' Example: \code{12} sums over the last 12 time periods to create the 2x2
 #' contingency table.
 #'
-#' @param alpha Alpha or Type-I error rate for detection of a changepoint, in
-#' the range (0, 1).
+#' @param alpha Alpha or Type-I error rate in the range (0, 1), used to
+#' determine signal status.
+#' It is the threshold for determining if the observed reporting rate is
+#' greater than the expected based on Monte Carlo simulations of the null.
 #'
-#' Default: \code{0.05} detects a changepoint at an alpha level of 0.05 or 5\%.
+#' Default: \code{0.05} is an alpha level of 0.05 or 5\%.
 #'
-#' @param mc_sample Number of bootstrap iterations for constructing the
-#' null distribution of means. Lowest recommended is 1000. Increasing iterations
-#' also increases p-value precision.
+#' @param mc_sample Number of Monte Carlo samples for constructing the
+#' null distribution based on empirical data. Lowest recommended is 1000.
+#' Increasing iterations also increases p-value precision.
 #'
-#' Default: \code{1000} uses 1000 bootstrap iterations.
+#' Default: \code{10000} uses 10000 bootstrap iterations.
 #'
 #' @param ... Further arguments passed onto \code{lrt} methods
 #'
@@ -113,11 +102,9 @@
 #' a2 <- lrt(mds_ts[[3]])
 #'
 #' @references
-#' Bate A, Lindquist M, et al. A Bayesian Neural Network Method for Adverse Drug Reaction Signal Generation. European Journal of Clinical Pharmacology, 1998, 54, 315-321.
+#' Huang L, Zalkikar J, Tiwari RC. A Likelihood Ratio Test Based Method for Signal Detection With Application to FDA’s Drug Safety Data. Journal of the American Statistical Association, 2011, Volume 106, Issue 496, 1230-1241.
 #'
-#' Ahmed I, Poncet A. PhViD: PharmacoVigilance Signal Detection, 2016. R package version 1.0.8.
-#'
-#' Lansner A, Ekeberg Ö. A one-layer feedback artificial neural network with a bayesian learning rule. Int. J. Neural Syst., 1989, 1, 77-87.
+#' Huang L, Zalkikar J, Tiwari RC. Likelihood-Ratio-Test Methods for Drug Safety Signal Detection from Multiple Clinical Datasets. Comput Math Methods Med. 2019, PMC6399568.
 #'
 #' @export
 lrt <- function (df, ...) {

@@ -3,6 +3,10 @@
 
 UNDER DEVELOPMENT
 
+**Implemented Updates**
+
+- Added LRT algorithm
+
 **Potential Updates**
 
 - Add Poisson MaxSPRT algorithm

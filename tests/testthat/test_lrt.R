@@ -24,8 +24,8 @@ test_that("function returns core mdsstat_test components", {
                                    "params",
                                    "data")))
 })
-test_that("BCPNN outputs are as expected", {
-  expect_equal(a2$test_name, "BCPNN")
+test_that("LRT outputs are as expected", {
+  expect_equal(a2$test_name, "LRT")
   expect_equal(a2$analysis_of, NA)
   expect_true(a2$status)
   expect_true(all(names(a2$result) %in% c("statistic",
@@ -33,26 +33,21 @@ test_that("BCPNN outputs are as expected", {
                                           "ucl",
                                           "p",
                                           "signal",
-                                          "signal_threshold",
-                                          "quantiles")))
+                                          "signal_threshold")))
   expect_true(a2$result$statistic > 0)
-  expect_true(a2$result$lcl > 0)
-  expect_true(a2$result$ucl > 0)
-  expect_true(a2$result$ucl > a2$result$lcl)
+  expect_true(is.na(a2$result$lcl))
+  expect_true(is.na(a2$result$ucl))
   expect_true(a2$result$p > 0)
   expect_is(a2$result$signal, "logical")
-  expect_equal(as.numeric(a2$result$signal_threshold), 1)
+  expect_equal(as.numeric(a2$result$signal_threshold), a2$params$alpha)
   expect_true(all(names(a2$params) %in% c("test_hyp",
                                           "eval_period",
-                                          "null_ratio",
-                                          "conf_interval",
-                                          "cont_adj")))
-  expect_equal(a2$params$test_hyp,
-               "5% quantile of the posterior distribution > 1")
+                                          "alpha",
+                                          "mc_sample")))
+  expect_true(grepl("Device-event reporting rate \\(RR\\)", a2$params$test_hyp))
   expect_is(a2$params$test_hyp, "character")
-  expect_equal(a2$params$null_ratio, 1)
-  expect_equal(a2$params$conf_interval, 0.9)
-  expect_equal(a2$params$cont_adj, 0)
+  expect_equal(a2$params$alpha, 0.05)
+  expect_equal(a2$params$mc_sample, 10000)
   expect_true(all(names(a2$data) %in% c("reference_time", "data")))
   expect_true(all(names(a2$data$data) %in% c("time_start", "time_end",
                                              "nA", "nB", "nC", "nD")))
@@ -116,7 +111,7 @@ a2d <- data
 a3d <- data
 a3 <- lrt(a2d)
 
-test_that("BCPNN df parameter functions as expected", {
+test_that("LRT df parameter functions as expected", {
   expect_is(a3, "list")
   expect_is(a3, "mdsstat_test")
   expect_true(all(names(a3) %in% c("test_name",
@@ -125,7 +120,7 @@ test_that("BCPNN df parameter functions as expected", {
                                    "result",
                                    "params",
                                    "data")))
-  expect_equal(a3$test_name, "BCPNN")
+  expect_equal(a3$test_name, "LRT")
   expect_equal(a3$analysis_of, NA)
   expect_true(a3$status)
   expect_true(all(names(a3$result) %in% c("statistic",
@@ -133,24 +128,23 @@ test_that("BCPNN df parameter functions as expected", {
                                           "ucl",
                                           "p",
                                           "signal",
-                                          "signal_threshold",
-                                          "quantiles")))
+                                          "signal_threshold")))
   expect_true(a3$result$statistic > 0)
-  expect_true(a3$result$lcl > 0)
-  expect_true(a3$result$ucl > 0)
-  expect_true(a3$result$ucl > a3$result$lcl)
+  expect_true(is.na(a3$result$lcl))
+  expect_true(is.na(a3$result$ucl))
   expect_true(a3$result$p > 0)
   expect_is(a3$result$signal, "logical")
-  expect_equal(as.numeric(a3$result$signal_threshold), 1)
+  expect_equal(as.numeric(a3$result$signal_threshold), a3$params$alpha)
   expect_true(all(names(a3$params) %in% c("test_hyp",
                                           "eval_period",
-                                          "null_ratio",
-                                          "conf_interval",
-                                          "cont_adj")))
+                                          "alpha",
+                                          "mc_sample")))
+  expect_true(grepl("Device-event reporting rate \\(RR\\)", a3$params$test_hyp))
   expect_is(a3$params$test_hyp, "character")
-  expect_equal(a2$params$null_ratio, 1)
-  expect_equal(a2$params$conf_interval, 0.9)
-  expect_equal(a2$params$cont_adj, 0)
+  expect_equal(a3$params$alpha, 0.05)
+  expect_equal(a3$params$mc_sample, 10000)
+
+
   expect_true(all(names(a3$data) %in% c("reference_time", "data")))
   expect_true(all(names(a3$data$data) %in% c("time_start", "time_end",
                                              "nA", "nB", "nC", "nD")))
@@ -183,6 +177,8 @@ test_that("eval_period parameter functions as expected", {
   expect_error(lrt(a3d, eval_period=2.5))
   expect_error(lrt(a3d, eval_period=nrow(a3d) + 1))
 })
+
+# I am here!!!!
 
 a4 <- lrt(a3d, null_ratio=2)
 test_that("null_ratio parameter functions as expected", {
