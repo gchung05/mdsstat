@@ -86,7 +86,8 @@ define_algos <- function(
   algolist <- c("poisson_rare", "prr", "shewhart", "xbar",
                 "cusum", "ror",
                 "sprt", "gps", "bcpnn",
-                "ewma", "cp_mean")
+                "ewma", "cp_mean",
+                "lrt")
   # algolist <- ls("package:mdsstat")[grepl("\\.mds_ts$", ls("package:mdsstat"))]
   # algolist <- gsub("\\.mds_ts$", "", algolist)
   if (!all(names(algos) %in% algolist)){

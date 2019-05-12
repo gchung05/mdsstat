@@ -178,56 +178,23 @@ test_that("eval_period parameter functions as expected", {
   expect_error(lrt(a3d, eval_period=nrow(a3d) + 1))
 })
 
-# I am here!!!!
-
-a4 <- lrt(a3d, null_ratio=2)
-test_that("null_ratio parameter functions as expected", {
-  expect_error(lrt(a3d, null_ratio=0.1))
-  expect_error(lrt(a3d, null_ratio=0))
-  expect_error(lrt(a3d, null_ratio=-1))
-  expect_is(lrt(a3d, null_ratio=2), "mdsstat_test")
-  expect_is(lrt(a3d, null_ratio=4), "mdsstat_test")
-  expect_equal(a4$params$null_ratio, 2)
+a4 <- lrt(a3d, alpha=0.01)
+test_that("alpha parameter functions as expected", {
+  expect_error(sprt(a3d, alpha=0))
+  expect_error(sprt(a3d, alpha=1))
+  expect_error(sprt(a3d, alpha=-.01))
+  expect_error(sprt(a3d, alpha=1.01))
+  expect_is(a4, "mdsstat_test")
+  expect_equal(a4$params$alpha, 0.01)
 })
 
-a4 <- lrt(a3d, conf_interval=0.95)
-test_that("conf_interval parameter functions as expected", {
-  expect_error(lrt(a3d, conf_interval=0))
-  expect_error(lrt(a3d, conf_interval=1))
-  expect_error(lrt(a3d, conf_interval=-.01))
-  expect_error(lrt(a3d, conf_interval=1.01))
-  expect_is(lrt(a3d, conf_interval=0.10), "mdsstat_test")
+a4 <- lrt(a3d, mc_sample=1001)
+a203 <- lrt(a3d, mc_sample=1002)
+test_that("mc_sample parameter functions as expected", {
   expect_is(a4, "mdsstat_test")
-  expect_equal(a4$params$conf_interval, 0.95)
-  expect_equal(a4$params$test_hyp,
-               "2.5% quantile of the posterior distribution > 1")
-})
-
-a4 <- lrt(a3d, quantiles=c(.1, .2, .3))
-test_that("quantiles parameter functions as expected", {
-  expect_error(lrt(a3d, quantiles=c(0, .1, .2)))
-  expect_error(lrt(a3d, quantiles=c(.1, .2, 1)))
-  expect_error(lrt(a3d, quantiles=c(.1, .2, -1)))
-  expect_error(lrt(a3d, quantiles=c(.1, .2, 2)))
-  expect_error(lrt(a3d, quantiles=c(0)))
-  expect_error(lrt(a3d, quantiles=c(1)))
-  expect_error(lrt(a3d, quantiles=c(2)))
-  expect_error(lrt(a3d, quantiles=c(-1)))
-  expect_is(lrt(a3d, quantiles=c(.5)), "mdsstat_test")
-  expect_error(lrt(a3d, quantiles=NA))
-  expect_is(lrt(a3d, quantiles=NULL), "mdsstat_test")
-  expect_is(a4, "mdsstat_test")
-  expect_equal(length(a4$result$quantiles), 3)
-})
-
-a4 <- lrt(a3d, cont_adj=1)
-test_that("cont_adj parameter functions as expected", {
-  expect_equal(unlist(a3d[nrow(a3d), c("nA", "nB", "nC", "nD")]) + 1,
-               unlist(a4$data$data[, -c(1:2)]))
-  expect_error(lrt(a3d, cont_adj=-1))
-  expect_error(lrt(a3d, cont_adj=NA))
-  expect_error(lrt(a3d, cont_adj=NULL))
-  expect_error(lrt(a3d, cont_adj="foo"))
-  expect_is(a4, "mdsstat_test")
-  expect_equal(a4$params$cont_adj, 1)
+  expect_equal(a4$params$mc_sample, 1001)
+  expect_equal(a203$params$mc_sample, 1002)
+  expect_error(lrt(a3d, mc_sample=500))
+  expect_error(lrt(a3d, mc_sample=1000.5))
+  expect_error(lrt(a3d, mc_sample=-1))
 })

@@ -71,6 +71,7 @@ Function            Description
 `ror()`             Reporting Odds Ratio
 `gps()`             Gamma Poisson Shrinker (containing EBGM and EB05)
 `bcpnn()`           Bayesian Confidence Propagation Neural Network
+`lrt()`             Likelihoood-Ratio Test
 `cp_mean()`         Mean-Shift Changepoint
 `poisson_rare()`    Poisson Test on Rare Events
 
