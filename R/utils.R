@@ -8,6 +8,8 @@
 #' \code{x} exists in the data frame.
 #' @param null_ok Default: \code{T}. Allow \code{x} to be \code{NULL}. If
 #' \code{x} is \code{NULL}, bypass checking.
+#' @param na_ok Default: \code{NULL}. Allow \code{x} to be \code{NA}. If
+#' \code{na_ok} is \code{NULL}, no \code{NA} check will occur.
 #' @param exclusions Default: \code{NULL}. Optional values that are excluded
 #' from checking in \code{check_names} (if it is not \code{NULL}).
 #' @param max_length Default: \code{NULL}. Optional maximum length of \code{x}.
@@ -20,6 +22,7 @@ input_param_checker <- function(
   check_class=NULL,
   check_names=NULL,
   null_ok=T,
+  na_ok=NULL,
   exclusions=NULL,
   max_length=NULL
 ){
@@ -33,7 +36,11 @@ input_param_checker <- function(
           this_class <- lapply(check_names[x], class)
         } else this_class <- class(x)
       } else this_class <- class(x)
-      if (!any(sapply(this_class, function(x) x %in% check_class))){
+      if (!is.null(na_ok) & length(x) == 1){
+        if (!na_ok & is.na(x)){
+          stop(paste0(x, " cannot be NA"))
+        }
+      } else if (!any(sapply(this_class, function(x) x %in% check_class))){
         stop(paste0(ifelse(class(x) == "character", paste(x, collapse=" "), quote(x)),
                     " must be of class '", paste(check_class, collapse=" "), "'"))
       }

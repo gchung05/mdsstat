@@ -67,6 +67,7 @@ Function            Description
 `cusum()`           Cumulative Sum Control Chart with 4 Western Electric Rules
 `ewma()`            Exponentially Weighted Moving Average
 `sprt()`            Sequential Probability Ratio Test
+`poisson_maxsprt()` Poisson MaxSPRT
 `prr()`             Proportional Reporting Ratio
 `ror()`             Reporting Odds Ratio
 `gps()`             Gamma Poisson Shrinker (containing EBGM and EB05)

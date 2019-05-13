@@ -160,14 +160,19 @@ poisson_maxsprt.default <- function(
   input_param_checker(obs_period, "numeric", null_ok=F, max_length=1)
   input_param_checker(alpha, "numeric", null_ok=F, max_length=1)
   input_param_checker(M, "numeric", null_ok=F, max_length=1)
-  input_param_checker(u_t, "numeric", null_ok=F, max_length=1)
+  input_param_checker(u_t, "numeric", null_ok=F, na_ok=T, max_length=1)
   if (!is.null(eval_period)){
     if (eval_period < 2) stop("eval_period must be 2 or greater")
     if (eval_period %% 1 != 0) stop("eval_period must be an integer")
     if (obs_period > eval_period){
-      stop("obs_period cannot be greater than eval_period")}
-    if (is.null(h0) & obs_period == eval_period){
-      stop("obs_period cannot equal eval_period unless h0 is declared")}
+      stop("obs_period cannot be greater than eval_period")
+    }
+    if (is.na(u_t) & obs_period == eval_period){
+      stop("obs_period cannot equal eval_period unless u_t is declared")
+    }
+  }
+  if (is.na(u_t) & obs_period == nrow(df)){
+    stop("obs_period cannot equal df rows unless u_t is declared")
   }
   if (obs_period %% 1 != 0 | obs_period <= 0){
     stop("obs_period must be a positive integer")
@@ -178,6 +183,13 @@ poisson_maxsprt.default <- function(
   if (M %% 1 != 0) stop("M must be an integer")
   if (M < 1) stop("D must be 1 or greater")
   if (!is.na(u_t)){ if (u_t <= 0) stop("u_t must be >0")}
+  # Ellipsis parameters for Sequential::SampleSize.Poisson()
+  dots <- list(...)
+  RR <- ifelse(is.null(dots$RR), 2, dots$RR)
+  power <- ifelse(is.null(dots$power), 0.9, dots$power)
+  D <- ifelse(is.null(dots$D), 0, dots$D)
+
+  u_t_input <- u_t
 
   # Order by time
   df <- df[order(df$time), ]
@@ -196,11 +208,10 @@ poisson_maxsprt.default <- function(
 
   # Check for non-runnable conditions
   hyp <- "Not run"
+  rr <- NA
   if(nrow(df) < 2){
-    rr <- NA
     rs <- stats::setNames(F, ">=2 time periods required")
   } else if(is.null(u_t) & (obs_period == eval_period)){
-    rr <- NA
     rs <- stats::setNames(F, paste("null distribution (u_t) cannot be inferred",
                                    "from data if all data is in observation",
                                    "period"))
@@ -210,21 +221,25 @@ poisson_maxsprt.default <- function(
     n_eval <- sum(df$event[c((nrow(df) - eval_period + 1)):
                              c((nrow(df) - obs_period))])
     # Estimation of sample size and critical value
-    sspoi <- Sequential::SampleSize.Poisson(alpha=alpha, M=M, D=D,
-                                            precision=0.01, ...)
+    sspoi <- Sequential::SampleSize.Poisson(alpha=alpha, M=M,
+                                            RR=RR, power=power, D=D,
+                                            precision=0.01)
     sspoi_ss <- sspoi[, "Sample Size"]
     sspoi_cv <- sspoi[, "Critical value"]
-    if (n_obs >= sspoi_ss){
-      # Only run test if observed events are less than "length of surveillance",
-      # which is defined in Kulldorff et al (2011) as the expected number of
-      # events under the null hypothesis.
-      rs <- stats::setNames(F, paste("observed events must be less than the",
-                                     "length of surveillance, which is a",
-                                     "function of parameters:",
-                                     "alpha, M, D, power, RR"))
+    if (is.na(u_t) & (n_eval >= sspoi_ss)){
+      # If the data are being used to construct the null, only run test if
+      # total events under the null are less than "length of surveillance",
+      # as defined in Kulldorff et al (2011).
+      rs <- stats::setNames(F, paste0(
+        "since u_t is being inferred from the data, ",
+        "total events during eval_period less obs_period (n_eval=", n_eval,
+        ") must be less than the ",
+        "length of surveillance (sspoi_ss=", round(sspoi_ss, 1),
+        " events), which is a function of parameters: ",
+        "alpha, M, D, power, RR"))
     } else if (n_obs < M){
       # Only run test if minimum number of events needed, M, is met
-      rs <- stats::setNames(F, paste0("minimum number of events M=",
+      rs <- stats::setNames(F, paste0("minimum number of events M=", M,
                                       " was not exceeded during observation ",
                                       "period (n=", n_obs, ")"))
     } else if ((is.na(u_t) & n_eval == 0) | (!is.na(u_t) & u_t == 0)){
@@ -242,7 +257,7 @@ poisson_maxsprt.default <- function(
         sig <- F
       } else{
         llr <- (u_t - c_t) + c_t * log(c_t / u_t)
-        sig <- llr > sspoi_cv
+        sig <- as.logical(llr > sspoi_cv)
       }
       hyp <- paste("Observed", round(c_t, 1),
                    "events greater than expected null", round(u_t, 1),
@@ -271,8 +286,8 @@ poisson_maxsprt.default <- function(
                             eval_period=eval_period,
                             obs_period=obs_period,
                             alpha=alpha,
-                            M=2,
-                            u_t=u_t),
+                            M=M,
+                            u_t=u_t_input),
                 data=rd)
     class(out) <- append(class(out), "mdsstat_test")
     return(out)

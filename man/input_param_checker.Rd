@@ -5,7 +5,7 @@
 \title{Check Input Parameters}
 \usage{
 input_param_checker(x, check_class = NULL, check_names = NULL,
-  null_ok = T, exclusions = NULL, max_length = NULL)
+  null_ok = T, na_ok = NULL, exclusions = NULL, max_length = NULL)
 }
 \arguments{
 \item{x}{Single object name, character, or vector of characters}
@@ -17,6 +17,9 @@ input_param_checker(x, check_class = NULL, check_names = NULL,
 
 \item{null_ok}{Default: \code{T}. Allow \code{x} to be \code{NULL}. If
 \code{x} is \code{NULL}, bypass checking.}
+
+\item{na_ok}{Default: \code{NULL}. Allow \code{x} to be \code{NA}. If
+\code{na_ok} is \code{NULL}, no \code{NA} check will occur.}
 
 \item{exclusions}{Default: \code{NULL}. Optional values that are excluded
 from checking in \code{check_names} (if it is not \code{NULL}).}
