@@ -13,9 +13,6 @@
 #' or \code{relative_risk} is greater than 1, and \code{h1_type="greater"}. This is
 #' because we wish to detect elevated occurrences of an undesirable event.
 #'
-#' For parameter \code{obs_period}, because the input data frame \code{df} is a
-#' time series, \code{sprt()} requires an observation period that
-#'
 #' For parameter \code{ts_event}, in the uncommon case where the
 #' device-event count (Cell A) variable is not \code{"nA"}, the name of the
 #' variable may be specified here. A named character
@@ -118,9 +115,8 @@
 #'   the run status.}
 #'   \item{result}{A standardized list of test run results: \code{statistic}
 #'   for the test statistic, \code{lcl} and \code{ucl} for the set
-#'   confidence bounds, \code{p} for the p-value, \code{signal} status,
-#'   \code{signal_threshold}, and both null \code{h0} and alternative
-#'   hypothesis \code{h1}.}
+#'   confidence bounds, \code{p} for the p-value, \code{signal} status, and
+#'   \code{signal_threshold}.}
 #'   \item{params}{The test parameters}
 #'   \item{data}{The data on which the test was run}
 #' }

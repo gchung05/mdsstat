@@ -24,6 +24,7 @@ Imports:
   utils,
   stats,
   lubridate,
+  Sequential,
   mds
 Suggests:
   testthat,
