@@ -34,12 +34,12 @@ test_that("LRT outputs are as expected", {
                                           "p",
                                           "signal",
                                           "signal_threshold")))
-  expect_true(a2$result$statistic > 0)
+  expect_true(a2$result$statistic >= 0)
   expect_true(is.na(a2$result$lcl))
   expect_true(is.na(a2$result$ucl))
   expect_true(a2$result$p > 0)
   expect_is(a2$result$signal, "logical")
-  expect_equal(as.numeric(a2$result$signal_threshold), a2$params$alpha)
+  expect_true(a2$result$signal_threshold > 0)
   expect_true(all(names(a2$params) %in% c("test_hyp",
                                           "eval_period",
                                           "alpha",
@@ -134,7 +134,7 @@ test_that("LRT df parameter functions as expected", {
   expect_true(is.na(a3$result$ucl))
   expect_true(a3$result$p > 0)
   expect_is(a3$result$signal, "logical")
-  expect_equal(as.numeric(a3$result$signal_threshold), a3$params$alpha)
+  expect_true(a3$result$signal_threshold > 0)
   expect_true(all(names(a3$params) %in% c("test_hyp",
                                           "eval_period",
                                           "alpha",

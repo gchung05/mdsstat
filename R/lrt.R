@@ -196,42 +196,39 @@ lrt.default <- function(
   } else{
     # Observed and expected
     N <- unlist(df[, c2x2])
-    E <- E2x2(N)
     # If all conditions are met, run LRT test
-    nij <- N[1]
-    Eij <- E[1]
-    n_j <- sum(N[c(1, 3)])
+    nij <- N[c(1, 3)]
+    ni_ <- c(sum(N[c(1, 2)]), sum(N[c(3, 4)]))
+    n_j <- sum(nij)
     P_ <- sum(N) # Exposure availability not assumed, use n__ instead
-    pij <- N[1] / sum(N[c(1, 2)])
-    qij <- N[3] / sum(N[c(3, 4)])
+    pij <- nij / ni_
+    qij <- (n_j - nij) / (P_ - ni_)
     # Log likelihood ratio
-    llr <- function(nij, Eij, n_j, P_){
-      nij * (log(nij) - log(Eij)) +
-        (n_j - nij) * (log(n_j - nij) - log(n_j - Eij)) -
-        n_j * (log(n_j) - log(P_))
+    llr <- function(nij, ni_){
+      n_j <- sum(nij)
+      P_ <- sum(N)
+      pij <- nij / ni_
+      qij <- (n_j - nij) / (P_ - ni_)
+      pi0 <- n_j / P_
+      llr_out <- nij * log(pij) + (n_j - nij) * log(qij) - n_j * log(pi0)
+      ifelse(pij > qij, llr_out, 0)
     }
-    llr_hat <- llr(nij, Eij, n_j, P_)
+    llr_hat <- llr(nij, ni_)
     # Monte Carlo null distribution
-    mc_llr <- mat.or.vec(mc_sample, 1)
-    for(i in 1:mc_sample){
-      samp <- stats::rmultinom(1, n_j, c(N[1] / P_, N[3] / P_))
-      samp_N <- c(samp[1], N[2], samp[2], N[4])
-      samp_E <- E2x2(samp_N)
-      mc_llr[i] <- llr(samp[1], samp_E[1], n_j, sum(samp_N))
-    }
-    pvalue <- sum(llr_hat < mc_llr) / mc_sample
+    samp <- stats::rmultinom(mc_sample, n_j, ni_ / sum(ni_))
+    mc_llr <- apply(samp, 2, function(x) max(llr(x, ni_)))
+    pvalue <- mean(mc_llr >= llr_hat[1])
+    llr_crit <- stats::quantile(mc_llr, probs=1 - alpha, na.rm=T)
     sig <- pvalue <= alpha
-    hyp <- paste0("Device-event reporting rate (RR) (",
-                  round(pij, 3), ") > comparator RR (",
-                  round(qij, 3), ") at alpha=", alpha)
-
+    hyp <- paste("Device-event reporting rate (RR) > comparator RR at alpha",
+                 alpha)
     # List of output values
-    rr <- list(statistic=stats::setNames(llr_hat, "Log-Likelihood Ratio"),
+    rr <- list(statistic=stats::setNames(llr_hat[1], "Log-Likelihood Ratio"),
                lcl=NA,
                ucl=NA,
                p=stats::setNames(pvalue, "p-value"),
                signal=sig,
-               signal_threshold=stats::setNames(alpha, "alpha"))
+               signal_threshold=stats::setNames(llr_crit, "LLR"))
     rs <- stats::setNames(T, "Success")
   }
 
