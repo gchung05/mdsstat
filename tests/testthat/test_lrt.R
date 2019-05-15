@@ -129,7 +129,7 @@ test_that("LRT df parameter functions as expected", {
                                           "p",
                                           "signal",
                                           "signal_threshold")))
-  expect_true(a3$result$statistic > 0)
+  expect_true(a3$result$statistic >= 0)
   expect_true(is.na(a3$result$lcl))
   expect_true(is.na(a3$result$ucl))
   expect_true(a3$result$p > 0)

@@ -185,9 +185,12 @@ poisson_maxsprt.default <- function(
   if (!is.na(u_t)){ if (u_t <= 0) stop("u_t must be >0")}
   # Ellipsis parameters for Sequential::SampleSize.Poisson()
   dots <- list(...)
-  RR <- ifelse(is.null(dots$RR), 2, dots$RR)
-  power <- ifelse(is.null(dots$power), 0.9, dots$power)
-  D <- ifelse(is.null(dots$D), 0, dots$D)
+  RR <- ifelse(is.null(dots$RR),
+               formals(Sequential::SampleSize.Poisson)$RR, dots$RR)
+  power <- ifelse(is.null(dots$power),
+                  formals(Sequential::SampleSize.Poisson)$power, dots$power)
+  D <- ifelse(is.null(dots$D),
+              formals(Sequential::SampleSize.Poisson)$D, dots$D)
 
   u_t_input <- u_t
 
@@ -226,17 +229,21 @@ poisson_maxsprt.default <- function(
                                             precision=0.01)
     sspoi_ss <- sspoi[, "Sample Size"]
     sspoi_cv <- sspoi[, "Critical value"]
-    if (is.na(u_t) & (n_eval >= sspoi_ss)){
+    if (is.na(u_t) & (n_eval < sspoi_ss)){
       # If the data are being used to construct the null, only run test if
-      # total events under the null are less than "length of surveillance",
-      # as defined in Kulldorff et al (2011).
+      # total events under the null are at least than "length of surveillance",
+      # as defined in Kulldorff et al (2011), in order to control Type I error.
       rs <- stats::setNames(F, paste0(
         "since u_t is being inferred from the data, ",
         "total events during eval_period less obs_period (n_eval=", n_eval,
-        ") must be less than the ",
+        ") must be at least equal to the ",
         "length of surveillance (sspoi_ss=", round(sspoi_ss, 1),
         " events), which is a function of parameters: ",
         "alpha, M, D, power, RR"))
+    } else if (n_obs > sspoi_ss){
+      rs <- stats::setNames(F, paste0(
+        "total events during observation period (n_obs=", n_eval,
+        ") exceeds the length of surveillance (sspoi_ss=", round(sspoi_ss, 1)))
     } else if (n_obs < M){
       # Only run test if minimum number of events needed, M, is met
       rs <- stats::setNames(F, paste0("minimum number of events M=", M,

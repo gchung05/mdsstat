@@ -74,7 +74,7 @@ Function            Description
 `bcpnn()`           Bayesian Confidence Propagation Neural Network
 `lrt()`             Likelihoood-Ratio Test
 `cp_mean()`         Mean-Shift Changepoint
-`poisson_rare()`    Poisson Test on Rare Events
+`poisson_rare()`    Generic Poisson Test
 
 These are planned/proposed algorithms to add:
 
@@ -82,7 +82,6 @@ Function            Description
 -----------------   ------------------------------------------------------------
 `chi_square()`      Chi-Square Test
 `changepoint()`     Additional changepoint variants
-`maxsprt()`         Maximized SPRT (likely Poisson variant)
 `cox_stuart()`      Cox-Stuart Test
 `uptrend()`         Linear Uptrend by Linear Modeling
 

@@ -1,10 +1,9 @@
 context("Poisson MaxSPRT Algorithm")
 
 # Reference example
-data <- data.frame(time=c(1:10), event=as.integer(stats::rpois(10, 1)))
-data$event[10] <- 9
+data <- data.frame(time=c(1:100), event=as.integer(stats::rpois(100, 1)))
+data$event[100] <- 6
 a1 <- poisson_maxsprt(data)
-a1$result$signal
 
 # Basic
 # -----
@@ -52,7 +51,7 @@ test_that("outputs are as expected", {
                                           "M",
                                           "u_t")))
   expect_is(a1$params$test_hyp, "character")
-  expect_equal(a1$params$eval_period, 10)
+  expect_equal(a1$params$eval_period, 100)
   expect_equal(a1$params$obs_period, 3)
   expect_equal(a1$params$alpha, 0.05)
   expect_equal(a1$params$M, 4)
@@ -67,7 +66,7 @@ test_that("outputs are as expected", {
 # ----------------
 a2d <- data
 a2d$rate <- ifelse(is.na(a2d$event), 0, a2d$event)
-a2d$exposure <- stats::rnorm(10, 50, 5)
+a2d$exposure <- stats::rnorm(100, 50, 5)
 a2d$rate <- a2d$rate / a2d$exposure
 a2 <- poisson_maxsprt(a2d, ts_event=c("Rate"="rate"))
 test_that("ts_event parameter functions as expected", {
@@ -82,15 +81,15 @@ test_that("ts_event parameter functions as expected", {
 test_that("eval_period parameter functions as expected", {
   expect_error(poisson_maxsprt(a2d, eval_period=0))
   expect_error(poisson_maxsprt(a2d, eval_period=5.5))
-  expect_error(poisson_maxsprt(a2d, eval_period=26))
-  expect_error(poisson_maxsprt(a2d, eval_period=10, obs_period=11))
+  expect_error(poisson_maxsprt(a2d, eval_period=101))
+  expect_error(poisson_maxsprt(a2d, eval_period=100, obs_period=101))
 })
 
 test_that("obs_period parameter functions as expected", {
   expect_error(poisson_maxsprt(a2d, obs_period=0))
   expect_error(poisson_maxsprt(a2d, obs_period=5.5))
-  expect_error(poisson_maxsprt(a2d, obs_period=10))
-  expect_error(poisson_maxsprt(a2d, obs_period=11))
+  expect_error(poisson_maxsprt(a2d, obs_period=100))
+  expect_error(poisson_maxsprt(a2d, obs_period=101))
   expect_error(poisson_maxsprt(a2d, obs_period="now"))
   skip_on_cran()
   expect_is(poisson_maxsprt(a2d, obs_period=1), "mdsstat_test")

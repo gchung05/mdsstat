@@ -7,7 +7,8 @@ Authors@R: c(
     person("Zhiheng", "Xu", role="ctb", comment="derived code for `cp_mean()`"),
     person("Stephane", "Bottine", role="ctb", comment="derived code from 'SPRT' package"),
     person("Ismaïl", "Ahmed", role="ctb", comment="derived code from 'PhViD' package"),
-    person("John", "Ihrie", role="ctb", comment="derived code from 'openEBGM' package"))
+    person("John", "Ihrie", role="ctb", comment="derived code from 'openEBGM' package"),
+    person("Jianjin", "Xu", role="ctb", comment="derived code for `lrt()`"))
 Maintainer: Gary Chung <gchung05@gmail.com>
 Description: A collection of common statistical algorithms used in active
     surveillance of medical device events. Context includes post-market
