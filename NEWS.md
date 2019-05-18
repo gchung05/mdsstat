@@ -1,8 +1,6 @@
 `mdsstat` 0.3.1
 ---------------------------------------
 
-UNDER DEVELOPMENT
-
 **Implemented Updates**
 
 - Added LRT algorithm
