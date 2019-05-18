@@ -46,17 +46,17 @@ of class \code{mds_ts}.
 
 Example: \code{"Count of bone cement leakages"}}
 
-\item{eval_period}{Optional positive integer indicating the number of unique
-times counting in reverse chronological order to evaluate. This will be used
-to establish the default null hypothesis \code{h0}.
+\item{eval_period}{Positive integer indicating the number of unique
+times counting in reverse chronological order to evaluate. If \code{u_t} is
+not specified, \code{eval_period} less \code{obs_period} will be used
+to establish an empirical null Poisson distribution, \code{u_t}.
 
 Default: \code{NULL} considers all times in \code{df}.}
 
-\item{obs_period}{Required positive integer indicating the number of unique times
-in reverse chronological order to observe and test against the null
-hypothesis \code{u_t}. This cannot be greater than \code{eval_period}. Used
-with \code{eval_period} to establish the default null hypothesis \code{u_t},
-if \code{u_t} is not explicitly set.
+\item{obs_period}{Positive integer indicating the number of unique
+times in reverse chronological order to observe and test against the null
+hypothesis, described by \code{u_t}. This cannot be greater than
+\code{eval_period}.
 
 Default: \code{3} indicates the last 3 times from \code{df} constitute the
 observation period. It is not \code{1} to emphasize its use on rarely
@@ -76,7 +76,7 @@ Default: \code{4} is a minimum of 4 events, per Kulldorff and Silva, 2015.}
 to test the hypothesis.
 
 Default: \code{NA} will infer the null distribution from the data using the
-\code{eval_period}, less the \code{obs_period}.}
+\code{eval_period} less the \code{obs_period}.}
 }
 \value{
 A named list of class \code{mdsstat_test} object, as follows:
@@ -95,7 +95,8 @@ A named list of class \code{mdsstat_test} object, as follows:
 }
 \description{
 Test on device-events using the Poisson Maximized Sequential Probability
-Ratio Test, or Poisson MaxSPRT, originally proposed by Kulldorff et al, 2011.
+Ratio Test, or Poisson MaxSPRT, originally proposed by Kulldorff et al
+(2011). Requires a call to Silva & Kulldorff's \code{Sequential} package.
 }
 \details{
 Runs a variant of Kulldorff's Poisson MaxSPRT where the mean of the null
@@ -108,6 +109,14 @@ and other parameters passed into \code{Sequential::SampleSize.Poisson()} to
 establish the critical MaxSPRT log likelihood ratios. Additional parameters
 eligible to be passed via \code{...} are \code{power}, \code{D}, and
 \code{RR}.
+
+The following constraints are on this test: 1) If \code{u_t} is being
+inferred from the data, the total number of events used to construct
+\code{u_t} must be at least
+equal to the required sample size in order to control Type I error, per
+Li 2009.
+2) The total number of observed events cannot be greater than the length
+of surveillance (required sample size).
 
 For parameter \code{ts_event}, in the uncommon case where the
 device-event count (Cell A) variable is not \code{"nA"}, the name of the
@@ -136,4 +145,6 @@ a2 <- poisson_maxsprt(mds_ts[[3]])
 Martin Kulldorff, Robert L. Davis, Margarette Kolczak, Edwin Lewis, Tracy Lieu & Richard Platt (2011) A Maximized Sequential Probability Ratio Test for Drug and Vaccine Safety Surveillance, Sequential Analysis, 30:1, 58-78.
 
 Ivair Ramos Silva, Martin Kulldorff (2019). Sequential: Exact Sequential Analysis for Poisson and Binomial Data. R package version 3.0.1. https://CRAN.R-project.org/package=Sequential
+
+Lingling Li, Martin Kulldorff (2009). A conditional maximized sequential probability ratio test for Pharmacovigilance. Statistics in Medicine. doi:10.1002/sim.3780
 }

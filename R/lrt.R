@@ -1,15 +1,16 @@
 #' Likelihood Ratio Rest
 #'
 #' Test on device-events using the Likelihood Ratio Test, originally proposed by
-#' Huang & Tiwari (2012). From
+#' Huang & Tiwari (2011). From
 #' the family of disproportionality analyses (DPA) used to generate signals of
 #' disproportionate reporting (SDRs).
 #'
-#' This is an implementation of the "Regular LRT" per the revised 2019
-#' article by Huang & Tiwari. It assumes a test on a single event of interest
+#' This is an implementation of the "Regular LRT" per
+#' Huang & Tiwari (2019). It assumes a test on a single event of interest
 #' where all other events & devices are collapsed, effectively testing a 2x2
 #' table only. Therefore this is a test on the significance of the likelihood
-#' ratio instead of the maximum likelihood over \code{n} events.
+#' ratio instead of the maximum likelihood over \code{i} events for a given
+#' medical product \code{j} (refer to Huang & Tiwari, 2011).
 #'
 #' For parameter \code{ts_event}, in the uncommon case where the
 #' device-event count (Cell A) variable is not \code{"nA"}, the name of the
@@ -102,7 +103,7 @@
 #' a2 <- lrt(mds_ts[[3]])
 #'
 #' @references
-#' Huang L, Zalkikar J, Tiwari RC. A Likelihood Ratio Test Based Method for Signal Detection With Application to FDA’s Drug Safety Data. Journal of the American Statistical Association, 2011, Volume 106, Issue 496, 1230-1241.
+#' Huang L, Zalkikar J, Tiwari RC. A Likelihood Ratio Test Based Method for Signal Detection with Application to FDA’s Drug Safety Data. Journal of the American Statistical Association, 2011, Volume 106, Issue 496, 1230-1241.
 #'
 #' Huang L, Zalkikar J, Tiwari RC. Likelihood-Ratio-Test Methods for Drug Safety Signal Detection from Multiple Clinical Datasets. Comput Math Methods Med. 2019, PMC6399568.
 #'
@@ -228,7 +229,7 @@ lrt.default <- function(
                ucl=NA,
                p=stats::setNames(pvalue, "p-value"),
                signal=sig,
-               signal_threshold=stats::setNames(llr_crit, "LLR"))
+               signal_threshold=stats::setNames(llr_crit, "Critical LLR"))
     rs <- stats::setNames(T, "Success")
   }
 
