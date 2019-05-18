@@ -111,7 +111,9 @@
 #' data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
 #' a1 <- poisson_maxsprt(data)
 #' # Example using an mds_ts object
+#' \dontrun{
 #' a2 <- poisson_maxsprt(mds_ts[[3]])
+#' }
 #'
 #' @references
 #' Martin Kulldorff, Robert L. Davis, Margarette Kolczak, Edwin Lewis, Tracy Lieu & Richard Platt (2011) A Maximized Sequential Probability Ratio Test for Drug and Vaccine Safety Surveillance, Sequential Analysis, 30:1, 58-78.
