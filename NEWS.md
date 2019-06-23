@@ -1,3 +1,8 @@
+`mdsstat` 0.3.2
+---------------------------------------
+
+*UNDER DEVELOPMENT*
+
 `mdsstat` 0.3.1
 ---------------------------------------
 
@@ -5,11 +10,6 @@
 
 - Added LRT algorithm
 - Added Poisson MaxSPRT algorithm
-
-**Potential Updates**
-
-- None upcoming
-
 
 `mdsstat` 0.3.0
 ---------------------------------------
