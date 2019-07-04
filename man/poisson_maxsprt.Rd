@@ -138,7 +138,9 @@ Leakages"="event_count")}
 data <- data.frame(time=c(1:25), event=as.integer(stats::rnorm(25, 100, 25)))
 a1 <- poisson_maxsprt(data)
 # Example using an mds_ts object
+\dontrun{
 a2 <- poisson_maxsprt(mds_ts[[3]])
+}
 
 }
 \references{
