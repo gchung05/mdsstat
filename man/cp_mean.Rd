@@ -8,12 +8,21 @@
 \usage{
 cp_mean(df, ...)
 
-\method{cp_mean}{mds_ts}(df, ts_event = c(Count = "nA"),
-  analysis_of = NA, ...)
+\method{cp_mean}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA, ...)
 
-\method{cp_mean}{default}(df, analysis_of = NA, eval_period = NULL,
-  alpha = 0.05, cp_max = 100, min_seglen = 6, epochs = NULL,
-  bootstrap_iter = 1000, replace = T, zero_rate = 1/3, ...)
+\method{cp_mean}{default}(
+  df,
+  analysis_of = NA,
+  eval_period = NULL,
+  alpha = 0.05,
+  cp_max = 100,
+  min_seglen = 6,
+  epochs = NULL,
+  bootstrap_iter = 1000,
+  replace = T,
+  zero_rate = 1/3,
+  ...
+)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic

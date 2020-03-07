@@ -1,12 +1,16 @@
-`mdsstat` 0.3.2
+`mdsstat` 0.3.3
 ---------------------------------------
-
 *UNDER DEVELOPMENT*
 
 **Potential Updates**
 
 - Allow `eval_period` parameter in algorithms to be max number of df rows, thus full contingency table analysis. Will need to account for un-runnable sequential analysis.
 
+`mdsstat` 0.3.2
+---------------------------------------
+
+**Implemented Updates**
+- Moved Poisson MaxSPRT algorithm to development branch `maxsprt` on Github
 
 `mdsstat` 0.3.1
 ---------------------------------------

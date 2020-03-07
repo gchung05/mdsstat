@@ -8,12 +8,19 @@
 \usage{
 cusum(df, ...)
 
-\method{cusum}{mds_ts}(df, ts_event = c(Count = "nA"),
-  analysis_of = NA, ...)
+\method{cusum}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA, ...)
 
-\method{cusum}{default}(df, analysis_of = NA, eval_period = NULL,
-  delta = 1, H = NULL, zero_rate = 1/3, mu = NULL, sigma = NULL,
-  ...)
+\method{cusum}{default}(
+  df,
+  analysis_of = NA,
+  eval_period = NULL,
+  delta = 1,
+  H = NULL,
+  zero_rate = 1/3,
+  mu = NULL,
+  sigma = NULL,
+  ...
+)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic

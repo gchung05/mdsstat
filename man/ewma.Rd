@@ -8,12 +8,19 @@
 \usage{
 ewma(df, ...)
 
-\method{ewma}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA,
-  ...)
+\method{ewma}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA, ...)
 
-\method{ewma}{default}(df, analysis_of = NA, eval_period = NULL,
-  delta = 3, lambda = 0.85, zero_rate = 1/3, mu = NULL,
-  sigma = NULL, ...)
+\method{ewma}{default}(
+  df,
+  analysis_of = NA,
+  eval_period = NULL,
+  delta = 3,
+  lambda = 0.85,
+  zero_rate = 1/3,
+  mu = NULL,
+  sigma = NULL,
+  ...
+)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic

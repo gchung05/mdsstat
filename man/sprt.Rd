@@ -8,13 +8,22 @@
 \usage{
 sprt(df, ...)
 
-\method{sprt}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA,
-  ...)
+\method{sprt}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA, ...)
 
-\method{sprt}{default}(df, analysis_of = NA, eval_period = NULL,
-  obs_period = 1, h0 = NULL, h1 = NULL, relative_risk = NULL,
-  distribution = "poisson", alpha = 0.05, beta = 0.2,
-  h1_type = "greater", ...)
+\method{sprt}{default}(
+  df,
+  analysis_of = NA,
+  eval_period = NULL,
+  obs_period = 1,
+  h0 = NULL,
+  h1 = NULL,
+  relative_risk = NULL,
+  distribution = "poisson",
+  alpha = 0.05,
+  beta = 0.2,
+  h1_type = "greater",
+  ...
+)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic

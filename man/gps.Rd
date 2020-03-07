@@ -8,13 +8,21 @@
 \usage{
 gps(df, ...)
 
-\method{gps}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA,
-  ...)
+\method{gps}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA, ...)
 
-\method{gps}{default}(df, analysis_of = NA, eval_period = 1,
-  null_ratio = 1, cred_interval = 0.9, init_prior = c(0.2, 0.02, 2,
-  4, 1/3), gamma_lower = 1e-05, gamma_upper = 20, quantiles = c(0.05,
-  0.95), cont_adj = 0, ...)
+\method{gps}{default}(
+  df,
+  analysis_of = NA,
+  eval_period = 1,
+  null_ratio = 1,
+  cred_interval = 0.9,
+  init_prior = c(0.2, 0.02, 2, 4, 1/3),
+  gamma_lower = 1e-05,
+  gamma_upper = 20,
+  quantiles = c(0.05, 0.95),
+  cont_adj = 0,
+  ...
+)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic

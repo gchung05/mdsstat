@@ -8,12 +8,17 @@
 \usage{
 poisson_rare(df, ...)
 
-\method{poisson_rare}{mds_ts}(df, ts_event = c(Count = "nA"),
-  analysis_of = NA, ...)
+\method{poisson_rare}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA, ...)
 
-\method{poisson_rare}{default}(df, analysis_of = NA,
-  eval_period = NULL, zero_rate = 2/3, p_rate = 0.2, p_crit = 0.05,
-  ...)
+\method{poisson_rare}{default}(
+  df,
+  analysis_of = NA,
+  eval_period = NULL,
+  zero_rate = 2/3,
+  p_rate = 0.2,
+  p_crit = 0.05,
+  ...
+)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic

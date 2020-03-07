@@ -8,11 +8,9 @@
 \usage{
 run_algos(data, algos, dataframe = T, non_dpa = "skip", ...)
 
-\method{run_algos}{list}(data, algos, dataframe = T, non_dpa = "skip",
-  ...)
+\method{run_algos}{list}(data, algos, dataframe = T, non_dpa = "skip", ...)
 
-\method{run_algos}{default}(data, algos, dataframe = T,
-  non_dpa = "skip", ...)
+\method{run_algos}{default}(data, algos, dataframe = T, non_dpa = "skip", ...)
 }
 \arguments{
 \item{data}{Required input dataset. Note that the dataset must satisfy the

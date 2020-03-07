@@ -8,11 +8,16 @@
 \usage{
 lrt(df, ...)
 
-\method{lrt}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA,
-  ...)
+\method{lrt}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA, ...)
 
-\method{lrt}{default}(df, analysis_of = NA, eval_period = 1,
-  alpha = 0.05, mc_sample = 10000, ...)
+\method{lrt}{default}(
+  df,
+  analysis_of = NA,
+  eval_period = 1,
+  alpha = 0.05,
+  mc_sample = 10000,
+  ...
+)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic

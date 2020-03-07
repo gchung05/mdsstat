@@ -1,4 +1,4 @@
-## ----setup, include = FALSE----------------------------------------------
+## ----setup, include = FALSE---------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -6,7 +6,7 @@ knitr::opts_chunk$set(
 load(file="../data/mds_ts.rda")
 library(mdsstat)
 
-## ------------------------------------------------------------------------
+## -----------------------------------------------------------------------------
 library(mdsstat)
 data(mds_ts)
 

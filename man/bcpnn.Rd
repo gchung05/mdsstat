@@ -8,12 +8,18 @@
 \usage{
 bcpnn(df, ...)
 
-\method{bcpnn}{mds_ts}(df, ts_event = c(Count = "nA"),
-  analysis_of = NA, ...)
+\method{bcpnn}{mds_ts}(df, ts_event = c(Count = "nA"), analysis_of = NA, ...)
 
-\method{bcpnn}{default}(df, analysis_of = NA, eval_period = 1,
-  null_ratio = 1, conf_interval = 0.9, quantiles = c(0.05, 0.95),
-  cont_adj = 0, ...)
+\method{bcpnn}{default}(
+  df,
+  analysis_of = NA,
+  eval_period = 1,
+  null_ratio = 1,
+  conf_interval = 0.9,
+  quantiles = c(0.05, 0.95),
+  cont_adj = 0,
+  ...
+)
 }
 \arguments{
 \item{df}{Required input data frame of class \code{mds_ts} or, for generic
