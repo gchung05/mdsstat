@@ -11,6 +11,7 @@
 
 **Implemented Updates**
 - Moved Poisson MaxSPRT algorithm to development branch `maxsprt` on Github
+- Explicit declarations of `stringsAsFactors=T` in all `data.frame()` calls for cross-version compatibility
 
 `mdsstat` 0.3.1
 ---------------------------------------

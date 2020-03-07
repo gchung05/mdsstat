@@ -110,7 +110,7 @@ poisson_rare.mds_ts <- function(
   } else name <- analysis_of
 
   out <- data.frame(time=df$time,
-                    event=df[[ts_event]])
+                    event=df[[ts_event]], stringsAsFactors=T)
   poisson_rare.default(out, analysis_of=name, ...)
 }
 

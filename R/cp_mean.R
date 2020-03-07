@@ -156,7 +156,7 @@ cp_mean.mds_ts <- function(
   } else name <- analysis_of
 
   out <- data.frame(time=df$time,
-                    event=df[[ts_event]])
+                    event=df[[ts_event]], stringsAsFactors=T)
   cp_mean.default(out, analysis_of=name, ...)
 }
 
@@ -261,9 +261,8 @@ cp_mean.default <- function(
         cp=df$time[cp],
         cpindex=cp,
         cpfound=(1 - conflevel) <= alpha,
-
         alpha=alpha,
-        pvalue=(1 - conflevel))
+        pvalue=(1 - conflevel), stringsAsFactors=T)
       return(out)
     }
 
@@ -290,7 +289,7 @@ cp_mean.default <- function(
         # Identify current segments
         cps_now <- c(1, a$cpindex, length(df$event) + 1)
         begin <- cps_now[1]
-        bhold <- data.frame()
+        bhold <- data.frame(stringsAsFactors=T)
         # Iterate over current segments
         for (j in c(2:(length(cps_now)))){
           end <- cps_now[j] - 1

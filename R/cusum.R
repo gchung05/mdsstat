@@ -129,7 +129,7 @@ cusum.mds_ts <- function(
   } else name <- analysis_of
 
   out <- data.frame(time=df$time,
-                    event=df[[ts_event]])
+                    event=df[[ts_event]], stringsAsFactors=T)
   cusum.default(out, analysis_of=name, ...)
 }
 

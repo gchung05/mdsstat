@@ -25,7 +25,8 @@ test_as_row <- function(
                     test_hyp=df$params$test_hyp,
                     test_params=I(list(df$params[!names(df$params) %in%
                                                    c("test_hyp",
-                                                     "eval_period")])))
+                                                     "eval_period")])),
+                    stringsAsFactors=T)
   if (all(is.na(df$result))){
     out <- cbind(out,
                  data.frame(signal=NA,
@@ -34,20 +35,22 @@ test_as_row <- function(
                             stat_lcl=I(list(NA)),
                             stat_ucl=I(list(NA)),
                             p_value=NA,
-                            stat_addtl=I(list(NA))))
+                            stat_addtl=I(list(NA)), stringsAsFactors=T))
   } else{
-    out <- cbind(out,
-                 data.frame(signal=df$result$signal,
-                            signal_threshold=I(list(df$result$signal_threshold)),
-                            stat=I(list(df$result$statistic)),
-                            stat_lcl=I(list(df$result$lcl)),
-                            stat_ucl=I(list(df$result$ucl)),
-                            p_value=df$result$p,
-                            stat_addtl=I(list(df$result[!names(df$result) %in%
-                                                          c("signal",
-                                                            "signal_threshold",
-                                                            "statistic",
-                                                            "lcl", "ucl", "p")]))))
+    out <- cbind(
+      out,
+      data.frame(signal=df$result$signal,
+                 signal_threshold=I(list(df$result$signal_threshold)),
+                 stat=I(list(df$result$statistic)),
+                 stat_lcl=I(list(df$result$lcl)),
+                 stat_ucl=I(list(df$result$ucl)),
+                 p_value=df$result$p,
+                 stat_addtl=I(list(df$result[!names(df$result) %in%
+                                               c("signal",
+                                                 "signal_threshold",
+                                                 "statistic",
+                                                 "lcl", "ucl", "p")])),
+                 stringsAsFactors=T))
   }
   rownames(out) <- c()
   class(out) <- append(class(out), "mdsstat_df")

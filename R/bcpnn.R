@@ -171,7 +171,7 @@ bcpnn.mds_ts <- function(
                       nA=df[[ts_event]],
                       nB=df$nB,
                       nC=df$nC,
-                      nD=df$nD)
+                      nD=df$nD, stringsAsFactors=T)
   } else{
     stop("Input mds_ts df does not contain data for disproportionality analysis.")
   }
@@ -223,8 +223,9 @@ bcpnn.default <- function(
       # Sum over eval_period
       timeRange <- range(df$time)
       df <- cbind(data.frame(time_start=timeRange[1],
-                             time_end=timeRange[2]),
-                  data.frame(t(colSums(df[, c2x2], na.rm=T))))
+                             time_end=timeRange[2], stringsAsFactors=T),
+                  data.frame(t(colSums(df[, c2x2], na.rm=T)),
+                             stringsAsFactors=T))
       # Apply continuity adjustment
       df[, c2x2] <- df[, c2x2] + cont_adj
     }
