@@ -1,7 +1,7 @@
 Package: mdsstat
 Type: Package
 Title: Statistical Trending for Medical Devices Surveillance
-Version: 0.3.2
+Version: 0.3.3.9000
 Authors@R: c(
     person("Gary", "Chung", email="gchung05@gmail.com", role=c("aut", "cre")),
     person("Zhiheng", "Xu", role="ctb", comment="derived code for `cp_mean()`"),
